@@ -404,7 +404,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/identity-verify-3893e0e0.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/identity-verify-d4bcc672.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account",
