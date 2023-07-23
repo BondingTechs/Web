@@ -1,31 +1,34 @@
-import { defineEventHandler, useBody } from 'h3';
+import { eventHandler, readBody } from 'h3';
 import { r as request } from './nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
-import 'http';
-import 'https';
+import 'node:http';
+import 'node:https';
 import 'destr';
-import 'ohmyfetch';
+import 'ofetch';
 import 'unenv/runtime/fetch/index';
 import 'hookable';
 import 'scule';
+import 'klona';
+import 'defu';
 import 'ohash';
 import 'ufo';
 import 'unstorage';
-import 'defu';
+import 'unstorage/drivers/fs';
 import 'radix3';
 import 'node:fs';
 import 'node:url';
 import 'pathe';
 import 'axios';
+import 'http-graceful-shutdown';
 
-const info_post = defineEventHandler(async (event) => {
+const info_post = eventHandler(async (event) => {
   try {
-    const { slug } = await useBody(event);
+    const { id } = await readBody(event);
     const {
       code,
       message = "",
       data = null
-    } = await request.post("/industry/category/info", { slug });
+    } = await request.post("/tip/getInfo", { id });
     return { error: code !== 1e3, code, message, data };
   } catch (err) {
     const { code, message = "" } = err;

@@ -1,47 +1,63 @@
-import { toRef, isRef, getCurrentInstance, inject, reactive, defineAsyncComponent, version, h as h$1, onUnmounted, toRaw, isReactive, defineComponent, mergeProps, withCtx, renderSlot, createTextVNode, toDisplayString, useSSRContext, cloneVNode, Fragment as Fragment$1, provide, ref, computed, onMounted, watch, watchEffect, nextTick, unref, Suspense, Transition, createElementBlock, resolveComponent, shallowRef, createVNode, openBlock, createBlock, renderList, createCommentVNode, createApp, onServerPrefetch, effectScope, markRaw, onErrorCaptured, Text, toRefs } from 'vue';
-import { $fetch as $fetch$1 } from 'ohmyfetch';
+import { toRef, isRef, hasInjectionContext, inject, version, toRaw, isReactive, defineComponent, mergeProps, withCtx, renderSlot, createTextVNode, toDisplayString, useSSRContext, ref, computed, provide, h as h$1, Fragment, onMounted, onUnmounted, watch, watchEffect, nextTick, Suspense, Transition, createElementBlock, getCurrentInstance, resolveComponent, reactive, unref, cloneVNode, createVNode, openBlock, createBlock, renderList, createCommentVNode, shallowReactive, withDirectives, vModelCheckbox, vShow, createApp, onServerPrefetch, markRaw, effectScope, onErrorCaptured, resolveDynamicComponent, shallowRef, isReadonly, defineAsyncComponent, isShallow, toRefs } from 'vue';
+import { $fetch as $fetch$1 } from 'ofetch';
 import { createHooks } from 'hookable';
 import { getContext, executeAsync } from 'unctx';
+import { RouterView, useRoute as useRoute$1, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
+import { createError as createError$1, sanitizeStatusCode, setCookie, getCookie, deleteCookie } from 'h3';
+import { hasProtocol, parseURL, parseQuery, withTrailingSlash, withoutTrailingSlash, withQuery, joinURL } from 'ufo';
 import destr from 'destr';
-import { hasProtocol, isEqual, joinURL, parseURL } from 'ufo';
-import { createError as createError$1, sendRedirect, appendHeader } from 'h3';
-import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter } from 'vue-router';
-import { parse, serialize } from 'cookie-es';
-import isHTTPS from 'is-https';
-import { CoreWarnCodes, CompileErrorCodes, registerMessageResolver, resolveValue, registerLocaleFallbacker, fallbackWithLocaleChain, setDevToolsHook, createCompileError, DEFAULT_LOCALE as DEFAULT_LOCALE$1, updateFallbackLocale, NUMBER_FORMAT_OPTIONS_KEYS, DATETIME_FORMAT_OPTIONS_KEYS, setFallbackContext, createCoreContext, clearDateTimeFormat, clearNumberFormat, setAdditionalMeta, getFallbackContext, NOT_REOSLVED, parseTranslateArgs, translate, MISSING_RESOLVE_VALUE, parseDateTimeArgs, datetime, parseNumberArgs, number } from '@intlify/core-base';
-import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderSuspense } from 'vue/server-renderer';
-import { isEqual as isEqual$1 } from 'ohash';
+import { klona } from 'klona';
+import { renderSSRHead } from '@unhead/ssr';
+import { composableNames, getActiveHead, createServerHead as createServerHead$1 } from 'unhead';
+import { defineHeadPlugin } from '@unhead/shared';
+import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrIncludeBooleanAttr, ssrLooseContain, ssrRenderTeleport, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
+import { parse } from 'cookie-es';
+import { hash, isEqual } from 'ohash';
 import store from 'store';
 import { defu } from 'defu';
+import { ref as ref$1 } from '@vue/runtime-core';
 import { a as useRuntimeConfig$1 } from '../nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
-import 'http';
-import 'https';
+import 'node:http';
+import 'node:https';
 import 'unenv/runtime/fetch/index';
 import 'scule';
 import 'unstorage';
+import 'unstorage/drivers/fs';
 import 'radix3';
 import 'node:fs';
 import 'node:url';
 import 'pathe';
 import 'axios';
+import 'http-graceful-shutdown';
 
-var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S, _T, _U, _V, _W, _X, _Y, _Z, __, _$, _aa, _ba, _ca, _da, _ea, _fa, _ga, _ha, _ia, _ja, _ka, _la, _ma, _na, _oa, _pa, _qa, _ra, _sa, _ta, _ua, _va;
 const appConfig = useRuntimeConfig$1().app;
 const baseURL = () => appConfig.baseURL;
-const nuxtAppCtx = getContext("nuxt-app");
+const nuxtAppCtx = /* @__PURE__ */ getContext("nuxt-app");
 const NuxtPluginIndicator = "__nuxt_plugin";
 function createNuxtApp(options) {
   let hydratingCount = 0;
   const nuxtApp = {
     provide: void 0,
     globalName: "nuxt",
+    versions: {
+      get nuxt() {
+        return "3.7.0-28168358.7046930a";
+      },
+      get vue() {
+        return nuxtApp.vueApp.version;
+      }
+    },
     payload: reactive({
       data: {},
       state: {},
       _errors: {},
       ...{ serverRendered: true }
     }),
+    static: {
+      data: {}
+    },
+    runWithContext: (fn) => callWithNuxt(nuxtApp, fn),
     isHydrating: false,
     deferHydration() {
       if (!nuxtApp.isHydrating) {
@@ -64,129 +80,524 @@ function createNuxtApp(options) {
     },
     _asyncDataPromises: {},
     _asyncData: {},
+    _payloadRevivers: {},
     ...options
   };
   nuxtApp.hooks = createHooks();
   nuxtApp.hook = nuxtApp.hooks.hook;
+  {
+    async function contextCaller(hooks, args) {
+      for (const hook of hooks) {
+        await nuxtApp.runWithContext(() => hook(...args));
+      }
+    }
+    nuxtApp.hooks.callHook = (name, ...args) => nuxtApp.hooks.callHookWith(contextCaller, name, ...args);
+  }
   nuxtApp.callHook = nuxtApp.hooks.callHook;
   nuxtApp.provide = (name, value) => {
     const $name = "$" + name;
-    defineGetter$1(nuxtApp, $name, value);
-    defineGetter$1(nuxtApp.vueApp.config.globalProperties, $name, value);
+    defineGetter(nuxtApp, $name, value);
+    defineGetter(nuxtApp.vueApp.config.globalProperties, $name, value);
   };
-  defineGetter$1(nuxtApp.vueApp, "$nuxt", nuxtApp);
-  defineGetter$1(nuxtApp.vueApp.config.globalProperties, "$nuxt", nuxtApp);
+  defineGetter(nuxtApp.vueApp, "$nuxt", nuxtApp);
+  defineGetter(nuxtApp.vueApp.config.globalProperties, "$nuxt", nuxtApp);
   {
     if (nuxtApp.ssrContext) {
       nuxtApp.ssrContext.nuxt = nuxtApp;
+      nuxtApp.ssrContext._payloadReducers = {};
+      nuxtApp.payload.path = nuxtApp.ssrContext.url;
     }
     nuxtApp.ssrContext = nuxtApp.ssrContext || {};
     if (nuxtApp.ssrContext.payload) {
       Object.assign(nuxtApp.payload, nuxtApp.ssrContext.payload);
     }
     nuxtApp.ssrContext.payload = nuxtApp.payload;
-    nuxtApp.payload.config = {
+    nuxtApp.ssrContext.config = {
       public: options.ssrContext.runtimeConfig.public,
       app: options.ssrContext.runtimeConfig.app
     };
   }
   const runtimeConfig = options.ssrContext.runtimeConfig;
-  const compatibilityConfig = new Proxy(runtimeConfig, {
-    get(target, prop) {
-      var _a2;
-      if (prop === "public") {
-        return target.public;
-      }
-      return (_a2 = target[prop]) != null ? _a2 : target.public[prop];
-    },
-    set(target, prop, value) {
-      {
-        return false;
-      }
-    }
-  });
-  nuxtApp.provide("config", compatibilityConfig);
+  nuxtApp.provide("config", runtimeConfig);
   return nuxtApp;
 }
 async function applyPlugin(nuxtApp, plugin2) {
-  if (typeof plugin2 !== "function") {
-    return;
+  if (plugin2.hooks) {
+    nuxtApp.hooks.addHooks(plugin2.hooks);
   }
-  const { provide: provide2 } = await callWithNuxt(nuxtApp, plugin2, [nuxtApp]) || {};
-  if (provide2 && typeof provide2 === "object") {
-    for (const key in provide2) {
-      nuxtApp.provide(key, provide2[key]);
+  if (typeof plugin2 === "function") {
+    const { provide: provide2 } = await nuxtApp.runWithContext(() => plugin2(nuxtApp)) || {};
+    if (provide2 && typeof provide2 === "object") {
+      for (const key in provide2) {
+        nuxtApp.provide(key, provide2[key]);
+      }
     }
   }
 }
 async function applyPlugins(nuxtApp, plugins2) {
+  const parallels = [];
+  const errors = [];
   for (const plugin2 of plugins2) {
-    await applyPlugin(nuxtApp, plugin2);
+    const promise = applyPlugin(nuxtApp, plugin2);
+    if (plugin2.parallel) {
+      parallels.push(promise.catch((e2) => errors.push(e2)));
+    } else {
+      await promise;
+    }
+  }
+  await Promise.all(parallels);
+  if (errors.length) {
+    throw errors[0];
   }
 }
-function normalizePlugins(_plugins2) {
-  const plugins2 = _plugins2.map((plugin2) => {
-    if (typeof plugin2 !== "function") {
-      return null;
-    }
-    if (plugin2.length > 1) {
-      return (nuxtApp) => plugin2(nuxtApp, nuxtApp.provide);
-    }
-    return plugin2;
-  }).filter(Boolean);
-  return plugins2;
-}
+/*! @__NO_SIDE_EFFECTS__ */
+// @__NO_SIDE_EFFECTS__
 function defineNuxtPlugin(plugin2) {
-  plugin2[NuxtPluginIndicator] = true;
-  return plugin2;
+  if (typeof plugin2 === "function") {
+    return plugin2;
+  }
+  delete plugin2.name;
+  return Object.assign(plugin2.setup || (() => {
+  }), plugin2, { [NuxtPluginIndicator]: true });
 }
 function callWithNuxt(nuxt, setup2, args) {
   const fn = () => args ? setup2(...args) : setup2();
   {
-    return nuxtAppCtx.callAsync(nuxt, fn);
+    return nuxt.vueApp.runWithContext(() => nuxtAppCtx.callAsync(nuxt, fn));
   }
 }
+/*! @__NO_SIDE_EFFECTS__ */
+// @__NO_SIDE_EFFECTS__
 function useNuxtApp() {
-  const nuxtAppInstance = nuxtAppCtx.tryUse();
+  var _a;
+  let nuxtAppInstance;
+  if (hasInjectionContext()) {
+    nuxtAppInstance = (_a = getCurrentInstance()) == null ? void 0 : _a.appContext.app.$nuxt;
+  }
+  nuxtAppInstance = nuxtAppInstance || nuxtAppCtx.tryUse();
   if (!nuxtAppInstance) {
-    const vm = getCurrentInstance();
-    if (!vm) {
-      throw new Error("nuxt instance unavailable");
+    {
+      throw new Error("[nuxt] instance unavailable");
     }
-    return vm.appContext.app.$nuxt;
   }
   return nuxtAppInstance;
 }
+/*! @__NO_SIDE_EFFECTS__ */
+// @__NO_SIDE_EFFECTS__
 function useRuntimeConfig() {
-  return useNuxtApp().$config;
+  return (/* @__PURE__ */ useNuxtApp()).$config;
 }
-function defineGetter$1(obj, key, val) {
+function defineGetter(obj, key, val) {
   Object.defineProperty(obj, key, { get: () => val });
 }
 function defineAppConfig(config) {
   return config;
 }
-const useError = () => toRef(useNuxtApp().payload, "error");
+const useStateKeyPrefix = "$s";
+function useState(...args) {
+  const autoKey = typeof args[args.length - 1] === "string" ? args.pop() : void 0;
+  if (typeof args[0] !== "string") {
+    args.unshift(autoKey);
+  }
+  const [_key, init] = args;
+  if (!_key || typeof _key !== "string") {
+    throw new TypeError("[nuxt] [useState] key must be a string: " + _key);
+  }
+  if (init !== void 0 && typeof init !== "function") {
+    throw new Error("[nuxt] [useState] init must be a function: " + init);
+  }
+  const key = useStateKeyPrefix + _key;
+  const nuxt = /* @__PURE__ */ useNuxtApp();
+  const state = toRef(nuxt.payload.state, key);
+  if (state.value === void 0 && init) {
+    const initialValue = init();
+    if (isRef(initialValue)) {
+      nuxt.payload.state[key] = initialValue;
+      return initialValue;
+    }
+    state.value = initialValue;
+  }
+  return state;
+}
+const LayoutMetaSymbol = Symbol("layout-meta");
+const PageRouteSymbol = Symbol("route");
+const useRouter = () => {
+  var _a;
+  return (_a = /* @__PURE__ */ useNuxtApp()) == null ? void 0 : _a.$router;
+};
+const useRoute = () => {
+  if (hasInjectionContext()) {
+    return inject(PageRouteSymbol, (/* @__PURE__ */ useNuxtApp())._route);
+  }
+  return (/* @__PURE__ */ useNuxtApp())._route;
+};
+/*! @__NO_SIDE_EFFECTS__ */
+// @__NO_SIDE_EFFECTS__
+function defineNuxtRouteMiddleware(middleware) {
+  return middleware;
+}
+const isProcessingMiddleware = () => {
+  try {
+    if ((/* @__PURE__ */ useNuxtApp())._processingMiddleware) {
+      return true;
+    }
+  } catch {
+    return true;
+  }
+  return false;
+};
+const navigateTo = (to, options) => {
+  if (!to) {
+    to = "/";
+  }
+  const toPath = typeof to === "string" ? to : withQuery(to.path || "/", to.query || {}) + (to.hash || "");
+  if (options == null ? void 0 : options.open) {
+    return Promise.resolve();
+  }
+  const isExternal = (options == null ? void 0 : options.external) || hasProtocol(toPath, { acceptRelative: true });
+  if (isExternal && !(options == null ? void 0 : options.external)) {
+    throw new Error("Navigating to external URL is not allowed by default. Use `navigateTo (url, { external: true })`.");
+  }
+  if (isExternal && parseURL(toPath).protocol === "script:") {
+    throw new Error("Cannot navigate to an URL with script protocol.");
+  }
+  const inMiddleware = isProcessingMiddleware();
+  const router = useRouter();
+  const nuxtApp = /* @__PURE__ */ useNuxtApp();
+  {
+    if (nuxtApp.ssrContext) {
+      const fullPath = typeof to === "string" || isExternal ? toPath : router.resolve(to).fullPath || "/";
+      const location2 = isExternal ? toPath : joinURL((/* @__PURE__ */ useRuntimeConfig()).app.baseURL, fullPath);
+      async function redirect(response) {
+        await nuxtApp.callHook("app:redirected");
+        const encodedLoc = location2.replace(/"/g, "%22");
+        nuxtApp.ssrContext._renderResponse = {
+          statusCode: sanitizeStatusCode((options == null ? void 0 : options.redirectCode) || 302, 302),
+          body: `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=${encodedLoc}"></head></html>`,
+          headers: { location: location2 }
+        };
+        return response;
+      }
+      if (!isExternal && inMiddleware) {
+        router.afterEach((final) => final.fullPath === fullPath ? redirect(false) : void 0);
+        return to;
+      }
+      return redirect(!inMiddleware ? void 0 : (
+        /* abort route navigation */
+        false
+      ));
+    }
+  }
+  if (isExternal) {
+    if (options == null ? void 0 : options.replace) {
+      location.replace(toPath);
+    } else {
+      location.href = toPath;
+    }
+    if (inMiddleware) {
+      if (!nuxtApp.isHydrating) {
+        return false;
+      }
+      return new Promise(() => {
+      });
+    }
+    return Promise.resolve();
+  }
+  return (options == null ? void 0 : options.replace) ? router.replace(to) : router.push(to);
+};
+const useError = () => toRef((/* @__PURE__ */ useNuxtApp()).payload, "error");
 const showError = (_err) => {
   const err = createError(_err);
   try {
-    const nuxtApp = useNuxtApp();
-    nuxtApp.callHook("app:error", err);
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
     const error = useError();
+    if (false)
+      ;
     error.value = error.value || err;
   } catch {
     throw err;
   }
   return err;
 };
+const isNuxtError = (err) => !!(err && typeof err === "object" && "__nuxt_error" in err);
 const createError = (err) => {
   const _err = createError$1(err);
   _err.__nuxt_error = true;
   return _err;
 };
+const __nuxt_page_meta$6 = {
+  layout: "blog"
+};
+const __nuxt_page_meta$5 = {
+  middleware: ["auth"]
+};
+const __nuxt_page_meta$4 = {
+  middleware: ["auth"]
+};
+const __nuxt_page_meta$3 = {
+  layout: "blog"
+};
+const __nuxt_page_meta$2 = {
+  layout: "blog"
+};
+const __nuxt_page_meta$1 = {
+  layout: "blog"
+};
+const __nuxt_page_meta = {
+  layout: "blog"
+};
+const _routes = [
+  {
+    name: "404",
+    path: "/404",
+    meta: {},
+    alias: [],
+    redirect: void 0,
+    component: () => import('./_nuxt/404-46c75357.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) ?? "index",
+    path: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.path) ?? "/",
+    meta: __nuxt_page_meta$6 || {},
+    alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
+    redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
+    component: () => import('./_nuxt/index-8ba810b8.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: "member-rule",
+    path: "/member-rule",
+    meta: {},
+    alias: [],
+    redirect: void 0,
+    component: () => import('./_nuxt/member-rule-4e73f12e.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/my",
+    children: [
+      {
+        name: "my-account-change-phone",
+        path: "account/change-phone",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/change-phone-0557a70d.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-account-email-binding",
+        path: "account/email-binding",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/email-binding-0687f601.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-account-email-verify",
+        path: "account/email-verify",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/email-verify-ca1c11c9.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-account-identity-verify",
+        path: "account/identity-verify",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/identity-verify-a0845ec6.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-account",
+        path: "account",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/index-eb59f8c1.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-account-reset-password",
+        path: "account/reset-password",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/reset-password-6079e8e4.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-collections",
+        path: "collections",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/collections-4c1fdd0b.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-history",
+        path: "history",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/history-d2446b92.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) ?? "my",
+        path: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.path) ?? "",
+        meta: __nuxt_page_meta$5 || {},
+        alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
+        redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
+        component: () => import('./_nuxt/index-9285f131.mjs').then((m2) => m2.default || m2)
+      },
+      {
+        name: "my-tips",
+        path: "tips",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/tips-11b2631b.mjs').then((m2) => m2.default || m2)
+      }
+    ],
+    name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? void 0,
+    meta: __nuxt_page_meta$4 || {},
+    alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
+    redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
+    component: () => import('./_nuxt/my-8cfd5e46.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
+    path: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.path) ?? "/news/article/:articleSlug()",
+    meta: __nuxt_page_meta$3 || {},
+    alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
+    redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
+    component: () => import('./_nuxt/_articleSlug_-d43c18f4.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: "news-categories",
+    path: "/news/categories",
+    meta: {},
+    alias: [],
+    redirect: void 0,
+    component: () => import('./_nuxt/categories-02cf976f.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) ?? "news-category-categorySlug",
+    path: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.path) ?? "/news/category/:categorySlug()",
+    meta: __nuxt_page_meta$2 || {},
+    alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
+    redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
+    component: () => import('./_nuxt/_categorySlug_-f6e5d02b.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) ?? "news-video-categorySlug",
+    path: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.path) ?? "/news/video/:categorySlug()",
+    meta: __nuxt_page_meta$1 || {},
+    alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
+    redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
+    component: () => import('./_nuxt/_categorySlug_-eca25dc3.mjs').then((m2) => m2.default || m2)
+  },
+  {
+    name: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) ?? "news-video",
+    path: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.path) ?? "/news/video",
+    meta: __nuxt_page_meta || {},
+    alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
+    redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
+    component: () => import('./_nuxt/index-de4db2a3.mjs').then((m2) => m2.default || m2)
+  }
+];
+function resolveUnref(r2) {
+  return typeof r2 === "function" ? r2() : unref(r2);
+}
+function resolveUnrefHeadInput(ref2, lastKey = "") {
+  if (ref2 instanceof Promise)
+    return ref2;
+  const root = resolveUnref(ref2);
+  if (!ref2 || !root)
+    return root;
+  if (Array.isArray(root))
+    return root.map((r2) => resolveUnrefHeadInput(r2, lastKey));
+  if (typeof root === "object") {
+    return Object.fromEntries(
+      Object.entries(root).map(([k2, v]) => {
+        if (k2 === "titleTemplate" || k2.startsWith("on"))
+          return [k2, unref(v)];
+        return [k2, resolveUnrefHeadInput(v, k2)];
+      })
+    );
+  }
+  return root;
+}
+const Vue3 = version.startsWith("3");
+const headSymbol = "usehead";
+function injectHead() {
+  return getCurrentInstance() && inject(headSymbol) || getActiveHead();
+}
+function vueInstall(head) {
+  const plugin2 = {
+    install(app) {
+      if (Vue3) {
+        app.config.globalProperties.$unhead = head;
+        app.config.globalProperties.$head = head;
+        app.provide(headSymbol, head);
+      }
+    }
+  };
+  return plugin2.install;
+}
+function createServerHead(options = {}) {
+  const head = createServerHead$1({
+    ...options,
+    plugins: [
+      VueReactiveUseHeadPlugin(),
+      ...(options == null ? void 0 : options.plugins) || []
+    ]
+  });
+  head.install = vueInstall(head);
+  return head;
+}
+function VueReactiveUseHeadPlugin() {
+  return defineHeadPlugin({
+    hooks: {
+      "entries:resolve": function(ctx) {
+        for (const entry2 of ctx.entries)
+          entry2.resolvedInput = resolveUnrefHeadInput(entry2.input);
+      }
+    }
+  });
+}
+function clientUseHead(input, options = {}) {
+  const head = injectHead();
+  const deactivated = ref(false);
+  const resolvedInput = ref({});
+  watchEffect(() => {
+    resolvedInput.value = deactivated.value ? {} : resolveUnrefHeadInput(input);
+  });
+  const entry2 = head.push(resolvedInput.value, options);
+  watch(resolvedInput, (e2) => {
+    entry2.patch(e2);
+  });
+  getCurrentInstance();
+  return entry2;
+}
+function serverUseHead(input, options = {}) {
+  const head = injectHead();
+  return head.push(input, options);
+}
+function useHead(input, options = {}) {
+  var _a;
+  const head = injectHead();
+  if (head) {
+    const isBrowser = !!((_a = head.resolvedOptions) == null ? void 0 : _a.document);
+    if (options.mode === "server" && isBrowser || options.mode === "client" && !isBrowser)
+      return;
+    return isBrowser ? clientUseHead(input, options) : serverUseHead(input, options);
+  }
+}
+const coreComposableNames = [
+  "injectHead"
+];
+({
+  "@unhead/vue": [...coreComposableNames, ...composableNames]
+});
 const getDefault = () => null;
 function useAsyncData(...args) {
-  var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2;
   const autoKey = typeof args[args.length - 1] === "string" ? args.pop() : void 0;
   if (typeof args[0] !== "string") {
     args.unshift(autoKey);
@@ -198,21 +609,19 @@ function useAsyncData(...args) {
   if (typeof handler !== "function") {
     throw new TypeError("[nuxt] [asyncData] handler must be a function.");
   }
-  options.server = (_a2 = options.server) != null ? _a2 : true;
-  options.default = (_b2 = options.default) != null ? _b2 : getDefault;
-  if (options.defer) {
-    console.warn("[useAsyncData] `defer` has been renamed to `lazy`. Support for `defer` will be removed in RC.");
-  }
-  options.lazy = (_d2 = (_c2 = options.lazy) != null ? _c2 : options.defer) != null ? _d2 : false;
-  options.initialCache = (_e2 = options.initialCache) != null ? _e2 : true;
-  options.immediate = (_f2 = options.immediate) != null ? _f2 : true;
-  const nuxt = useNuxtApp();
-  const useInitialCache = () => (nuxt.isHydrating || options.initialCache) && nuxt.payload.data[key] !== void 0;
+  options.server = options.server ?? true;
+  options.default = options.default ?? getDefault;
+  options.lazy = options.lazy ?? false;
+  options.immediate = options.immediate ?? true;
+  const nuxt = /* @__PURE__ */ useNuxtApp();
+  const getCachedData = () => nuxt.isHydrating ? nuxt.payload.data[key] : nuxt.static.data[key];
+  const hasCachedData = () => getCachedData() !== void 0;
   if (!nuxt._asyncData[key]) {
     nuxt._asyncData[key] = {
-      data: ref(useInitialCache() ? nuxt.payload.data[key] : (_h2 = (_g2 = options.default) == null ? void 0 : _g2.call(options)) != null ? _h2 : null),
-      pending: ref(!useInitialCache()),
-      error: ref(nuxt.payload._errors[key] ? createError(nuxt.payload._errors[key]) : null)
+      data: ref(getCachedData() ?? options.default()),
+      pending: ref(!hasCachedData()),
+      error: toRef(nuxt.payload._errors, key),
+      status: ref("idle")
     };
   }
   const asyncData = { ...nuxt._asyncData[key] };
@@ -223,10 +632,11 @@ function useAsyncData(...args) {
       }
       nuxt._asyncDataPromises[key].cancelled = true;
     }
-    if (opts._initial && useInitialCache()) {
-      return nuxt.payload.data[key];
+    if ((opts._initial || nuxt.isHydrating && opts._initial !== false) && hasCachedData()) {
+      return getCachedData();
     }
     asyncData.pending.value = true;
+    asyncData.status.value = "pending";
     const promise = new Promise(
       (resolve, reject) => {
         try {
@@ -235,25 +645,27 @@ function useAsyncData(...args) {
           reject(err);
         }
       }
-    ).then((result) => {
+    ).then((_result) => {
       if (promise.cancelled) {
         return nuxt._asyncDataPromises[key];
       }
+      let result = _result;
       if (options.transform) {
-        result = options.transform(result);
+        result = options.transform(_result);
       }
       if (options.pick) {
         result = pick(result, options.pick);
       }
       asyncData.data.value = result;
       asyncData.error.value = null;
+      asyncData.status.value = "success";
     }).catch((error) => {
-      var _a3, _b3;
       if (promise.cancelled) {
         return nuxt._asyncDataPromises[key];
       }
       asyncData.error.value = error;
-      asyncData.data.value = unref((_b3 = (_a3 = options.default) == null ? void 0 : _a3.call(options)) != null ? _b3 : null);
+      asyncData.data.value = unref(options.default());
+      asyncData.status.value = "error";
     }).finally(() => {
       if (promise.cancelled) {
         return;
@@ -272,7 +684,11 @@ function useAsyncData(...args) {
   const fetchOnServer = options.server !== false && nuxt.payload.serverRendered;
   if (fetchOnServer && options.immediate) {
     const promise = initialFetch();
-    onServerPrefetch(() => promise);
+    if (getCurrentInstance()) {
+      onServerPrefetch(() => promise);
+    } else {
+      nuxt.hook("app:created", () => promise);
+    }
   }
   const asyncDataPromise = Promise.resolve(nuxt._asyncDataPromises[key]).then(() => asyncData);
   Object.assign(asyncDataPromise, asyncData);
@@ -285,90 +701,25 @@ function pick(obj, keys) {
   }
   return newObj;
 }
-function useState(...args) {
-  const autoKey = typeof args[args.length - 1] === "string" ? args.pop() : void 0;
-  if (typeof args[0] !== "string") {
-    args.unshift(autoKey);
-  }
-  const [_key, init] = args;
-  if (!_key || typeof _key !== "string") {
-    throw new TypeError("[nuxt] [useState] key must be a string: " + _key);
-  }
-  if (init !== void 0 && typeof init !== "function") {
-    throw new Error("[nuxt] [useState] init must be a function: " + init);
-  }
-  const key = "$s" + _key;
-  const nuxt = useNuxtApp();
-  const state = toRef(nuxt.payload.state, key);
-  if (state.value === void 0 && init) {
-    const initialValue = init();
-    if (isRef(initialValue)) {
-      nuxt.payload.state[key] = initialValue;
-      return initialValue;
-    }
-    state.value = initialValue;
-  }
-  return state;
+function useRequestEvent(nuxtApp = /* @__PURE__ */ useNuxtApp()) {
+  var _a;
+  return (_a = nuxtApp.ssrContext) == null ? void 0 : _a.event;
 }
-const useRouter = () => {
-  var _a2;
-  return (_a2 = useNuxtApp()) == null ? void 0 : _a2.$router;
-};
-const useRoute = () => {
-  if (getCurrentInstance()) {
-    return inject("_route", useNuxtApp()._route);
-  }
-  return useNuxtApp()._route;
-};
-const defineNuxtRouteMiddleware = (middleware) => middleware;
-const addRouteMiddleware = (name, middleware, options = {}) => {
-  const nuxtApp = useNuxtApp();
-  if (options.global || typeof name === "function") {
-    nuxtApp._middleware.global.push(typeof name === "function" ? name : middleware);
-  } else {
-    nuxtApp._middleware.named[name] = middleware;
-  }
-};
-const navigateTo = (to, options) => {
-  if (!to) {
-    to = "/";
-  }
-  const toPath = typeof to === "string" ? to : to.path || "/";
-  const isExternal = hasProtocol(toPath, true);
-  if (isExternal && !(options == null ? void 0 : options.external)) {
-    throw new Error("Navigating to external URL is not allowed by default. Use `nagivateTo (url, { external: true })`.");
-  }
-  if (isExternal && parseURL(toPath).protocol === "script:") {
-    throw new Error("Cannot navigate to an URL with script protocol.");
-  }
-  const router = useRouter();
-  {
-    const nuxtApp = useNuxtApp();
-    if (nuxtApp.ssrContext && nuxtApp.ssrContext.event) {
-      const redirectLocation = isExternal ? toPath : joinURL(useRuntimeConfig().app.baseURL, router.resolve(to).fullPath || "/");
-      return nuxtApp.callHook("app:redirected").then(() => sendRedirect(nuxtApp.ssrContext.event, redirectLocation, (options == null ? void 0 : options.redirectCode) || 302));
-    }
-  }
-  if (isExternal) {
-    if (options == null ? void 0 : options.replace) {
-      location.replace(toPath);
-    } else {
-      location.href = toPath;
-    }
-    return Promise.resolve();
-  }
-  return (options == null ? void 0 : options.replace) ? router.replace(to) : router.push(to);
-};
+function useRequestFetch() {
+  var _a;
+  const event = (_a = (/* @__PURE__ */ useNuxtApp()).ssrContext) == null ? void 0 : _a.event;
+  return (event == null ? void 0 : event.$fetch) || globalThis.$fetch;
+}
 function useFetch(request, arg1, arg2) {
   const [opts = {}, autoKey] = typeof arg1 === "string" ? [{}, arg1] : [arg1, arg2];
-  const _key = opts.key || autoKey;
+  const _key = opts.key || hash([autoKey, unref(opts.baseURL), typeof request === "string" ? request : "", unref(opts.params || opts.query)]);
   if (!_key || typeof _key !== "string") {
     throw new TypeError("[nuxt] [useFetch] key must be a string: " + _key);
   }
   if (!request) {
     throw new Error("[nuxt] [useFetch] request is missing.");
   }
-  const key = "$f" + _key;
+  const key = _key === autoKey ? "$f" + _key : _key;
   const _request = computed(() => {
     let r2 = request;
     if (typeof r2 === "function") {
@@ -376,6 +727,9 @@ function useFetch(request, arg1, arg2) {
     }
     return unref(r2);
   });
+  if (!opts.baseURL && typeof _request.value === "string" && _request.value.startsWith("//")) {
+    throw new Error('[nuxt] [useFetch] the request URL must not start with "//".');
+  }
   const {
     server,
     lazy,
@@ -383,7 +737,6 @@ function useFetch(request, arg1, arg2) {
     transform,
     pick: pick2,
     watch: watch2,
-    initialCache,
     immediate,
     ...fetchOptions
   } = opts;
@@ -397,54 +750,43 @@ function useFetch(request, arg1, arg2) {
     default: defaultFn,
     transform,
     pick: pick2,
-    initialCache,
     immediate,
-    watch: [
-      _fetchOptions,
-      _request,
-      ...watch2 || []
-    ]
+    watch: watch2 === false ? [] : [_fetchOptions, _request, ...watch2 || []]
   };
   let controller;
   const asyncData = useAsyncData(key, () => {
-    var _a2;
-    (_a2 = controller == null ? void 0 : controller.abort) == null ? void 0 : _a2.call(controller);
+    var _a;
+    (_a = controller == null ? void 0 : controller.abort) == null ? void 0 : _a.call(controller);
     controller = typeof AbortController !== "undefined" ? new AbortController() : {};
-    return $fetch(_request.value, { signal: controller.signal, ..._fetchOptions });
+    const isLocalFetch = typeof _request.value === "string" && _request.value.startsWith("/");
+    let _$fetch = opts.$fetch || globalThis.$fetch;
+    if (!opts.$fetch && isLocalFetch) {
+      _$fetch = useRequestFetch();
+    }
+    return _$fetch(_request.value, { signal: controller.signal, ..._fetchOptions });
   }, _asyncDataOptions);
   return asyncData;
 }
-function useRequestHeaders(include) {
-  var _a2, _b2;
-  const headers = (_b2 = (_a2 = useNuxtApp().ssrContext) == null ? void 0 : _a2.event.req.headers) != null ? _b2 : {};
-  if (!include) {
-    return headers;
-  }
-  return Object.fromEntries(include.filter((key) => headers[key]).map((key) => [key, headers[key]]));
-}
-function useRequestEvent(nuxtApp = useNuxtApp()) {
-  var _a2;
-  return (_a2 = nuxtApp.ssrContext) == null ? void 0 : _a2.event;
-}
 const CookieDefaults = {
   path: "/",
+  watch: true,
   decode: (val) => destr(decodeURIComponent(val)),
   encode: (val) => encodeURIComponent(typeof val === "string" ? val : JSON.stringify(val))
 };
 function useCookie(name, _opts) {
-  var _a2, _b2;
+  var _a;
   const opts = { ...CookieDefaults, ..._opts };
   const cookies = readRawCookies(opts) || {};
-  const cookie = ref((_b2 = cookies[name]) != null ? _b2 : (_a2 = opts.default) == null ? void 0 : _a2.call(opts));
+  const cookie = ref(cookies[name] ?? ((_a = opts.default) == null ? void 0 : _a.call(opts)));
   {
-    const nuxtApp = useNuxtApp();
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
     const writeFinalCookieValue = () => {
-      if (!isEqual$1(cookie.value, cookies[name])) {
+      if (!isEqual(cookie.value, cookies[name])) {
         writeServerCookie(useRequestEvent(nuxtApp), name, cookie.value, opts);
       }
     };
     const unhook = nuxtApp.hooks.hookOnce("app:rendered", writeFinalCookieValue);
-    nuxtApp.hooks.hookOnce("app:redirected", () => {
+    nuxtApp.hooks.hookOnce("app:error", () => {
       unhook();
       return writeFinalCookieValue();
     });
@@ -452,29 +794,56 @@ function useCookie(name, _opts) {
   return cookie;
 }
 function readRawCookies(opts = {}) {
-  var _a2;
+  var _a;
   {
-    return parse(((_a2 = useRequestEvent()) == null ? void 0 : _a2.req.headers.cookie) || "", opts);
+    return parse(((_a = useRequestEvent()) == null ? void 0 : _a.node.req.headers.cookie) || "", opts);
   }
-}
-function serializeCookie(name, value, opts = {}) {
-  if (value === null || value === void 0) {
-    return serialize(name, value, { ...opts, maxAge: -1 });
-  }
-  return serialize(name, value, opts);
 }
 function writeServerCookie(event, name, value, opts = {}) {
   if (event) {
-    appendHeader(event, "Set-Cookie", serializeCookie(name, value, opts));
+    if (value !== null && value !== void 0) {
+      return setCookie(event, name, value, opts);
+    }
+    if (getCookie(event, name) !== void 0) {
+      return deleteCookie(event, name, opts);
+    }
+  }
+}
+const appPageTransition = { "name": "page" };
+const appLayoutTransition = { "name": "layout" };
+const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [], "noscript": [] };
+const appKeepalive = false;
+function definePayloadReducer(name, reduce) {
+  {
+    (/* @__PURE__ */ useNuxtApp()).ssrContext._payloadReducers[name] = reduce;
   }
 }
 const firstNonUndefined = (...args) => args.find((arg) => arg !== void 0);
 const DEFAULT_EXTERNAL_REL_ATTRIBUTE = "noopener noreferrer";
+/*! @__NO_SIDE_EFFECTS__ */
+// @__NO_SIDE_EFFECTS__
 function defineNuxtLink(options) {
   const componentName = options.componentName || "NuxtLink";
-  return defineComponent({
+  const resolveTrailingSlashBehavior = (to, resolve) => {
+    if (!to || options.trailingSlash !== "append" && options.trailingSlash !== "remove") {
+      return to;
+    }
+    const normalizeTrailingSlash = options.trailingSlash === "append" ? withTrailingSlash : withoutTrailingSlash;
+    if (typeof to === "string") {
+      return normalizeTrailingSlash(to, true);
+    }
+    const path = "path" in to ? to.path : resolve(to).path;
+    return {
+      ...to,
+      name: void 0,
+      // named routes would otherwise always override trailing slash behavior
+      path: normalizeTrailingSlash(path, true)
+    };
+  };
+  return /* @__PURE__ */ defineComponent({
     name: componentName,
     props: {
+      // Routing
       to: {
         type: [String, Object],
         default: void 0,
@@ -485,6 +854,7 @@ function defineNuxtLink(options) {
         default: void 0,
         required: false
       },
+      // Attributes
       target: {
         type: String,
         default: void 0,
@@ -500,6 +870,7 @@ function defineNuxtLink(options) {
         default: void 0,
         required: false
       },
+      // Prefetching
       prefetch: {
         type: Boolean,
         default: void 0,
@@ -510,6 +881,7 @@ function defineNuxtLink(options) {
         default: void 0,
         required: false
       },
+      // Styling
       activeClass: {
         type: String,
         default: void 0,
@@ -525,6 +897,7 @@ function defineNuxtLink(options) {
         default: void 0,
         required: false
       },
+      // Vue Router's `<RouterLink>` additional props
       replace: {
         type: Boolean,
         default: void 0,
@@ -535,11 +908,13 @@ function defineNuxtLink(options) {
         default: void 0,
         required: false
       },
+      // Edge cases handling
       external: {
         type: Boolean,
         default: void 0,
         required: false
       },
+      // Slot API
       custom: {
         type: Boolean,
         default: void 0,
@@ -549,7 +924,8 @@ function defineNuxtLink(options) {
     setup(props, { slots }) {
       const router = useRouter();
       const to = computed(() => {
-        return props.to || props.href || "";
+        const path = props.to || props.href || "";
+        return resolveTrailingSlashBehavior(path, router.resolve);
       });
       const isExternal = computed(() => {
         if (props.external) {
@@ -561,1080 +937,142 @@ function defineNuxtLink(options) {
         if (typeof to.value === "object") {
           return false;
         }
-        return to.value === "" || hasProtocol(to.value, true);
+        return to.value === "" || hasProtocol(to.value, { acceptRelative: true });
       });
       const prefetched = ref(false);
       const el = void 0;
+      const elRef = void 0;
       return () => {
-        var _a2, _b2, _c2;
+        var _a, _b;
         if (!isExternal.value) {
+          const routerLinkProps = {
+            ref: elRef,
+            to: to.value,
+            activeClass: props.activeClass || options.activeClass,
+            exactActiveClass: props.exactActiveClass || options.exactActiveClass,
+            replace: props.replace,
+            ariaCurrentValue: props.ariaCurrentValue,
+            custom: props.custom
+          };
+          if (!props.custom) {
+            if (prefetched.value) {
+              routerLinkProps.class = props.prefetchedClass || options.prefetchedClass;
+            }
+            routerLinkProps.rel = props.rel;
+          }
           return h$1(
             resolveComponent("RouterLink"),
-            {
-              ref: void 0,
-              to: to.value,
-              ...prefetched.value && !props.custom ? { class: props.prefetchedClass || options.prefetchedClass } : {},
-              activeClass: props.activeClass || options.activeClass,
-              exactActiveClass: props.exactActiveClass || options.exactActiveClass,
-              replace: props.replace,
-              ariaCurrentValue: props.ariaCurrentValue,
-              custom: props.custom
-            },
+            routerLinkProps,
             slots.default
           );
         }
-        const href = typeof to.value === "object" ? (_b2 = (_a2 = router.resolve(to.value)) == null ? void 0 : _a2.href) != null ? _b2 : null : to.value || null;
+        const href = typeof to.value === "object" ? ((_a = router.resolve(to.value)) == null ? void 0 : _a.href) ?? null : to.value || null;
         const target = props.target || null;
         const rel = props.noRel ? null : firstNonUndefined(props.rel, options.externalRelAttribute, href ? DEFAULT_EXTERNAL_REL_ATTRIBUTE : "") || null;
-        const navigate2 = () => navigateTo(href, { replace: props.replace });
+        const navigate = () => navigateTo(href, { replace: props.replace });
         if (props.custom) {
           if (!slots.default) {
             return null;
           }
           return slots.default({
             href,
-            navigate: navigate2,
-            route: router.resolve(href),
+            navigate,
+            get route() {
+              if (!href) {
+                return void 0;
+              }
+              const url = parseURL(href);
+              return {
+                path: url.pathname,
+                fullPath: url.pathname,
+                get query() {
+                  return parseQuery(url.search);
+                },
+                hash: url.hash,
+                // stub properties for compat with vue-router
+                params: {},
+                name: void 0,
+                matched: [],
+                redirectedFrom: void 0,
+                meta: {},
+                href
+              };
+            },
             rel,
             target,
+            isExternal: isExternal.value,
             isActive: false,
             isExactActive: false
           });
         }
-        return h$1("a", { ref: el, href, rel, target }, (_c2 = slots.default) == null ? void 0 : _c2.call(slots));
+        return h$1("a", { ref: el, href, rel, target }, (_b = slots.default) == null ? void 0 : _b.call(slots));
       };
     }
   });
 }
-const __nuxt_component_0$1 = defineNuxtLink({ componentName: "NuxtLink" });
-function isObject$2(val) {
-  return val !== null && typeof val === "object";
+const __nuxt_component_0$3 = /* @__PURE__ */ defineNuxtLink({ componentName: "NuxtLink" });
+function isObject(value) {
+  return value !== null && typeof value === "object";
 }
-function _defu(baseObj, defaults, namespace = ".", merger) {
-  if (!isObject$2(defaults)) {
-    return _defu(baseObj, {}, namespace, merger);
+function _defu(baseObject, defaults, namespace = ".", merger) {
+  if (!isObject(defaults)) {
+    return _defu(baseObject, {}, namespace, merger);
   }
-  const obj = Object.assign({}, defaults);
-  for (const key in baseObj) {
+  const object = Object.assign({}, defaults);
+  for (const key in baseObject) {
     if (key === "__proto__" || key === "constructor") {
       continue;
     }
-    const val = baseObj[key];
-    if (val === null || val === void 0) {
+    const value = baseObject[key];
+    if (value === null || value === void 0) {
       continue;
     }
-    if (merger && merger(obj, key, val, namespace)) {
+    if (merger && merger(object, key, value, namespace)) {
       continue;
     }
-    if (Array.isArray(val) && Array.isArray(obj[key])) {
-      obj[key] = val.concat(obj[key]);
-    } else if (isObject$2(val) && isObject$2(obj[key])) {
-      obj[key] = _defu(val, obj[key], (namespace ? `${namespace}.` : "") + key.toString(), merger);
+    if (Array.isArray(value) && Array.isArray(object[key])) {
+      object[key] = [...value, ...object[key]];
+    } else if (isObject(value) && isObject(object[key])) {
+      object[key] = _defu(
+        value,
+        object[key],
+        (namespace ? `${namespace}.` : "") + key.toString(),
+        merger
+      );
     } else {
-      obj[key] = val;
+      object[key] = value;
     }
   }
-  return obj;
+  return object;
 }
 function createDefu(merger) {
-  return (...args) => args.reduce((p2, c2) => _defu(p2, c2, "", merger), {});
+  return (...arguments_) => (
+    // eslint-disable-next-line unicorn/no-array-reduce
+    arguments_.reduce((p2, c2) => _defu(p2, c2, "", merger), {})
+  );
 }
-const defuFn = createDefu((obj, key, currentValue, _namespace) => {
-  if (typeof obj[key] !== "undefined" && typeof currentValue === "function") {
-    obj[key] = currentValue(obj[key]);
+const defuFn = createDefu((object, key, currentValue) => {
+  if (typeof object[key] !== "undefined" && typeof currentValue === "function") {
+    object[key] = currentValue(object[key]);
     return true;
   }
 });
 const cfg0 = defineAppConfig({
-  name: "BondingTechs \u9375\u7D50\u79D1\u6280",
+  name: "BondingTechs 鍵結科技",
   link: "/"
 });
 const inlineConfig = {};
-const __appConfig = defuFn(cfg0, inlineConfig);
+const __appConfig = /* @__PURE__ */ defuFn(cfg0, inlineConfig);
 function useAppConfig() {
-  const nuxtApp = useNuxtApp();
+  const nuxtApp = /* @__PURE__ */ useNuxtApp();
   if (!nuxtApp._appConfig) {
-    nuxtApp._appConfig = reactive(__appConfig);
+    nuxtApp._appConfig = klona(__appConfig);
   }
   return nuxtApp._appConfig;
 }
-function useHead(meta) {
-  useNuxtApp()._useHead(meta);
-}
-const components = {
-  Alert: defineAsyncComponent(() => import('./_nuxt/Alert.be4b8739.mjs').then((c2) => c2.default || c2)),
-  Loading: defineAsyncComponent(() => import('./_nuxt/Loading.f5a3bdf3.mjs').then((c2) => c2.default || c2)),
-  Message: defineAsyncComponent(() => import('./_nuxt/Message.bfd913ff.mjs').then((c2) => c2.default || c2))
-};
-const _nuxt_components_plugin_mjs_KR1HBZs4kY = defineNuxtPlugin((nuxtApp) => {
-  for (const name in components) {
-    nuxtApp.vueApp.component(name, components[name]);
-    nuxtApp.vueApp.component("Lazy" + name, components[name]);
-  }
-});
-const isVue2 = false;
-const isVue3 = true;
-function resolveUnref(r2) {
-  return typeof r2 === "function" ? r2() : unref(r2);
-}
-var PROVIDE_KEY = "usehead";
-var HEAD_COUNT_KEY = "head:count";
-var HEAD_ATTRS_KEY = "data-head-attrs";
-var SELF_CLOSING_TAGS = ["meta", "link", "base"];
-var BODY_TAG_ATTR_NAME = "data-meta-body";
-var propsToString = (props) => {
-  const handledAttributes = [];
-  for (const [key, value] of Object.entries(props)) {
-    if (value === false || value == null)
-      continue;
-    let attribute = key;
-    if (value !== true)
-      attribute += `="${String(value).replace(/"/g, "&quot;")}"`;
-    handledAttributes.push(attribute);
-  }
-  return handledAttributes.length > 0 ? ` ${handledAttributes.join(" ")}` : "";
-};
-var tagToString = (tag) => {
-  const attrs = propsToString(tag.props);
-  const openTag = `<${tag.tag}${attrs}>`;
-  return SELF_CLOSING_TAGS.includes(tag.tag) ? openTag : `${openTag}${tag.children || ""}</${tag.tag}>`;
-};
-var resolveHeadEntries = (entries, force) => {
-  return entries.map((e2) => {
-    if (e2.input && (force || !e2.resolved))
-      e2.input = resolveUnrefHeadInput(e2.input);
-    return e2;
-  });
-};
-var renderHeadToString = async (head) => {
-  var _a2, _b2;
-  const headHtml = [];
-  const bodyHtml = [];
-  let titleHtml = "";
-  const attrs = { htmlAttrs: {}, bodyAttrs: {} };
-  const resolvedEntries = resolveHeadEntries(head.headEntries);
-  for (const h2 in head.hooks["resolved:entries"])
-    await head.hooks["resolved:entries"][h2](resolvedEntries);
-  const headTags = resolveHeadEntriesToTags(resolvedEntries);
-  for (const h2 in head.hooks["resolved:tags"])
-    await head.hooks["resolved:tags"][h2](headTags);
-  for (const tag of headTags) {
-    if ((_a2 = tag.options) == null ? void 0 : _a2.beforeTagRender)
-      tag.options.beforeTagRender(tag);
-    if (tag.tag === "title")
-      titleHtml = tagToString(tag);
-    else if (tag.tag === "htmlAttrs" || tag.tag === "bodyAttrs")
-      attrs[tag.tag] = { ...attrs[tag.tag], ...tag.props };
-    else if ((_b2 = tag.options) == null ? void 0 : _b2.body)
-      bodyHtml.push(tagToString(tag));
-    else
-      headHtml.push(tagToString(tag));
-  }
-  headHtml.push(`<meta name="${HEAD_COUNT_KEY}" content="${headHtml.length}">`);
-  return {
-    get headTags() {
-      return titleHtml + headHtml.join("");
-    },
-    get htmlAttrs() {
-      return propsToString({
-        ...attrs.htmlAttrs,
-        [HEAD_ATTRS_KEY]: Object.keys(attrs.htmlAttrs).join(",")
-      });
-    },
-    get bodyAttrs() {
-      return propsToString({
-        ...attrs.bodyAttrs,
-        [HEAD_ATTRS_KEY]: Object.keys(attrs.bodyAttrs).join(",")
-      });
-    },
-    get bodyTags() {
-      return bodyHtml.join("");
-    }
-  };
-};
-var sortTags = (aTag, bTag) => {
-  const tagWeight = (tag) => {
-    var _a2;
-    if ((_a2 = tag.options) == null ? void 0 : _a2.renderPriority)
-      return tag.options.renderPriority;
-    switch (tag.tag) {
-      case "base":
-        return -1;
-      case "meta":
-        if (tag.props.charset)
-          return -2;
-        if (tag.props["http-equiv"] === "content-security-policy")
-          return 0;
-        return 10;
-      default:
-        return 10;
-    }
-  };
-  return tagWeight(aTag) - tagWeight(bTag);
-};
-var tagDedupeKey = (tag) => {
-  const { props, tag: tagName, options } = tag;
-  if (["base", "title", "titleTemplate", "bodyAttrs", "htmlAttrs"].includes(tagName))
-    return tagName;
-  if (tagName === "link" && props.rel === "canonical")
-    return "canonical";
-  if (props.charset)
-    return "charset";
-  if (options == null ? void 0 : options.key)
-    return `${tagName}:${options.key}`;
-  const name = ["id"];
-  if (tagName === "meta")
-    name.push(...["name", "property", "http-equiv"]);
-  for (const n2 of name) {
-    if (typeof props[n2] !== "undefined") {
-      return `${tagName}:${n2}:${props[n2]}`;
-    }
-  }
-  return tag.runtime.position;
-};
-function resolveUnrefHeadInput(ref2) {
-  const root = resolveUnref(ref2);
-  if (!ref2 || !root) {
-    return root;
-  }
-  if (Array.isArray(root)) {
-    return root.map(resolveUnrefHeadInput);
-  }
-  if (typeof root === "object") {
-    return Object.fromEntries(
-      Object.entries(root).map(([key, value]) => {
-        if (key === "titleTemplate")
-          return [key, unref(value)];
-        return [
-          key,
-          resolveUnrefHeadInput(value)
-        ];
-      })
-    );
-  }
-  return root;
-}
-var resolveTag = (name, input, e2) => {
-  var _a2;
-  input = { ...input };
-  const tag = {
-    tag: name,
-    props: {},
-    runtime: {
-      entryId: e2.id
-    },
-    options: {
-      ...e2.options
-    }
-  };
-  ["hid", "vmid", "key"].forEach((key) => {
-    if (input[key]) {
-      tag.options.key = input[key];
-      delete input[key];
-    }
-  });
-  ["children", "innerHTML", "textContent"].forEach((key) => {
-    if (typeof input[key] !== "undefined") {
-      tag.children = input[key];
-      delete input[key];
-    }
-  });
-  ["body", "renderPriority"].forEach((key) => {
-    if (typeof input[key] !== "undefined") {
-      tag.options[key] = input[key];
-      delete input[key];
-    }
-  });
-  if ((_a2 = tag.options) == null ? void 0 : _a2.body)
-    input[BODY_TAG_ATTR_NAME] = true;
-  tag.props = input;
-  return tag;
-};
-var headInputToTags = (e2) => {
-  return Object.entries(e2.input).filter(([, v2]) => typeof v2 !== "undefined").map(([key, value]) => {
-    return (Array.isArray(value) ? value : [value]).map((props) => {
-      switch (key) {
-        case "title":
-        case "titleTemplate":
-          return {
-            tag: key,
-            children: props,
-            props: {},
-            runtime: { entryId: e2.id },
-            options: e2.options
-          };
-        case "base":
-        case "meta":
-        case "link":
-        case "style":
-        case "script":
-        case "noscript":
-        case "htmlAttrs":
-        case "bodyAttrs":
-          return resolveTag(key, props, e2);
-        default:
-          return false;
-      }
-    });
-  }).flat().filter((v2) => !!v2);
-};
-var renderTitleTemplate = (template, title) => {
-  if (template == null)
-    return title || null;
-  if (typeof template === "function")
-    return template(title);
-  return template.replace("%s", title != null ? title : "");
-};
-var resolveHeadEntriesToTags = (entries) => {
-  const deduping = {};
-  const resolvedEntries = resolveHeadEntries(entries);
-  resolvedEntries.forEach((entry2, entryIndex) => {
-    const tags = headInputToTags(entry2);
-    tags.forEach((tag, tagIdx) => {
-      tag.runtime = tag.runtime || {};
-      tag.runtime.position = entryIndex * 1e4 + tagIdx;
-      deduping[tagDedupeKey(tag)] = tag;
-    });
-  });
-  let resolvedTags = Object.values(deduping).sort((a2, b2) => a2.runtime.position - b2.runtime.position).sort(sortTags);
-  const titleTemplateIdx = resolvedTags.findIndex((i) => i.tag === "titleTemplate");
-  const titleIdx = resolvedTags.findIndex((i) => i.tag === "title");
-  if (titleIdx !== -1 && titleTemplateIdx !== -1) {
-    const newTitle = renderTitleTemplate(
-      resolvedTags[titleTemplateIdx].children,
-      resolvedTags[titleIdx].children
-    );
-    if (newTitle !== null) {
-      resolvedTags[titleIdx].children = newTitle || resolvedTags[titleIdx].children;
-    } else {
-      resolvedTags = resolvedTags.filter((_, i) => i !== titleIdx);
-    }
-    resolvedTags = resolvedTags.filter((_, i) => i !== titleTemplateIdx);
-  } else if (titleTemplateIdx !== -1) {
-    const newTitle = renderTitleTemplate(
-      resolvedTags[titleTemplateIdx].children
-    );
-    if (newTitle !== null) {
-      resolvedTags[titleTemplateIdx].children = newTitle;
-      resolvedTags[titleTemplateIdx].tag = "title";
-    } else {
-      resolvedTags = resolvedTags.filter((_, i) => i !== titleTemplateIdx);
-    }
-  }
-  return resolvedTags;
-};
-function isEqualNode(oldTag, newTag) {
-  if (oldTag instanceof HTMLElement && newTag instanceof HTMLElement) {
-    const nonce = newTag.getAttribute("nonce");
-    if (nonce && !oldTag.getAttribute("nonce")) {
-      const cloneTag = newTag.cloneNode(true);
-      cloneTag.setAttribute("nonce", "");
-      cloneTag.nonce = nonce;
-      return nonce === oldTag.nonce && oldTag.isEqualNode(cloneTag);
-    }
-  }
-  return oldTag.isEqualNode(newTag);
-}
-var setAttrs = (el, attrs) => {
-  const existingAttrs = el.getAttribute(HEAD_ATTRS_KEY);
-  if (existingAttrs) {
-    for (const key of existingAttrs.split(",")) {
-      if (!(key in attrs))
-        el.removeAttribute(key);
-    }
-  }
-  const keys = [];
-  for (const key in attrs) {
-    const value = attrs[key];
-    if (value == null)
-      continue;
-    if (value === false)
-      el.removeAttribute(key);
-    else
-      el.setAttribute(key, value);
-    keys.push(key);
-  }
-  if (keys.length)
-    el.setAttribute(HEAD_ATTRS_KEY, keys.join(","));
-  else
-    el.removeAttribute(HEAD_ATTRS_KEY);
-};
-var createElement = (tag, document2) => {
-  var _a2;
-  const $el = document2.createElement(tag.tag);
-  Object.entries(tag.props).forEach(([k2, v2]) => {
-    if (v2 !== false) {
-      $el.setAttribute(k2, v2 === true ? "" : String(v2));
-    }
-  });
-  if (tag.children) {
-    if ((_a2 = tag.options) == null ? void 0 : _a2.safe) {
-      if (tag.tag !== "script")
-        $el.textContent = tag.children;
-    } else {
-      $el.innerHTML = tag.children;
-    }
-  }
-  return $el;
-};
-var updateElements = (document2 = window.document, type, tags) => {
-  var _a2, _b2;
-  const head = document2.head;
-  const body = document2.body;
-  let headCountEl = head.querySelector(`meta[name="${HEAD_COUNT_KEY}"]`);
-  const bodyMetaElements = body.querySelectorAll(`[${BODY_TAG_ATTR_NAME}]`);
-  const headCount = headCountEl ? Number(headCountEl.getAttribute("content")) : 0;
-  const oldHeadElements = [];
-  const oldBodyElements = [];
-  if (bodyMetaElements) {
-    for (let i = 0; i < bodyMetaElements.length; i++) {
-      if (bodyMetaElements[i] && ((_a2 = bodyMetaElements[i].tagName) == null ? void 0 : _a2.toLowerCase()) === type)
-        oldBodyElements.push(bodyMetaElements[i]);
-    }
-  }
-  if (headCountEl) {
-    for (let i = 0, j = headCountEl.previousElementSibling; i < headCount; i++, j = (j == null ? void 0 : j.previousElementSibling) || null) {
-      if (((_b2 = j == null ? void 0 : j.tagName) == null ? void 0 : _b2.toLowerCase()) === type)
-        oldHeadElements.push(j);
-    }
-  } else {
-    headCountEl = document2.createElement("meta");
-    headCountEl.setAttribute("name", HEAD_COUNT_KEY);
-    headCountEl.setAttribute("content", "0");
-    head.append(headCountEl);
-  }
-  let newElements = tags.map((tag) => {
-    var _a3;
-    var _a22;
-    return {
-      element: createElement(tag, document2),
-      body: (_a3 = (_a22 = tag.options) == null ? void 0 : _a22.body) != null ? _a3 : false
-    };
-  });
-  newElements = newElements.filter((newEl) => {
-    for (let i = 0; i < oldHeadElements.length; i++) {
-      const oldEl = oldHeadElements[i];
-      if (isEqualNode(oldEl, newEl.element)) {
-        oldHeadElements.splice(i, 1);
-        return false;
-      }
-    }
-    for (let i = 0; i < oldBodyElements.length; i++) {
-      const oldEl = oldBodyElements[i];
-      if (isEqualNode(oldEl, newEl.element)) {
-        oldBodyElements.splice(i, 1);
-        return false;
-      }
-    }
-    return true;
-  });
-  oldBodyElements.forEach((t2) => {
-    var _a22;
-    return (_a22 = t2.parentNode) == null ? void 0 : _a22.removeChild(t2);
-  });
-  oldHeadElements.forEach((t2) => {
-    var _a22;
-    return (_a22 = t2.parentNode) == null ? void 0 : _a22.removeChild(t2);
-  });
-  newElements.forEach((t2) => {
-    if (t2.body)
-      body.insertAdjacentElement("beforeend", t2.element);
-    else
-      head.insertBefore(t2.element, headCountEl);
-  });
-  headCountEl.setAttribute(
-    "content",
-    `${headCount - oldHeadElements.length + newElements.filter((t2) => !t2.body).length}`
-  );
-};
-var updateDOM = async (head, previousTags, document2) => {
-  var _a2, _b2;
-  const tags = {};
-  if (!document2)
-    document2 = window.document;
-  for (const k2 in head.hooks["before:dom"]) {
-    if (await head.hooks["before:dom"][k2]() === false)
-      return;
-  }
-  const resolvedEntries = resolveHeadEntries(head.headEntries);
-  for (const h2 in head.hooks["resolved:entries"])
-    await head.hooks["resolved:entries"][h2](resolvedEntries);
-  const headTags = resolveHeadEntriesToTags(resolvedEntries);
-  for (const h2 in head.hooks["resolved:tags"])
-    await head.hooks["resolved:tags"][h2](headTags);
-  for (const tag of headTags) {
-    switch (tag.tag) {
-      case "title":
-        if (typeof tag.children !== "undefined")
-          document2.title = tag.children;
-        break;
-      case "base":
-      case "meta":
-      case "link":
-      case "style":
-      case "script":
-      case "noscript":
-        tags[tag.tag] = tags[tag.tag] || [];
-        tags[tag.tag].push(tag);
-        break;
-    }
-  }
-  setAttrs(document2.documentElement, ((_a2 = headTags.find((t2) => t2.tag === "htmlAttrs")) == null ? void 0 : _a2.props) || {});
-  setAttrs(document2.body, ((_b2 = headTags.find((t2) => t2.tag === "bodyAttrs")) == null ? void 0 : _b2.props) || {});
-  const tagKeys = /* @__PURE__ */ new Set([...Object.keys(tags), ...previousTags]);
-  for (const tag of tagKeys)
-    updateElements(document2, tag, tags[tag] || []);
-  previousTags.clear();
-  Object.keys(tags).forEach((i) => previousTags.add(i));
-};
-version.startsWith("2.");
-var createHead = (initHeadObject) => {
-  let entries = [];
-  let entryId = 0;
-  const previousTags = /* @__PURE__ */ new Set();
-  let domUpdateTick = null;
-  const head = {
-    install(app2) {
-      if (app2.config.globalProperties)
-        app2.config.globalProperties.$head = head;
-      app2.provide(PROVIDE_KEY, head);
-    },
-    hooks: {
-      "before:dom": [],
-      "resolved:tags": [],
-      "resolved:entries": []
-    },
-    get headEntries() {
-      return entries;
-    },
-    get headTags() {
-      const resolvedEntries = resolveHeadEntries(head.headEntries);
-      return resolveHeadEntriesToTags(resolvedEntries);
-    },
-    addHeadObjs(input, options) {
-      return head.addEntry(input, options);
-    },
-    addEntry(input, options = {}) {
-      let resolved = false;
-      if (options == null ? void 0 : options.resolved) {
-        resolved = true;
-        delete options.resolved;
-      }
-      const entry2 = {
-        id: entryId++,
-        options,
-        resolved,
-        input
-      };
-      entries.push(entry2);
-      return {
-        remove() {
-          entries = entries.filter((_objs) => _objs.id !== entry2.id);
-        },
-        update(updatedInput) {
-          entries = entries.map((e2) => {
-            if (e2.id === entry2.id)
-              e2.input = updatedInput;
-            return e2;
-          });
-        }
-      };
-    },
-    async updateDOM(document2, force) {
-      const doDomUpdate = () => {
-        domUpdateTick = null;
-        return updateDOM(head, previousTags, document2);
-      };
-      if (force)
-        return doDomUpdate();
-      return domUpdateTick = domUpdateTick || new Promise((resolve) => nextTick(() => resolve(doDomUpdate())));
-    },
-    addReactiveEntry(input, options = {}) {
-      let entrySideEffect = null;
-      const cleanUpWatch = watchEffect(() => {
-        const resolvedInput = resolveUnrefHeadInput(input);
-        if (entrySideEffect === null) {
-          entrySideEffect = head.addEntry(
-            resolvedInput,
-            { ...options, resolved: true }
-          );
-        } else {
-          entrySideEffect.update(resolvedInput);
-        }
-      });
-      return () => {
-        cleanUpWatch();
-        if (entrySideEffect)
-          entrySideEffect.remove();
-      };
-    }
-  };
-  if (initHeadObject)
-    head.addEntry(initHeadObject);
-  return head;
-};
-const appPageTransition = { "name": "page" };
-const appLayoutTransition = { "name": "layout" };
-const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [], "noscript": [] };
-const appKeepalive = false;
-const node_modules_nuxt_dist_head_runtime_lib_vueuse_head_plugin_mjs_D7WGfuP1A0 = defineNuxtPlugin((nuxtApp) => {
-  const head = createHead();
-  head.addEntry(appHead, { resolved: true });
-  nuxtApp.vueApp.use(head);
-  nuxtApp._useHead = (_meta, options) => {
-    {
-      head.addEntry(_meta, options);
-      return;
-    }
-  };
-  {
-    nuxtApp.ssrContext.renderMeta = async () => {
-      const meta = await renderHeadToString(head);
-      return {
-        ...meta,
-        bodyScripts: meta.bodyTags
-      };
-    };
-  }
-});
-const metaMixin = {
-  created() {
-    const instance = getCurrentInstance();
-    if (!instance) {
-      return;
-    }
-    const options = instance.type;
-    if (!options || !("head" in options)) {
-      return;
-    }
-    const nuxtApp = useNuxtApp();
-    const source = typeof options.head === "function" ? () => options.head(nuxtApp) : options.head;
-    useHead(source);
-  }
-};
-const node_modules_nuxt_dist_head_runtime_mixin_plugin_mjs_prWV5EzJWI = defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.mixin(metaMixin);
-});
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta = {};
-const __nuxt_page_meta$6 = {
-  layout: "blog"
-};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta = {};
-const __nuxt_page_meta$5 = {
-  middleware: ["auth"]
-};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta = {};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta = {};
-const __nuxt_page_meta$4 = {
-  middleware: ["auth"]
-};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta = {};
-const __nuxt_page_meta$3 = {
-  layout: "blog"
-};
-const _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta = {};
-const __nuxt_page_meta$2 = {
-  layout: "blog"
-};
-const __nuxt_page_meta$1 = {
-  layout: "blog"
-};
-const __nuxt_page_meta = {
-  layout: "blog"
-};
-const _routes = [
-  {
-    name: (_a = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.name) != null ? _a : "404___en",
-    path: (_b = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.path) != null ? _b : "/en/:catchAll(.*)*",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/404.vue",
-    children: [],
-    meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta,
-    alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.alias) || [],
-    redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.redirect) || void 0,
-    component: () => import('./_nuxt/404.e74f0965.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_c = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.name) != null ? _c : "404___tr",
-    path: (_d = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.path) != null ? _d : "/:catchAll(.*)*",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/404.vue",
-    children: [],
-    meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta,
-    alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.alias) || [],
-    redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47404_46vueMeta.redirect) || void 0,
-    component: () => import('./_nuxt/404.e74f0965.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_e = __nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) != null ? _e : "index___en",
-    path: (_f = __nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.path) != null ? _f : "/en",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/index.vue",
-    children: [],
-    meta: __nuxt_page_meta$6,
-    alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
-    redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
-    component: () => import('./_nuxt/index.008d529e.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_g = __nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) != null ? _g : "index___tr",
-    path: (_h = __nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.path) != null ? _h : "/",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/index.vue",
-    children: [],
-    meta: __nuxt_page_meta$6,
-    alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
-    redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
-    component: () => import('./_nuxt/index.008d529e.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_i = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.name) != null ? _i : "member-rule___en",
-    path: (_j = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.path) != null ? _j : "/en/member-rule",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/member-rule.vue",
-    children: [],
-    meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta,
-    alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.alias) || [],
-    redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.redirect) || void 0,
-    component: () => import('./_nuxt/member-rule.f7d69ea4.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_k = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.name) != null ? _k : "member-rule___tr",
-    path: (_l = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.path) != null ? _l : "/member-rule",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/member-rule.vue",
-    children: [],
-    meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta,
-    alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.alias) || [],
-    redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47member_45rule_46vueMeta.redirect) || void 0,
-    component: () => import('./_nuxt/member-rule.f7d69ea4.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    path: (_m = __nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.path) != null ? _m : "/en/my",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/my.vue",
-    children: [
-      {
-        name: (_n = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.name) != null ? _n : "my-account-change-phone___en",
-        path: (_o = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.path) != null ? _o : "account/change-phone",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/change-phone.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/change-phone.b25b7566.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_p = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.name) != null ? _p : "my-account-email-binding___en",
-        path: (_q = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.path) != null ? _q : "account/email-binding",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/email-binding.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/email-binding.9b85775b.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_r = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.name) != null ? _r : "my-account-email-verify___en",
-        path: (_s = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.path) != null ? _s : "account/email-verify",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/email-verify.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/email-verify.cd468bb3.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_t = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.name) != null ? _t : "my-account-identity-verify___en",
-        path: (_u = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.path) != null ? _u : "account/identity-verify",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/identity-verify.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/identity-verify.d17853f4.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_v = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.name) != null ? _v : "my-account___en",
-        path: (_w = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.path) != null ? _w : "account",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/index.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/index.1124168d.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_x = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.name) != null ? _x : "my-account-reset-password___en",
-        path: (_y = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.path) != null ? _y : "account/reset-password",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/reset-password.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/reset-password.a7553ae1.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_z = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.name) != null ? _z : "my-collections___en",
-        path: (_A = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.path) != null ? _A : "collections",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/collections.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/collections.b21ecff3.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_B = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.name) != null ? _B : "my-history___en",
-        path: (_C = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.path) != null ? _C : "history",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/history.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/history.b23fe440.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_D = __nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) != null ? _D : "my___en",
-        path: (_E = __nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) != null ? _E : "",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/index.vue",
-        children: [],
-        meta: __nuxt_page_meta$4,
-        alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
-        redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
-        component: () => import('./_nuxt/index.04d74abe.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_F = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.name) != null ? _F : "my-tips___en",
-        path: (_G = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.path) != null ? _G : "tips",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/tips.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/tips.8f3d18b8.mjs').then((m2) => m2.default || m2)
-      }
-    ],
-    name: (_H = __nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) != null ? _H : void 0,
-    meta: __nuxt_page_meta$5,
-    alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
-    redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
-    component: () => import('./_nuxt/my.1eb4e0e3.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    path: (_I = __nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.path) != null ? _I : "/my",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/my.vue",
-    children: [
-      {
-        name: (_J = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.name) != null ? _J : "my-account-change-phone___tr",
-        path: (_K = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.path) != null ? _K : "account/change-phone",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/change-phone.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47change_45phone_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/change-phone.b25b7566.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_L = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.name) != null ? _L : "my-account-email-binding___tr",
-        path: (_M = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.path) != null ? _M : "account/email-binding",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/email-binding.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45binding_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/email-binding.9b85775b.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_N = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.name) != null ? _N : "my-account-email-verify___tr",
-        path: (_O = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.path) != null ? _O : "account/email-verify",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/email-verify.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47email_45verify_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/email-verify.cd468bb3.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_P = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.name) != null ? _P : "my-account-identity-verify___tr",
-        path: (_Q = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.path) != null ? _Q : "account/identity-verify",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/identity-verify.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47identity_45verify_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/identity-verify.d17853f4.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_R = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.name) != null ? _R : "my-account___tr",
-        path: (_S = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.path) != null ? _S : "account",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/index.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47index_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/index.1124168d.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_T = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.name) != null ? _T : "my-account-reset-password___tr",
-        path: (_U = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.path) != null ? _U : "account/reset-password",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/account/reset-password.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47account_47reset_45password_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/reset-password.a7553ae1.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_V = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.name) != null ? _V : "my-collections___tr",
-        path: (_W = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.path) != null ? _W : "collections",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/collections.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47collections_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/collections.b21ecff3.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_X = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.name) != null ? _X : "my-history___tr",
-        path: (_Y = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.path) != null ? _Y : "history",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/history.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47history_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/history.b23fe440.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_Z = __nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) != null ? _Z : "my___tr",
-        path: (__ = __nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) != null ? __ : "",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/index.vue",
-        children: [],
-        meta: __nuxt_page_meta$4,
-        alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
-        redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
-        component: () => import('./_nuxt/index.04d74abe.mjs').then((m2) => m2.default || m2)
-      },
-      {
-        name: (_$ = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.name) != null ? _$ : "my-tips___tr",
-        path: (_aa = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.path) != null ? _aa : "tips",
-        file: "/Users/kurou/project/bonding-old/project/web/src/pages/my/tips.vue",
-        children: [],
-        meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta,
-        alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.alias) || [],
-        redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47my_47tips_46vueMeta.redirect) || void 0,
-        component: () => import('./_nuxt/tips.8f3d18b8.mjs').then((m2) => m2.default || m2)
-      }
-    ],
-    name: (_ba = __nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) != null ? _ba : void 0,
-    meta: __nuxt_page_meta$5,
-    alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
-    redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
-    component: () => import('./_nuxt/my.1eb4e0e3.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ca = __nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) != null ? _ca : "news-article-articleSlug___en",
-    path: (_da = __nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.path) != null ? _da : "/en/news/article/:articleSlug",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/article/[articleSlug].vue",
-    children: [],
-    meta: __nuxt_page_meta$3,
-    alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
-    redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_.eb97f7b3.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ea = __nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) != null ? _ea : "news-article-articleSlug___tr",
-    path: (_fa = __nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.path) != null ? _fa : "/news/article/:articleSlug",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/article/[articleSlug].vue",
-    children: [],
-    meta: __nuxt_page_meta$3,
-    alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
-    redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_.eb97f7b3.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ga = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.name) != null ? _ga : "news-categories___en",
-    path: (_ha = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.path) != null ? _ha : "/en/news/categories",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/categories.vue",
-    children: [],
-    meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta,
-    alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.alias) || [],
-    redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.redirect) || void 0,
-    component: () => import('./_nuxt/categories.bb6c8a6a.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ia = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.name) != null ? _ia : "news-categories___tr",
-    path: (_ja = _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.path) != null ? _ja : "/news/categories",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/categories.vue",
-    children: [],
-    meta: _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta,
-    alias: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.alias) || [],
-    redirect: (_47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta == null ? void 0 : _47Users_47kurou_47project_47bonding_45old_47project_47web_47src_47pages_47news_47categories_46vueMeta.redirect) || void 0,
-    component: () => import('./_nuxt/categories.bb6c8a6a.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ka = __nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) != null ? _ka : "news-category-categorySlug___en",
-    path: (_la = __nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.path) != null ? _la : "/en/news/category/:categorySlug",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/category/[categorySlug].vue",
-    children: [],
-    meta: __nuxt_page_meta$2,
-    alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
-    redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_.4efc928f.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ma = __nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) != null ? _ma : "news-category-categorySlug___tr",
-    path: (_na = __nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.path) != null ? _na : "/news/category/:categorySlug",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/category/[categorySlug].vue",
-    children: [],
-    meta: __nuxt_page_meta$2,
-    alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
-    redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_.4efc928f.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_oa = __nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) != null ? _oa : "news-video-categorySlug___en",
-    path: (_pa = __nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.path) != null ? _pa : "/en/news/video/:categorySlug",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/video/[categorySlug].vue",
-    children: [],
-    meta: __nuxt_page_meta$1,
-    alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
-    redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_.f0ca19a1.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_qa = __nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) != null ? _qa : "news-video-categorySlug___tr",
-    path: (_ra = __nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.path) != null ? _ra : "/news/video/:categorySlug",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/video/[categorySlug].vue",
-    children: [],
-    meta: __nuxt_page_meta$1,
-    alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
-    redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_.f0ca19a1.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_sa = __nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) != null ? _sa : "news-video___en",
-    path: (_ta = __nuxt_page_meta == null ? void 0 : __nuxt_page_meta.path) != null ? _ta : "/en/news/video",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/video/index.vue",
-    children: [],
-    meta: __nuxt_page_meta,
-    alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
-    redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index.5f89fe0a.mjs').then((m2) => m2.default || m2)
-  },
-  {
-    name: (_ua = __nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) != null ? _ua : "news-video___tr",
-    path: (_va = __nuxt_page_meta == null ? void 0 : __nuxt_page_meta.path) != null ? _va : "/news/video",
-    file: "/Users/kurou/project/bonding-old/project/web/src/pages/news/video/index.vue",
-    children: [],
-    meta: __nuxt_page_meta,
-    alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
-    redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index.5f89fe0a.mjs').then((m2) => m2.default || m2)
-  }
-];
 const routerOptions0 = {
   scrollBehavior: (to, from, savedPosition) => {
-    const nuxtApp = useNuxtApp();
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
     return new Promise((resolve) => {
       nuxtApp.hooks.hookOnce("page:finish", async () => {
         await nextTick();
@@ -1649,7 +1087,9 @@ const routerOptions0 = {
 };
 const routerOptions1 = {
   scrollBehavior(to, from, savedPosition) {
-    const nuxtApp = useNuxtApp();
+    var _a;
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
+    const behavior = ((_a = useRouter().options) == null ? void 0 : _a.scrollBehaviorType) ?? "auto";
     let position = savedPosition || void 0;
     if (!position && from && to && to.meta.scrollToTop !== false && _isDifferentRoute(from, to)) {
       position = { left: 0, top: 0 };
@@ -1659,16 +1099,16 @@ const routerOptions1 = {
         return { left: 0, top: 0 };
       }
       if (to.hash) {
-        return { el: to.hash, top: _getHashElementScrollMarginTop(to.hash) };
+        return { el: to.hash, top: _getHashElementScrollMarginTop(to.hash), behavior };
       }
     }
-    const hasTransition = to.meta.pageTransition !== false && from.meta.pageTransition !== false;
-    const hookToWait = hasTransition ? "page:transition:finish" : "page:finish";
+    const hasTransition = (route) => !!(route.meta.pageTransition ?? appPageTransition);
+    const hookToWait = hasTransition(from) && hasTransition(to) ? "page:transition:finish" : "page:finish";
     return new Promise((resolve) => {
       nuxtApp.hooks.hookOnce(hookToWait, async () => {
         await nextTick();
         if (to.hash) {
-          position = { el: to.hash, top: _getHashElementScrollMarginTop(to.hash) };
+          position = { el: to.hash, top: _getHashElementScrollMarginTop(to.hash), behavior };
         }
         resolve(position);
       });
@@ -1676,18 +1116,24 @@ const routerOptions1 = {
   }
 };
 function _getHashElementScrollMarginTop(selector) {
-  const elem = document.querySelector(selector);
-  if (elem) {
-    return parseFloat(getComputedStyle(elem).scrollMarginTop);
+  try {
+    const elem = document.querySelector(selector);
+    if (elem) {
+      return parseFloat(getComputedStyle(elem).scrollMarginTop);
+    }
+  } catch {
   }
   return 0;
 }
-function _isDifferentRoute(a2, b2) {
-  const samePageComponent = a2.matched[0] === b2.matched[0];
+function _isDifferentRoute(from, to) {
+  const samePageComponent = to.matched.every((comp, index) => {
+    var _a, _b, _c;
+    return ((_a = comp.components) == null ? void 0 : _a.default) === ((_c = (_b = from.matched[index]) == null ? void 0 : _b.components) == null ? void 0 : _c.default);
+  });
   if (!samePageComponent) {
     return true;
   }
-  if (samePageComponent && JSON.stringify(a2.params) !== JSON.stringify(b2.params)) {
+  if (samePageComponent && JSON.stringify(from.params) !== JSON.stringify(to.params)) {
     return true;
   }
   return false;
@@ -1698,155 +1144,221 @@ const routerOptions = {
   ...routerOptions1,
   ...routerOptions0
 };
-const validate = defineNuxtRouteMiddleware(async (to) => {
-  var _a2;
+const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
+  var _a;
   let __temp, __restore;
-  if (!((_a2 = to.meta) == null ? void 0 : _a2.validate)) {
+  if (!((_a = to.meta) == null ? void 0 : _a.validate)) {
     return;
   }
+  useRouter();
   const result = ([__temp, __restore] = executeAsync(() => Promise.resolve(to.meta.validate(to))), __temp = await __temp, __restore(), __temp);
-  if (typeof result === "boolean") {
+  if (result === true) {
+    return;
+  }
+  {
     return result;
   }
-  return createError(result);
 });
 const globalMiddleware = [
   validate
 ];
 const namedMiddleware = {
-  auth: () => import('./_nuxt/auth.78a7e1b8.mjs')
+  auth: () => import('./_nuxt/auth-ceed06c0.mjs')
 };
-const node_modules_nuxt_dist_pages_runtime_router_mjs_qNv5Ky2ZmB = defineNuxtPlugin(async (nuxtApp) => {
-  var _a2, _b2, _c2, _d2;
-  let __temp, __restore;
-  let routerBase = useRuntimeConfig().app.baseURL;
-  if (routerOptions.hashMode && !routerBase.includes("#")) {
-    routerBase += "#";
-  }
-  const history = (_b2 = (_a2 = routerOptions.history) == null ? void 0 : _a2.call(routerOptions, routerBase)) != null ? _b2 : createMemoryHistory(routerBase);
-  const routes = (_d2 = (_c2 = routerOptions.routes) == null ? void 0 : _c2.call(routerOptions, _routes)) != null ? _d2 : _routes;
-  const initialURL = nuxtApp.ssrContext.url;
-  const router = createRouter({
-    ...routerOptions,
-    history,
-    routes
-  });
-  nuxtApp.vueApp.use(router);
-  const previousRoute = shallowRef(router.currentRoute.value);
-  router.afterEach((_to, from) => {
-    previousRoute.value = from;
-  });
-  Object.defineProperty(nuxtApp.vueApp.config.globalProperties, "previousRoute", {
-    get: () => previousRoute.value
-  });
-  const _route = shallowRef(router.resolve(initialURL));
-  const syncCurrentRoute = () => {
-    _route.value = router.currentRoute.value;
-  };
-  nuxtApp.hook("page:finish", syncCurrentRoute);
-  router.afterEach((to, from) => {
-    var _a3, _b3, _c3, _d3;
-    if (((_b3 = (_a3 = to.matched[0]) == null ? void 0 : _a3.components) == null ? void 0 : _b3.default) === ((_d3 = (_c3 = from.matched[0]) == null ? void 0 : _c3.components) == null ? void 0 : _d3.default)) {
-      syncCurrentRoute();
+const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
+  name: "nuxt:router",
+  enforce: "pre",
+  async setup(nuxtApp) {
+    var _a, _b;
+    let __temp, __restore;
+    let routerBase = (/* @__PURE__ */ useRuntimeConfig()).app.baseURL;
+    if (routerOptions.hashMode && !routerBase.includes("#")) {
+      routerBase += "#";
     }
-  });
-  const route = {};
-  for (const key in _route.value) {
-    route[key] = computed(() => _route.value[key]);
-  }
-  nuxtApp._route = reactive(route);
-  nuxtApp._middleware = nuxtApp._middleware || {
-    global: [],
-    named: {}
-  };
-  useError();
-  try {
-    if (true) {
-      ;
-      [__temp, __restore] = executeAsync(() => router.push(initialURL)), await __temp, __restore();
-      ;
-    }
-    ;
-    [__temp, __restore] = executeAsync(() => router.isReady()), await __temp, __restore();
-    ;
-  } catch (error2) {
-    callWithNuxt(nuxtApp, showError, [error2]);
-  }
-  const initialLayout = useState("_layout");
-  router.beforeEach(async (to, from) => {
-    var _a3, _b3;
-    to.meta = reactive(to.meta);
-    if (nuxtApp.isHydrating) {
-      to.meta.layout = (_a3 = initialLayout.value) != null ? _a3 : to.meta.layout;
-    }
-    nuxtApp._processingMiddleware = true;
-    const middlewareEntries = /* @__PURE__ */ new Set([...globalMiddleware, ...nuxtApp._middleware.global]);
-    for (const component of to.matched) {
-      const componentMiddleware = component.meta.middleware;
-      if (!componentMiddleware) {
-        continue;
-      }
-      if (Array.isArray(componentMiddleware)) {
-        for (const entry2 of componentMiddleware) {
-          middlewareEntries.add(entry2);
+    const history = ((_a = routerOptions.history) == null ? void 0 : _a.call(routerOptions, routerBase)) ?? createMemoryHistory(routerBase);
+    const routes = ((_b = routerOptions.routes) == null ? void 0 : _b.call(routerOptions, _routes)) ?? _routes;
+    let startPosition;
+    const initialURL = nuxtApp.ssrContext.url;
+    const router = createRouter({
+      ...routerOptions,
+      scrollBehavior: (to, from, savedPosition) => {
+        var _a2;
+        if (from === START_LOCATION) {
+          startPosition = savedPosition;
+          return;
         }
-      } else {
-        middlewareEntries.add(componentMiddleware);
+        router.options.scrollBehavior = routerOptions.scrollBehavior;
+        return (_a2 = routerOptions.scrollBehavior) == null ? void 0 : _a2.call(routerOptions, to, START_LOCATION, startPosition || savedPosition);
+      },
+      history,
+      routes
+    });
+    nuxtApp.vueApp.use(router);
+    const previousRoute = shallowRef(router.currentRoute.value);
+    router.afterEach((_to, from) => {
+      previousRoute.value = from;
+    });
+    Object.defineProperty(nuxtApp.vueApp.config.globalProperties, "previousRoute", {
+      get: () => previousRoute.value
+    });
+    const _route = shallowRef(router.resolve(initialURL));
+    const syncCurrentRoute = () => {
+      _route.value = router.currentRoute.value;
+    };
+    nuxtApp.hook("page:finish", syncCurrentRoute);
+    router.afterEach((to, from) => {
+      var _a2, _b2, _c, _d;
+      if (((_b2 = (_a2 = to.matched[0]) == null ? void 0 : _a2.components) == null ? void 0 : _b2.default) === ((_d = (_c = from.matched[0]) == null ? void 0 : _c.components) == null ? void 0 : _d.default)) {
+        syncCurrentRoute();
       }
-    }
-    for (const entry2 of middlewareEntries) {
-      const middleware = typeof entry2 === "string" ? nuxtApp._middleware.named[entry2] || await ((_b3 = namedMiddleware[entry2]) == null ? void 0 : _b3.call(namedMiddleware).then((r2) => r2.default || r2)) : entry2;
-      if (!middleware) {
-        throw new Error(`Unknown route middleware: '${entry2}'.`);
-      }
-      const result = await callWithNuxt(nuxtApp, middleware, [to, from]);
-      {
-        if (result === false || result instanceof Error) {
-          const error2 = result || createError$1({
-            statusCode: 404,
-            statusMessage: `Page Not Found: ${initialURL}`
-          });
-          return callWithNuxt(nuxtApp, showError, [error2]);
-        }
-      }
-      if (result || result === false) {
-        return result;
-      }
-    }
-  });
-  router.afterEach(async (to) => {
-    delete nuxtApp._processingMiddleware;
-    if (to.matched.length === 0) {
-      callWithNuxt(nuxtApp, showError, [createError$1({
-        statusCode: 404,
-        fatal: false,
-        statusMessage: `Page not found: ${to.fullPath}`
-      })]);
-    } else if (to.matched[0].name === "404" && nuxtApp.ssrContext) {
-      nuxtApp.ssrContext.event.res.statusCode = 404;
-    } else {
-      const currentURL = to.fullPath || "/";
-      if (!isEqual(currentURL, initialURL)) {
-        await callWithNuxt(nuxtApp, navigateTo, [currentURL]);
-      }
-    }
-  });
-  nuxtApp.hooks.hookOnce("app:created", async () => {
-    try {
-      await router.replace({
-        ...router.resolve(initialURL),
-        name: void 0,
-        force: true
+    });
+    const route = {};
+    for (const key in _route.value) {
+      Object.defineProperty(route, key, {
+        get: () => _route.value[key]
       });
-    } catch (error2) {
-      callWithNuxt(nuxtApp, showError, [error2]);
     }
-  });
-  return { provide: { router } };
+    nuxtApp._route = shallowReactive(route);
+    nuxtApp._middleware = nuxtApp._middleware || {
+      global: [],
+      named: {}
+    };
+    useError();
+    try {
+      if (true) {
+        ;
+        [__temp, __restore] = executeAsync(() => router.push(initialURL)), await __temp, __restore();
+        ;
+      }
+      ;
+      [__temp, __restore] = executeAsync(() => router.isReady()), await __temp, __restore();
+      ;
+    } catch (error2) {
+      [__temp, __restore] = executeAsync(() => nuxtApp.runWithContext(() => showError(error2))), await __temp, __restore();
+    }
+    const initialLayout = useState("_layout");
+    router.beforeEach(async (to, from) => {
+      var _a2, _b2;
+      to.meta = reactive(to.meta);
+      if (nuxtApp.isHydrating && initialLayout.value && !isReadonly(to.meta.layout)) {
+        to.meta.layout = initialLayout.value;
+      }
+      nuxtApp._processingMiddleware = true;
+      if (!((_a2 = nuxtApp.ssrContext) == null ? void 0 : _a2.islandContext)) {
+        const middlewareEntries = /* @__PURE__ */ new Set([...globalMiddleware, ...nuxtApp._middleware.global]);
+        for (const component of to.matched) {
+          const componentMiddleware = component.meta.middleware;
+          if (!componentMiddleware) {
+            continue;
+          }
+          if (Array.isArray(componentMiddleware)) {
+            for (const entry2 of componentMiddleware) {
+              middlewareEntries.add(entry2);
+            }
+          } else {
+            middlewareEntries.add(componentMiddleware);
+          }
+        }
+        for (const entry2 of middlewareEntries) {
+          const middleware = typeof entry2 === "string" ? nuxtApp._middleware.named[entry2] || await ((_b2 = namedMiddleware[entry2]) == null ? void 0 : _b2.call(namedMiddleware).then((r2) => r2.default || r2)) : entry2;
+          if (!middleware) {
+            throw new Error(`Unknown route middleware: '${entry2}'.`);
+          }
+          const result = await nuxtApp.runWithContext(() => middleware(to, from));
+          {
+            if (result === false || result instanceof Error) {
+              const error2 = result || createError$1({
+                statusCode: 404,
+                statusMessage: `Page Not Found: ${initialURL}`
+              });
+              await nuxtApp.runWithContext(() => showError(error2));
+              return false;
+            }
+          }
+          if (result || result === false) {
+            return result;
+          }
+        }
+      }
+    });
+    router.onError(() => {
+      delete nuxtApp._processingMiddleware;
+    });
+    router.afterEach(async (to, _from, failure) => {
+      var _a2;
+      delete nuxtApp._processingMiddleware;
+      if ((failure == null ? void 0 : failure.type) === 4) {
+        return;
+      }
+      if (to.matched.length === 0 && !((_a2 = nuxtApp.ssrContext) == null ? void 0 : _a2.islandContext)) {
+        await nuxtApp.runWithContext(() => showError(createError$1({
+          statusCode: 404,
+          fatal: false,
+          statusMessage: `Page not found: ${to.fullPath}`
+        })));
+      } else if (to.redirectedFrom && to.fullPath !== initialURL) {
+        await nuxtApp.runWithContext(() => navigateTo(to.fullPath || "/"));
+      }
+    });
+    nuxtApp.hooks.hookOnce("app:created", async () => {
+      try {
+        await router.replace({
+          ...router.resolve(initialURL),
+          name: void 0,
+          // #4920, #4982
+          force: true
+        });
+        router.options.scrollBehavior = routerOptions.scrollBehavior;
+      } catch (error2) {
+        await nuxtApp.runWithContext(() => showError(error2));
+      }
+    });
+    return { provide: { router } };
+  }
+});
+const reducers = {
+  NuxtError: (data) => isNuxtError(data) && data.toJSON(),
+  EmptyShallowRef: (data) => isRef(data) && isShallow(data) && !data.value && (typeof data.value === "bigint" ? "0n" : JSON.stringify(data.value) || "_"),
+  EmptyRef: (data) => isRef(data) && !data.value && (typeof data.value === "bigint" ? "0n" : JSON.stringify(data.value) || "_"),
+  ShallowRef: (data) => isRef(data) && isShallow(data) && data.value,
+  ShallowReactive: (data) => isReactive(data) && isShallow(data) && toRaw(data),
+  Ref: (data) => isRef(data) && data.value,
+  Reactive: (data) => isReactive(data) && toRaw(data)
+};
+const revive_payload_server_eJ33V7gbc6 = /* @__PURE__ */ defineNuxtPlugin({
+  name: "nuxt:revive-payload:server",
+  setup() {
+    for (const reducer in reducers) {
+      definePayloadReducer(reducer, reducers[reducer]);
+    }
+  }
+});
+const components_plugin_KR1HBZs4kY = /* @__PURE__ */ defineNuxtPlugin({
+  name: "nuxt:global-components"
+});
+const unhead_KgADcZ0jPj = /* @__PURE__ */ defineNuxtPlugin({
+  name: "nuxt:head",
+  setup(nuxtApp) {
+    const createHead = createServerHead;
+    const head = createHead();
+    head.push(appHead);
+    nuxtApp.vueApp.use(head);
+    {
+      nuxtApp.ssrContext.renderMeta = async () => {
+        const meta = await renderSSRHead(head);
+        return {
+          ...meta,
+          bodyScriptsPrepend: meta.bodyTagsOpen,
+          // resolves naming difference with NuxtMeta and Unhead
+          bodyScripts: meta.bodyTags
+        };
+      };
+    }
+  }
 });
 const plugin = {
-  install: (app2, options) => {
-    app2.provide("n-config-provider", {
+  install: (app, options) => {
+    app.provide("n-config-provider", {
       mergedThemeHashRef: computed(() => ""),
       mergedBreakpointsRef: computed(() => void 0),
       mergedRtlRef: computed(() => void 0),
@@ -1865,20 +1377,20 @@ const plugin = {
     });
   }
 };
-const node_modules__64huntersofbook_naive_ui_nuxt_dist_runtime_config_mjs_hyx03WSFRE = defineNuxtPlugin((nuxtApp) => {
-  var _a2, _b2;
-  const config = (_b2 = (_a2 = useRuntimeConfig()) == null ? void 0 : _a2.public) == null ? void 0 : _b2.naiveUI;
+const config_hyx03WSFRE = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
+  var _a, _b;
+  const config = (_b = (_a = /* @__PURE__ */ useRuntimeConfig()) == null ? void 0 : _a.public) == null ? void 0 : _b.naiveUI;
   if (config)
     nuxtApp.vueApp.use(plugin, config);
 });
 const ssrContextKey = Symbol("@css-render/vue3-ssr");
-function setup(app2) {
+function setup(app) {
   const styles = [];
   const ssrContext = {
     styles,
     ids: /* @__PURE__ */ new Set()
   };
-  app2.provide(ssrContextKey, ssrContext);
+  app.provide(ssrContextKey, ssrContext);
   return {
     collect() {
       const res = styles.join("\n");
@@ -1887,7 +1399,7 @@ function setup(app2) {
     }
   };
 }
-const node_modules__64huntersofbook_naive_ui_nuxt_dist_runtime_plugin_mjs_dUrdF0P1fL = defineNuxtPlugin((nuxtApp) => {
+const plugin_dUrdF0P1fL = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
   setup(nuxtApp.vueApp);
   nuxtApp.hook("app:beforeMount", () => {
     const meta = document.createElement("meta");
@@ -1895,8 +1407,9 @@ const node_modules__64huntersofbook_naive_ui_nuxt_dist_runtime_plugin_mjs_dUrdF0
     document.head.appendChild(meta);
   });
 });
+const isVue2 = false;
 const preference = "system";
-const node_modules__64nuxtjs_color_mode_dist_runtime_plugin_server_mjs_XNCxeHyTuP = defineNuxtPlugin((nuxtApp) => {
+const plugin_server_XNCxeHyTuP = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
   const colorMode = useState("color-mode", () => reactive({
     preference,
     value: preference,
@@ -1918,2415 +1431,7 @@ const node_modules__64nuxtjs_color_mode_dist_runtime_plugin_server_mjs_XNCxeHyTu
   });
   nuxtApp.provide("colorMode", colorMode);
 });
-/*!
-  * shared v9.3.0-beta.6
-  * (c) 2022 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-const inBrowser = false;
-const hasSymbol$1 = typeof Symbol === "function" && typeof Symbol.toStringTag === "symbol";
-const makeSymbol$1 = (name) => hasSymbol$1 ? Symbol(name) : name;
-const isNumber = (val) => typeof val === "number" && isFinite(val);
-const isRegExp = (val) => toTypeString(val) === "[object RegExp]";
-const isEmptyObject = (val) => isPlainObject$1(val) && Object.keys(val).length === 0;
-const assign$2 = Object.assign;
-let _globalThis;
-const getGlobalThis = () => {
-  return _globalThis || (_globalThis = typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : typeof global !== "undefined" ? global : {});
-};
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-function hasOwn(obj, key) {
-  return hasOwnProperty.call(obj, key);
-}
-const isArray$1 = Array.isArray;
-const isFunction$1 = (val) => typeof val === "function";
-const isString$1 = (val) => typeof val === "string";
-const isBoolean$1 = (val) => typeof val === "boolean";
-const isObject$1 = (val) => val !== null && typeof val === "object";
-const objectToString = Object.prototype.toString;
-const toTypeString = (value) => objectToString.call(value);
-const isPlainObject$1 = (val) => toTypeString(val) === "[object Object]";
-/*!
-  * vue-i18n v9.3.0-beta.6
-  * (c) 2022 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-const VERSION = "9.3.0-beta.6";
-function initFeatureFlags() {
-  if (typeof __INTLIFY_PROD_DEVTOOLS__ !== "boolean") {
-    getGlobalThis().__INTLIFY_PROD_DEVTOOLS__ = false;
-  }
-}
-CoreWarnCodes.__EXTEND_POINT__;
-let code = CompileErrorCodes.__EXTEND_POINT__;
-const inc = () => ++code;
-const I18nErrorCodes = {
-  UNEXPECTED_RETURN_TYPE: code,
-  INVALID_ARGUMENT: inc(),
-  MUST_BE_CALL_SETUP_TOP: inc(),
-  NOT_INSLALLED: inc(),
-  NOT_AVAILABLE_IN_LEGACY_MODE: inc(),
-  REQUIRED_VALUE: inc(),
-  INVALID_VALUE: inc(),
-  CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN: inc(),
-  NOT_INSLALLED_WITH_PROVIDE: inc(),
-  UNEXPECTED_ERROR: inc(),
-  NOT_COMPATIBLE_LEGACY_VUE_I18N: inc(),
-  BRIDGE_SUPPORT_VUE_2_ONLY: inc(),
-  MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION: inc(),
-  NOT_AVAILABLE_COMPOSITION_IN_LEGACY: inc(),
-  __EXTEND_POINT__: inc()
-};
-function createI18nError(code2, ...args) {
-  return createCompileError(code2, null, void 0);
-}
-const TransrateVNodeSymbol = /* @__PURE__ */ makeSymbol$1("__transrateVNode");
-const DatetimePartsSymbol = /* @__PURE__ */ makeSymbol$1("__datetimeParts");
-const NumberPartsSymbol = /* @__PURE__ */ makeSymbol$1("__numberParts");
-const SetPluralRulesSymbol = makeSymbol$1("__setPluralRules");
-const InejctWithOption = /* @__PURE__ */ makeSymbol$1("__injectWithOption");
-function handleFlatJson(obj) {
-  if (!isObject$1(obj)) {
-    return obj;
-  }
-  for (const key in obj) {
-    if (!hasOwn(obj, key)) {
-      continue;
-    }
-    if (!key.includes(".")) {
-      if (isObject$1(obj[key])) {
-        handleFlatJson(obj[key]);
-      }
-    } else {
-      const subKeys = key.split(".");
-      const lastIndex = subKeys.length - 1;
-      let currentObj = obj;
-      for (let i = 0; i < lastIndex; i++) {
-        if (!(subKeys[i] in currentObj)) {
-          currentObj[subKeys[i]] = {};
-        }
-        currentObj = currentObj[subKeys[i]];
-      }
-      currentObj[subKeys[lastIndex]] = obj[key];
-      delete obj[key];
-      if (isObject$1(currentObj[subKeys[lastIndex]])) {
-        handleFlatJson(currentObj[subKeys[lastIndex]]);
-      }
-    }
-  }
-  return obj;
-}
-function getLocaleMessages(locale, options) {
-  const { messages, __i18n, messageResolver, flatJson } = options;
-  const ret = isPlainObject$1(messages) ? messages : isArray$1(__i18n) ? {} : { [locale]: {} };
-  if (isArray$1(__i18n)) {
-    __i18n.forEach((custom) => {
-      if ("locale" in custom && "resource" in custom) {
-        const { locale: locale2, resource } = custom;
-        if (locale2) {
-          ret[locale2] = ret[locale2] || {};
-          deepCopy(resource, ret[locale2]);
-        } else {
-          deepCopy(resource, ret);
-        }
-      } else {
-        isString$1(custom) && deepCopy(JSON.parse(custom), ret);
-      }
-    });
-  }
-  if (messageResolver == null && flatJson) {
-    for (const key in ret) {
-      if (hasOwn(ret, key)) {
-        handleFlatJson(ret[key]);
-      }
-    }
-  }
-  return ret;
-}
-const isNotObjectOrIsArray = (val) => !isObject$1(val) || isArray$1(val);
-function deepCopy(src, des) {
-  if (isNotObjectOrIsArray(src) || isNotObjectOrIsArray(des)) {
-    throw createI18nError(I18nErrorCodes.INVALID_VALUE);
-  }
-  for (const key in src) {
-    if (hasOwn(src, key)) {
-      if (isNotObjectOrIsArray(src[key]) || isNotObjectOrIsArray(des[key])) {
-        des[key] = src[key];
-      } else {
-        deepCopy(src[key], des[key]);
-      }
-    }
-  }
-}
-function getComponentOptions(instance) {
-  return instance.type;
-}
-function adjustI18nResources(global2, options, componentOptions) {
-  let messages = isObject$1(options.messages) ? options.messages : {};
-  if ("__i18nGlobal" in componentOptions) {
-    messages = getLocaleMessages(globalThis.locale.value, {
-      messages,
-      __i18n: componentOptions.__i18nGlobal
-    });
-  }
-  const locales = Object.keys(messages);
-  if (locales.length) {
-    locales.forEach((locale) => {
-      global2.mergeLocaleMessage(locale, messages[locale]);
-    });
-  }
-  {
-    if (isObject$1(options.datetimeFormats)) {
-      const locales2 = Object.keys(options.datetimeFormats);
-      if (locales2.length) {
-        locales2.forEach((locale) => {
-          global2.mergeDateTimeFormat(locale, options.datetimeFormats[locale]);
-        });
-      }
-    }
-    if (isObject$1(options.numberFormats)) {
-      const locales2 = Object.keys(options.numberFormats);
-      if (locales2.length) {
-        locales2.forEach((locale) => {
-          global2.mergeNumberFormat(locale, options.numberFormats[locale]);
-        });
-      }
-    }
-  }
-}
-function createTextNode(key) {
-  return createVNode(Text, null, key, 0);
-}
-const DEVTOOLS_META = "__INTLIFY_META__";
-let composerID = 0;
-function defineCoreMissingHandler(missing) {
-  return (ctx, locale, key, type) => {
-    return missing(locale, key, getCurrentInstance() || void 0, type);
-  };
-}
-const getMetaInfo = () => {
-  const instance = getCurrentInstance();
-  let meta = null;
-  return instance && (meta = getComponentOptions(instance)[DEVTOOLS_META]) ? { [DEVTOOLS_META]: meta } : null;
-};
-function createComposer(options = {}, VueI18nLegacy) {
-  const { __root } = options;
-  const _isGlobal = __root === void 0;
-  let _inheritLocale = isBoolean$1(options.inheritLocale) ? options.inheritLocale : true;
-  const _locale = ref(
-    __root && _inheritLocale ? __root.locale.value : isString$1(options.locale) ? options.locale : DEFAULT_LOCALE$1
-  );
-  const _fallbackLocale = ref(
-    __root && _inheritLocale ? __root.fallbackLocale.value : isString$1(options.fallbackLocale) || isArray$1(options.fallbackLocale) || isPlainObject$1(options.fallbackLocale) || options.fallbackLocale === false ? options.fallbackLocale : _locale.value
-  );
-  const _messages = ref(getLocaleMessages(_locale.value, options));
-  const _datetimeFormats = ref(isPlainObject$1(options.datetimeFormats) ? options.datetimeFormats : { [_locale.value]: {} });
-  const _numberFormats = ref(isPlainObject$1(options.numberFormats) ? options.numberFormats : { [_locale.value]: {} });
-  let _missingWarn = __root ? __root.missingWarn : isBoolean$1(options.missingWarn) || isRegExp(options.missingWarn) ? options.missingWarn : true;
-  let _fallbackWarn = __root ? __root.fallbackWarn : isBoolean$1(options.fallbackWarn) || isRegExp(options.fallbackWarn) ? options.fallbackWarn : true;
-  let _fallbackRoot = __root ? __root.fallbackRoot : isBoolean$1(options.fallbackRoot) ? options.fallbackRoot : true;
-  let _fallbackFormat = !!options.fallbackFormat;
-  let _missing = isFunction$1(options.missing) ? options.missing : null;
-  let _runtimeMissing = isFunction$1(options.missing) ? defineCoreMissingHandler(options.missing) : null;
-  let _postTranslation = isFunction$1(options.postTranslation) ? options.postTranslation : null;
-  let _warnHtmlMessage = __root ? __root.warnHtmlMessage : isBoolean$1(options.warnHtmlMessage) ? options.warnHtmlMessage : true;
-  let _escapeParameter = !!options.escapeParameter;
-  const _modifiers = __root ? __root.modifiers : isPlainObject$1(options.modifiers) ? options.modifiers : {};
-  let _pluralRules = options.pluralRules || __root && __root.pluralRules;
-  let _context;
-  const getCoreContext = () => {
-    _isGlobal && setFallbackContext(null);
-    const ctxOptions = {
-      version: VERSION,
-      locale: _locale.value,
-      fallbackLocale: _fallbackLocale.value,
-      messages: _messages.value,
-      modifiers: _modifiers,
-      pluralRules: _pluralRules,
-      missing: _runtimeMissing === null ? void 0 : _runtimeMissing,
-      missingWarn: _missingWarn,
-      fallbackWarn: _fallbackWarn,
-      fallbackFormat: _fallbackFormat,
-      unresolving: true,
-      postTranslation: _postTranslation === null ? void 0 : _postTranslation,
-      warnHtmlMessage: _warnHtmlMessage,
-      escapeParameter: _escapeParameter,
-      messageResolver: options.messageResolver,
-      __meta: { framework: "vue" }
-    };
-    {
-      ctxOptions.datetimeFormats = _datetimeFormats.value;
-      ctxOptions.numberFormats = _numberFormats.value;
-      ctxOptions.__datetimeFormatters = isPlainObject$1(_context) ? _context.__datetimeFormatters : void 0;
-      ctxOptions.__numberFormatters = isPlainObject$1(_context) ? _context.__numberFormatters : void 0;
-    }
-    const ctx = createCoreContext(ctxOptions);
-    _isGlobal && setFallbackContext(ctx);
-    return ctx;
-  };
-  _context = getCoreContext();
-  updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-  function trackReactivityValues() {
-    return [
-      _locale.value,
-      _fallbackLocale.value,
-      _messages.value,
-      _datetimeFormats.value,
-      _numberFormats.value
-    ];
-  }
-  const locale = computed({
-    get: () => _locale.value,
-    set: (val) => {
-      _locale.value = val;
-      _context.locale = _locale.value;
-    }
-  });
-  const fallbackLocale = computed({
-    get: () => _fallbackLocale.value,
-    set: (val) => {
-      _fallbackLocale.value = val;
-      _context.fallbackLocale = _fallbackLocale.value;
-      updateFallbackLocale(_context, _locale.value, val);
-    }
-  });
-  const messages = computed(() => _messages.value);
-  const datetimeFormats = /* @__PURE__ */ computed(() => _datetimeFormats.value);
-  const numberFormats = /* @__PURE__ */ computed(() => _numberFormats.value);
-  function getPostTranslationHandler() {
-    return isFunction$1(_postTranslation) ? _postTranslation : null;
-  }
-  function setPostTranslationHandler(handler) {
-    _postTranslation = handler;
-    _context.postTranslation = handler;
-  }
-  function getMissingHandler() {
-    return _missing;
-  }
-  function setMissingHandler(handler) {
-    if (handler !== null) {
-      _runtimeMissing = defineCoreMissingHandler(handler);
-    }
-    _missing = handler;
-    _context.missing = _runtimeMissing;
-  }
-  const wrapWithDeps = (fn, argumentParser, warnType, fallbackSuccess, fallbackFail, successCondition) => {
-    trackReactivityValues();
-    let ret;
-    if (__INTLIFY_PROD_DEVTOOLS__) {
-      try {
-        setAdditionalMeta(getMetaInfo());
-        if (!_isGlobal) {
-          _context.fallbackContext = __root ? getFallbackContext() : void 0;
-        }
-        ret = fn(_context);
-      } finally {
-        setAdditionalMeta(null);
-        if (!_isGlobal) {
-          _context.fallbackContext = void 0;
-        }
-      }
-    } else {
-      ret = fn(_context);
-    }
-    if (isNumber(ret) && ret === NOT_REOSLVED) {
-      const [key, arg2] = argumentParser();
-      return __root && _fallbackRoot ? fallbackSuccess(__root) : fallbackFail(key);
-    } else if (successCondition(ret)) {
-      return ret;
-    } else {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_RETURN_TYPE);
-    }
-  };
-  function t2(...args) {
-    return wrapWithDeps((context) => Reflect.apply(translate, null, [context, ...args]), () => parseTranslateArgs(...args), "translate", (root) => Reflect.apply(root.t, root, [...args]), (key) => key, (val) => isString$1(val));
-  }
-  function rt(...args) {
-    const [arg1, arg2, arg3] = args;
-    if (arg3 && !isObject$1(arg3)) {
-      throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
-    }
-    return t2(...[arg1, arg2, assign$2({ resolvedMessage: true }, arg3 || {})]);
-  }
-  function d2(...args) {
-    return wrapWithDeps((context) => Reflect.apply(datetime, null, [context, ...args]), () => parseDateTimeArgs(...args), "datetime format", (root) => Reflect.apply(root.d, root, [...args]), () => MISSING_RESOLVE_VALUE, (val) => isString$1(val));
-  }
-  function n2(...args) {
-    return wrapWithDeps((context) => Reflect.apply(number, null, [context, ...args]), () => parseNumberArgs(...args), "number format", (root) => Reflect.apply(root.n, root, [...args]), () => MISSING_RESOLVE_VALUE, (val) => isString$1(val));
-  }
-  function normalize(values) {
-    return values.map((val) => isString$1(val) || isNumber(val) || isBoolean$1(val) ? createTextNode(String(val)) : val);
-  }
-  const interpolate = (val) => val;
-  const processor = {
-    normalize,
-    interpolate,
-    type: "vnode"
-  };
-  function transrateVNode(...args) {
-    return wrapWithDeps(
-      (context) => {
-        let ret;
-        const _context2 = context;
-        try {
-          _context2.processor = processor;
-          ret = Reflect.apply(translate, null, [_context2, ...args]);
-        } finally {
-          _context2.processor = null;
-        }
-        return ret;
-      },
-      () => parseTranslateArgs(...args),
-      "translate",
-      (root) => root[TransrateVNodeSymbol](...args),
-      (key) => [createTextNode(key)],
-      (val) => isArray$1(val)
-    );
-  }
-  function numberParts(...args) {
-    return wrapWithDeps(
-      (context) => Reflect.apply(number, null, [context, ...args]),
-      () => parseNumberArgs(...args),
-      "number format",
-      (root) => root[NumberPartsSymbol](...args),
-      () => [],
-      (val) => isString$1(val) || isArray$1(val)
-    );
-  }
-  function datetimeParts(...args) {
-    return wrapWithDeps(
-      (context) => Reflect.apply(datetime, null, [context, ...args]),
-      () => parseDateTimeArgs(...args),
-      "datetime format",
-      (root) => root[DatetimePartsSymbol](...args),
-      () => [],
-      (val) => isString$1(val) || isArray$1(val)
-    );
-  }
-  function setPluralRules(rules) {
-    _pluralRules = rules;
-    _context.pluralRules = _pluralRules;
-  }
-  function te(key, locale2) {
-    const targetLocale = isString$1(locale2) ? locale2 : _locale.value;
-    const message = getLocaleMessage(targetLocale);
-    return _context.messageResolver(message, key) !== null;
-  }
-  function resolveMessages(key) {
-    let messages2 = null;
-    const locales = fallbackWithLocaleChain(_context, _fallbackLocale.value, _locale.value);
-    for (let i = 0; i < locales.length; i++) {
-      const targetLocaleMessages = _messages.value[locales[i]] || {};
-      const messageValue = _context.messageResolver(targetLocaleMessages, key);
-      if (messageValue != null) {
-        messages2 = messageValue;
-        break;
-      }
-    }
-    return messages2;
-  }
-  function tm(key) {
-    const messages2 = resolveMessages(key);
-    return messages2 != null ? messages2 : __root ? __root.tm(key) || {} : {};
-  }
-  function getLocaleMessage(locale2) {
-    return _messages.value[locale2] || {};
-  }
-  function setLocaleMessage2(locale2, message) {
-    _messages.value[locale2] = message;
-    _context.messages = _messages.value;
-  }
-  function mergeLocaleMessage2(locale2, message) {
-    _messages.value[locale2] = _messages.value[locale2] || {};
-    deepCopy(message, _messages.value[locale2]);
-    _context.messages = _messages.value;
-  }
-  function getDateTimeFormat(locale2) {
-    return _datetimeFormats.value[locale2] || {};
-  }
-  function setDateTimeFormat(locale2, format2) {
-    _datetimeFormats.value[locale2] = format2;
-    _context.datetimeFormats = _datetimeFormats.value;
-    clearDateTimeFormat(_context, locale2, format2);
-  }
-  function mergeDateTimeFormat(locale2, format2) {
-    _datetimeFormats.value[locale2] = assign$2(_datetimeFormats.value[locale2] || {}, format2);
-    _context.datetimeFormats = _datetimeFormats.value;
-    clearDateTimeFormat(_context, locale2, format2);
-  }
-  function getNumberFormat(locale2) {
-    return _numberFormats.value[locale2] || {};
-  }
-  function setNumberFormat(locale2, format2) {
-    _numberFormats.value[locale2] = format2;
-    _context.numberFormats = _numberFormats.value;
-    clearNumberFormat(_context, locale2, format2);
-  }
-  function mergeNumberFormat(locale2, format2) {
-    _numberFormats.value[locale2] = assign$2(_numberFormats.value[locale2] || {}, format2);
-    _context.numberFormats = _numberFormats.value;
-    clearNumberFormat(_context, locale2, format2);
-  }
-  composerID++;
-  if (__root && inBrowser) {
-    watch(__root.locale, (val) => {
-      if (_inheritLocale) {
-        _locale.value = val;
-        _context.locale = val;
-        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-      }
-    });
-    watch(__root.fallbackLocale, (val) => {
-      if (_inheritLocale) {
-        _fallbackLocale.value = val;
-        _context.fallbackLocale = val;
-        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-      }
-    });
-  }
-  const composer = {
-    id: composerID,
-    locale,
-    fallbackLocale,
-    get inheritLocale() {
-      return _inheritLocale;
-    },
-    set inheritLocale(val) {
-      _inheritLocale = val;
-      if (val && __root) {
-        _locale.value = __root.locale.value;
-        _fallbackLocale.value = __root.fallbackLocale.value;
-        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-      }
-    },
-    get availableLocales() {
-      return Object.keys(_messages.value).sort();
-    },
-    messages,
-    get modifiers() {
-      return _modifiers;
-    },
-    get pluralRules() {
-      return _pluralRules || {};
-    },
-    get isGlobal() {
-      return _isGlobal;
-    },
-    get missingWarn() {
-      return _missingWarn;
-    },
-    set missingWarn(val) {
-      _missingWarn = val;
-      _context.missingWarn = _missingWarn;
-    },
-    get fallbackWarn() {
-      return _fallbackWarn;
-    },
-    set fallbackWarn(val) {
-      _fallbackWarn = val;
-      _context.fallbackWarn = _fallbackWarn;
-    },
-    get fallbackRoot() {
-      return _fallbackRoot;
-    },
-    set fallbackRoot(val) {
-      _fallbackRoot = val;
-    },
-    get fallbackFormat() {
-      return _fallbackFormat;
-    },
-    set fallbackFormat(val) {
-      _fallbackFormat = val;
-      _context.fallbackFormat = _fallbackFormat;
-    },
-    get warnHtmlMessage() {
-      return _warnHtmlMessage;
-    },
-    set warnHtmlMessage(val) {
-      _warnHtmlMessage = val;
-      _context.warnHtmlMessage = val;
-    },
-    get escapeParameter() {
-      return _escapeParameter;
-    },
-    set escapeParameter(val) {
-      _escapeParameter = val;
-      _context.escapeParameter = val;
-    },
-    t: t2,
-    getLocaleMessage,
-    setLocaleMessage: setLocaleMessage2,
-    mergeLocaleMessage: mergeLocaleMessage2,
-    getPostTranslationHandler,
-    setPostTranslationHandler,
-    getMissingHandler,
-    setMissingHandler,
-    [SetPluralRulesSymbol]: setPluralRules
-  };
-  {
-    composer.datetimeFormats = datetimeFormats;
-    composer.numberFormats = numberFormats;
-    composer.rt = rt;
-    composer.te = te;
-    composer.tm = tm;
-    composer.d = d2;
-    composer.n = n2;
-    composer.getDateTimeFormat = getDateTimeFormat;
-    composer.setDateTimeFormat = setDateTimeFormat;
-    composer.mergeDateTimeFormat = mergeDateTimeFormat;
-    composer.getNumberFormat = getNumberFormat;
-    composer.setNumberFormat = setNumberFormat;
-    composer.mergeNumberFormat = mergeNumberFormat;
-    composer[InejctWithOption] = options.__injectWithOption;
-    composer[TransrateVNodeSymbol] = transrateVNode;
-    composer[DatetimePartsSymbol] = datetimeParts;
-    composer[NumberPartsSymbol] = numberParts;
-  }
-  return composer;
-}
-const baseFormatProps = {
-  tag: {
-    type: [String, Object]
-  },
-  locale: {
-    type: String
-  },
-  scope: {
-    type: String,
-    validator: (val) => val === "parent" || val === "global",
-    default: "parent"
-  },
-  i18n: {
-    type: Object
-  }
-};
-function getInterpolateArg({ slots }, keys) {
-  if (keys.length === 1 && keys[0] === "default") {
-    const ret = slots.default ? slots.default() : [];
-    return ret.reduce((slot, current) => {
-      return [
-        ...slot,
-        ...current.type === Fragment$1 ? current.children : [current]
-      ];
-    }, []);
-  } else {
-    return keys.reduce((arg, key) => {
-      const slot = slots[key];
-      if (slot) {
-        arg[key] = slot();
-      }
-      return arg;
-    }, {});
-  }
-}
-function getFragmentableTag(tag) {
-  return Fragment$1;
-}
-const Translation = {
-  name: "i18n-t",
-  props: assign$2({
-    keypath: {
-      type: String,
-      required: true
-    },
-    plural: {
-      type: [Number, String],
-      validator: (val) => isNumber(val) || !isNaN(val)
-    }
-  }, baseFormatProps),
-  setup(props, context) {
-    const { slots, attrs } = context;
-    const i18n = props.i18n || useI18n({
-      useScope: props.scope,
-      __useComponent: true
-    });
-    return () => {
-      const keys = Object.keys(slots).filter((key) => key !== "_");
-      const options = {};
-      if (props.locale) {
-        options.locale = props.locale;
-      }
-      if (props.plural !== void 0) {
-        options.plural = isString$1(props.plural) ? +props.plural : props.plural;
-      }
-      const arg = getInterpolateArg(context, keys);
-      const children = i18n[TransrateVNodeSymbol](props.keypath, arg, options);
-      const assignedAttrs = assign$2({}, attrs);
-      const tag = isString$1(props.tag) || isObject$1(props.tag) ? props.tag : getFragmentableTag();
-      return h$1(tag, assignedAttrs, children);
-    };
-  }
-};
-function isVNode(target) {
-  return isArray$1(target) && !isString$1(target[0]);
-}
-function renderFormatter(props, context, slotKeys, partFormatter) {
-  const { slots, attrs } = context;
-  return () => {
-    const options = { part: true };
-    let overrides = {};
-    if (props.locale) {
-      options.locale = props.locale;
-    }
-    if (isString$1(props.format)) {
-      options.key = props.format;
-    } else if (isObject$1(props.format)) {
-      if (isString$1(props.format.key)) {
-        options.key = props.format.key;
-      }
-      overrides = Object.keys(props.format).reduce((options2, prop) => {
-        return slotKeys.includes(prop) ? assign$2({}, options2, { [prop]: props.format[prop] }) : options2;
-      }, {});
-    }
-    const parts = partFormatter(...[props.value, options, overrides]);
-    let children = [options.key];
-    if (isArray$1(parts)) {
-      children = parts.map((part, index) => {
-        const slot = slots[part.type];
-        const node = slot ? slot({ [part.type]: part.value, index, parts }) : [part.value];
-        if (isVNode(node)) {
-          node[0].key = `${part.type}-${index}`;
-        }
-        return node;
-      });
-    } else if (isString$1(parts)) {
-      children = [parts];
-    }
-    const assignedAttrs = assign$2({}, attrs);
-    const tag = isString$1(props.tag) || isObject$1(props.tag) ? props.tag : getFragmentableTag();
-    return h$1(tag, assignedAttrs, children);
-  };
-}
-const NumberFormat = {
-  name: "i18n-n",
-  props: assign$2({
-    value: {
-      type: Number,
-      required: true
-    },
-    format: {
-      type: [String, Object]
-    }
-  }, baseFormatProps),
-  setup(props, context) {
-    const i18n = props.i18n || useI18n({ useScope: "parent", __useComponent: true });
-    return renderFormatter(props, context, NUMBER_FORMAT_OPTIONS_KEYS, (...args) => i18n[NumberPartsSymbol](...args));
-  }
-};
-const DatetimeFormat = {
-  name: "i18n-d",
-  props: assign$2({
-    value: {
-      type: [Number, Date],
-      required: true
-    },
-    format: {
-      type: [String, Object]
-    }
-  }, baseFormatProps),
-  setup(props, context) {
-    const i18n = props.i18n || useI18n({ useScope: "parent", __useComponent: true });
-    return renderFormatter(props, context, DATETIME_FORMAT_OPTIONS_KEYS, (...args) => i18n[DatetimePartsSymbol](...args));
-  }
-};
-function getComposer$2(i18n, instance) {
-  const i18nInternal = i18n;
-  if (i18n.mode === "composition") {
-    return i18nInternal.__getInstance(instance) || i18n.global;
-  } else {
-    const vueI18n = i18nInternal.__getInstance(instance);
-    return vueI18n != null ? vueI18n.__composer : i18n.global.__composer;
-  }
-}
-function vTDirective(i18n) {
-  const _process = (binding) => {
-    const { instance, modifiers, value } = binding;
-    if (!instance || !instance.$) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    const composer = getComposer$2(i18n, instance.$);
-    const parsedValue = parseValue(value);
-    return [
-      Reflect.apply(composer.t, composer, [...makeParams(parsedValue)]),
-      composer
-    ];
-  };
-  const register = (el, binding) => {
-    const [textContent, composer] = _process(binding);
-    el.__composer = composer;
-    el.textContent = textContent;
-  };
-  const unregister = (el) => {
-    if (el.__composer) {
-      el.__composer = void 0;
-      delete el.__composer;
-    }
-  };
-  const update = (el, { value }) => {
-    if (el.__composer) {
-      const composer = el.__composer;
-      const parsedValue = parseValue(value);
-      el.textContent = Reflect.apply(composer.t, composer, [
-        ...makeParams(parsedValue)
-      ]);
-    }
-  };
-  const getSSRProps = (binding) => {
-    const [textContent] = _process(binding);
-    return { textContent };
-  };
-  return {
-    created: register,
-    unmounted: unregister,
-    beforeUpdate: update,
-    getSSRProps
-  };
-}
-function parseValue(value) {
-  if (isString$1(value)) {
-    return { path: value };
-  } else if (isPlainObject$1(value)) {
-    if (!("path" in value)) {
-      throw createI18nError(I18nErrorCodes.REQUIRED_VALUE, "path");
-    }
-    return value;
-  } else {
-    throw createI18nError(I18nErrorCodes.INVALID_VALUE);
-  }
-}
-function makeParams(value) {
-  const { path, locale, args, choice, plural } = value;
-  const options = {};
-  const named = args || {};
-  if (isString$1(locale)) {
-    options.locale = locale;
-  }
-  if (isNumber(choice)) {
-    options.plural = choice;
-  }
-  if (isNumber(plural)) {
-    options.plural = plural;
-  }
-  return [path, named, options];
-}
-function apply(app2, i18n, ...options) {
-  const pluginOptions = isPlainObject$1(options[0]) ? options[0] : {};
-  const useI18nComponentName = !!pluginOptions.useI18nComponentName;
-  const globalInstall = isBoolean$1(pluginOptions.globalInstall) ? pluginOptions.globalInstall : true;
-  if (globalInstall) {
-    app2.component(!useI18nComponentName ? Translation.name : "i18n", Translation);
-    app2.component(NumberFormat.name, NumberFormat);
-    app2.component(DatetimeFormat.name, DatetimeFormat);
-  }
-  {
-    app2.directive("t", vTDirective(i18n));
-  }
-}
-const I18nInjectionKey = /* @__PURE__ */ makeSymbol$1("global-vue-i18n");
-function createI18n(options = {}, VueI18nLegacy) {
-  const __globalInjection = isBoolean$1(options.globalInjection) ? options.globalInjection : true;
-  const __allowComposition = true;
-  const __instances = /* @__PURE__ */ new Map();
-  const [globalScope, __global] = createGlobal(options);
-  const symbol = makeSymbol$1("");
-  function __getInstance(component) {
-    return __instances.get(component) || null;
-  }
-  function __setInstance(component, instance) {
-    __instances.set(component, instance);
-  }
-  function __deleteInstance(component) {
-    __instances.delete(component);
-  }
-  {
-    const i18n = {
-      get mode() {
-        return "composition";
-      },
-      get allowComposition() {
-        return __allowComposition;
-      },
-      async install(app2, ...options2) {
-        app2.__VUE_I18N_SYMBOL__ = symbol;
-        app2.provide(app2.__VUE_I18N_SYMBOL__, i18n);
-        if (__globalInjection) {
-          injectGlobalFields(app2, i18n.global);
-        }
-        {
-          apply(app2, i18n, ...options2);
-        }
-        const unmountApp = app2.unmount;
-        app2.unmount = () => {
-          i18n.dispose();
-          unmountApp();
-        };
-      },
-      get global() {
-        return __global;
-      },
-      dispose() {
-        globalScope.stop();
-      },
-      __instances,
-      __getInstance,
-      __setInstance,
-      __deleteInstance
-    };
-    return i18n;
-  }
-}
-function useI18n(options = {}) {
-  const instance = getCurrentInstance();
-  if (instance == null) {
-    throw createI18nError(I18nErrorCodes.MUST_BE_CALL_SETUP_TOP);
-  }
-  if (!instance.isCE && instance.appContext.app != null && !instance.appContext.app.__VUE_I18N_SYMBOL__) {
-    throw createI18nError(I18nErrorCodes.NOT_INSLALLED);
-  }
-  const i18n = getI18nInstance(instance);
-  const global2 = getGlobalComposer(i18n);
-  const componentOptions = getComponentOptions(instance);
-  const scope = getScope(options, componentOptions);
-  if (scope === "global") {
-    adjustI18nResources(global2, options, componentOptions);
-    return global2;
-  }
-  if (scope === "parent") {
-    let composer2 = getComposer$3(i18n, instance, options.__useComponent);
-    if (composer2 == null) {
-      composer2 = global2;
-    }
-    return composer2;
-  }
-  const i18nInternal = i18n;
-  let composer = i18nInternal.__getInstance(instance);
-  if (composer == null) {
-    const composerOptions = assign$2({}, options);
-    if ("__i18n" in componentOptions) {
-      composerOptions.__i18n = componentOptions.__i18n;
-    }
-    if (global2) {
-      composerOptions.__root = global2;
-    }
-    composer = createComposer(composerOptions);
-    setupLifeCycle(i18nInternal, instance);
-    i18nInternal.__setInstance(instance, composer);
-  }
-  return composer;
-}
-function createGlobal(options, legacyMode, VueI18nLegacy) {
-  const scope = effectScope();
-  {
-    const obj = scope.run(() => createComposer(options));
-    if (obj == null) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    return [scope, obj];
-  }
-}
-function getI18nInstance(instance) {
-  {
-    const i18n = inject(!instance.isCE ? instance.appContext.app.__VUE_I18N_SYMBOL__ : I18nInjectionKey);
-    if (!i18n) {
-      throw createI18nError(!instance.isCE ? I18nErrorCodes.UNEXPECTED_ERROR : I18nErrorCodes.NOT_INSLALLED_WITH_PROVIDE);
-    }
-    return i18n;
-  }
-}
-function getScope(options, componentOptions) {
-  return isEmptyObject(options) ? "__i18n" in componentOptions ? "local" : "global" : !options.useScope ? "local" : options.useScope;
-}
-function getGlobalComposer(i18n) {
-  return i18n.mode === "composition" ? i18n.global : i18n.global.__composer;
-}
-function getComposer$3(i18n, target, useComponent = false) {
-  let composer = null;
-  const root = target.root;
-  let current = target.parent;
-  while (current != null) {
-    const i18nInternal = i18n;
-    if (i18n.mode === "composition") {
-      composer = i18nInternal.__getInstance(current);
-    }
-    if (composer != null) {
-      break;
-    }
-    if (root === current) {
-      break;
-    }
-    current = current.parent;
-  }
-  return composer;
-}
-function setupLifeCycle(i18n, target, composer) {
-  {
-    onUnmounted(() => {
-      i18n.__deleteInstance(target);
-    }, target);
-  }
-}
-const globalExportProps = [
-  "locale",
-  "fallbackLocale",
-  "availableLocales"
-];
-const globalExportMethods = ["t", "rt", "d", "n", "tm"];
-function injectGlobalFields(app2, composer) {
-  const i18n = /* @__PURE__ */ Object.create(null);
-  globalExportProps.forEach((prop) => {
-    const desc = Object.getOwnPropertyDescriptor(composer, prop);
-    if (!desc) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    const wrap = isRef(desc.value) ? {
-      get() {
-        return desc.value.value;
-      },
-      set(val) {
-        desc.value.value = val;
-      }
-    } : {
-      get() {
-        return desc.get && desc.get();
-      }
-    };
-    Object.defineProperty(i18n, prop, wrap);
-  });
-  app2.config.globalProperties.$i18n = i18n;
-  globalExportMethods.forEach((method) => {
-    const desc = Object.getOwnPropertyDescriptor(composer, method);
-    if (!desc || !desc.value) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    Object.defineProperty(app2.config.globalProperties, `$${method}`, desc);
-  });
-}
-registerMessageResolver(resolveValue);
-registerLocaleFallbacker(fallbackWithLocaleChain);
-{
-  initFeatureFlags();
-}
-if (__INTLIFY_PROD_DEVTOOLS__) {
-  const target = getGlobalThis();
-  target.__INTLIFY__ = true;
-  setDevToolsHook(target.__INTLIFY_DEVTOOLS_GLOBAL_HOOK__);
-}
-const STRATEGIES = {
-  PREFIX: "prefix",
-  PREFIX_EXCEPT_DEFAULT: "prefix_except_default",
-  PREFIX_AND_DEFAULT: "prefix_and_default",
-  NO_PREFIX: "no_prefix"
-};
-const DEFAULT_LOCALE = "";
-const DEFAULT_STRATEGY = STRATEGIES.PREFIX_EXCEPT_DEFAULT;
-const DEFAULT_TRAILING_SLASH = false;
-const DEFAULT_ROUTES_NAME_SEPARATOR = "___";
-const DEFAULT_LOCALE_ROUTE_NAME_SUFFIX = "default";
-const DEFAULT_DETECTION_DIRECTION = "ltr";
-const DEFAULT_BASE_URL = "";
-const DEFAULT_DYNAMIC_PARAMS_KEY = "";
-/*!
-  * shared v9.3.0-beta.6
-  * (c) 2022 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-const hasSymbol = typeof Symbol === "function" && typeof Symbol.toStringTag === "symbol";
-const makeSymbol = (name) => hasSymbol ? Symbol(name) : name;
-const assign$1 = Object.assign;
-const isArray = Array.isArray;
-const isFunction = (val) => typeof val === "function";
-const isString = (val) => typeof val === "string";
-const isBoolean = (val) => typeof val === "boolean";
-const isSymbol = (val) => typeof val === "symbol";
-const isObject = (val) => val !== null && typeof val === "object";
-const TRAILING_SLASH_RE = /\/$|\/\?/;
-function hasTrailingSlash(input = "", queryParams = false) {
-  if (!queryParams) {
-    return input.endsWith("/");
-  }
-  return TRAILING_SLASH_RE.test(input);
-}
-function withoutTrailingSlash(input = "", queryParams = false) {
-  if (!queryParams) {
-    return (hasTrailingSlash(input) ? input.slice(0, -1) : input) || "/";
-  }
-  if (!hasTrailingSlash(input, true)) {
-    return input || "/";
-  }
-  const [s0, ...s2] = input.split("?");
-  return (s0.slice(0, -1) || "/") + (s2.length ? `?${s2.join("?")}` : "");
-}
-function withTrailingSlash(input = "", queryParams = false) {
-  if (!queryParams) {
-    return input.endsWith("/") ? input : input + "/";
-  }
-  if (hasTrailingSlash(input, true)) {
-    return input || "/";
-  }
-  const [s0, ...s2] = input.split("?");
-  return s0 + "/" + (s2.length ? `?${s2.join("?")}` : "");
-}
-function warn(msg, err) {
-  if (typeof console !== "undefined") {
-    console.warn(`[vue-i18n-routing] ` + msg);
-    if (err) {
-      console.warn(err.stack);
-    }
-  }
-}
-function getNormalizedLocales(locales) {
-  locales = locales || [];
-  const normalized = [];
-  for (const locale of locales) {
-    if (isString(locale)) {
-      normalized.push({ code: locale });
-    } else {
-      normalized.push(locale);
-    }
-  }
-  return normalized;
-}
-function isI18nInstance(i18n) {
-  return i18n != null && "global" in i18n && "mode" in i18n;
-}
-function isComposer(target) {
-  return target != null && !("__composer" in target) && isRef(target.locale);
-}
-function isVueI18n(target) {
-  return target != null && "__composer" in target;
-}
-function isExportedGlobalComposer(target) {
-  return target != null && !("__composer" in target) && !isRef(target.locale);
-}
-function isLegacyVueI18n$1(target) {
-  return target != null && ("__VUE_I18N_BRIDGE__" in target || "_sync" in target);
-}
-function getComposer(i18n) {
-  return isI18nInstance(i18n) ? isComposer(i18n.global) ? i18n.global : i18n.global.__composer : isVueI18n(i18n) ? i18n.__composer : i18n;
-}
-function getLocale(i18n) {
-  const target = isI18nInstance(i18n) ? i18n.global : i18n;
-  return isComposer(target) ? target.locale.value : isExportedGlobalComposer(target) || isVueI18n(target) || isLegacyVueI18n$1(target) ? target.locale : target.locale;
-}
-function getLocales(i18n) {
-  const target = isI18nInstance(i18n) ? i18n.global : i18n;
-  return isComposer(target) ? target.locales.value : isExportedGlobalComposer(target) || isVueI18n(target) || isLegacyVueI18n$1(target) ? target.locales : target.locales;
-}
-function getLocaleCodes(i18n) {
-  const target = isI18nInstance(i18n) ? i18n.global : i18n;
-  return isComposer(target) ? target.localeCodes.value : isExportedGlobalComposer(target) || isVueI18n(target) || isLegacyVueI18n$1(target) ? target.localeCodes : target.localeCodes;
-}
-function setLocale(i18n, locale) {
-  const target = isI18nInstance(i18n) ? i18n.global : i18n;
-  if (isComposer(target)) {
-    {
-      target.locale.value = locale;
-    }
-  } else if (isExportedGlobalComposer(target) || isVueI18n(target) || isLegacyVueI18n$1(target)) {
-    target.locale = locale;
-  } else {
-    throw new Error("TODO:");
-  }
-}
-function getRouteName(routeName) {
-  return isString(routeName) ? routeName : isSymbol(routeName) ? routeName.toString() : "(null)";
-}
-function getLocaleRouteName(routeName, locale, {
-  defaultLocale,
-  strategy,
-  routesNameSeparator,
-  defaultLocaleRouteNameSuffix
-}) {
-  let name = getRouteName(routeName) + (strategy === "no_prefix" ? "" : routesNameSeparator + locale);
-  if (locale === defaultLocale && strategy === "prefix_and_default") {
-    name += routesNameSeparator + defaultLocaleRouteNameSuffix;
-  }
-  return name;
-}
-function resolveBaseUrl(baseUrl, context) {
-  if (isFunction(baseUrl)) {
-    return baseUrl(context);
-  }
-  return baseUrl;
-}
-function matchBrowserLocale(locales, browserLocales) {
-  const matchedLocales = [];
-  for (const [index, browserCode] of browserLocales.entries()) {
-    const matchedLocale = locales.find((l2) => l2.iso.toLowerCase() === browserCode.toLowerCase());
-    if (matchedLocale) {
-      matchedLocales.push({ code: matchedLocale.code, score: 1 - index / browserLocales.length });
-      break;
-    }
-  }
-  for (const [index, browserCode] of browserLocales.entries()) {
-    const languageCode = browserCode.split("-")[0].toLowerCase();
-    const matchedLocale = locales.find((l2) => l2.iso.split("-")[0].toLowerCase() === languageCode);
-    if (matchedLocale) {
-      matchedLocales.push({ code: matchedLocale.code, score: 0.999 - index / browserLocales.length });
-      break;
-    }
-  }
-  return matchedLocales;
-}
-const DefaultBrowserLocaleMatcher = matchBrowserLocale;
-function compareBrowserLocale(a2, b2) {
-  if (a2.score === b2.score) {
-    return b2.code.length - a2.code.length;
-  }
-  return b2.score - a2.score;
-}
-const DefaultBrowerLocaleComparer = compareBrowserLocale;
-function findBrowserLocale(locales, browserLocales, { matcher = DefaultBrowserLocaleMatcher, comparer = DefaultBrowerLocaleComparer } = {}) {
-  const normalizedLocales = [];
-  for (const l2 of locales) {
-    const { code: code2 } = l2;
-    const iso = l2.iso || code2;
-    normalizedLocales.push({ code: code2, iso });
-  }
-  const matchedLocales = matcher(normalizedLocales, browserLocales);
-  if (matchedLocales.length > 1) {
-    matchedLocales.sort(comparer);
-  }
-  return matchedLocales.length ? matchedLocales[0].code : "";
-}
-function proxyVueInstance(target) {
-  return function() {
-    return Reflect.apply(
-      target,
-      {
-        getRouteBaseName: this.getRouteBaseName,
-        localePath: this.localePath,
-        localeRoute: this.localeRoute,
-        localeLocation: this.localeLocation,
-        resolveRoute: this.resolveRoute,
-        switchLocalePath: this.switchLocalePath,
-        localeHead: this.localeHead,
-        i18n: this.$i18n,
-        route: this.$route,
-        router: this.$router
-      },
-      arguments
-    );
-  };
-}
-function extendI18n(i18n, {
-  locales = [],
-  localeCodes: localeCodes2 = [],
-  baseUrl = DEFAULT_BASE_URL,
-  hooks = {},
-  context = {}
-} = {}) {
-  const scope = effectScope();
-  const orgInstall = i18n.install;
-  i18n.install = (vue, ...options) => {
-    Reflect.apply(orgInstall, i18n, [vue, ...options]);
-    const composer = getComposer(i18n);
-    scope.run(() => extendComposer(composer, { locales, localeCodes: localeCodes2, baseUrl, hooks, context }));
-    if (isVueI18n(i18n.global)) {
-      extendVueI18n(i18n.global, hooks.onExtendVueI18n);
-    }
-    const app2 = vue;
-    const exported = i18n.mode === "composition" ? app2.config.globalProperties.$i18n : null;
-    if (exported) {
-      extendExportedGlobal(exported, composer, hooks.onExtendExportedGlobal);
-    }
-    const pluginOptions = isPluginOptions(options[0]) ? options[0] : { inject: true };
-    if (pluginOptions.inject) {
-      vue.mixin({
-        methods: {
-          resolveRoute: proxyVueInstance(resolveRoute),
-          localePath: proxyVueInstance(localePath),
-          localeRoute: proxyVueInstance(localeRoute),
-          localeLocation: proxyVueInstance(localeLocation),
-          switchLocalePath: proxyVueInstance(switchLocalePath),
-          getRouteBaseName: proxyVueInstance(getRouteBaseName),
-          localeHead: proxyVueInstance(localeHead)
-        }
-      });
-    }
-    if (app2.unmount) {
-      const unmountApp = app2.unmount;
-      app2.unmount = () => {
-        scope.stop();
-        unmountApp();
-      };
-    }
-  };
-  return scope;
-}
-function extendComposer(composer, options) {
-  const { locales, localeCodes: localeCodes2, baseUrl, context } = options;
-  const _locales = ref(locales);
-  const _localeCodes = ref(localeCodes2);
-  const _baseUrl = ref("");
-  composer.locales = computed(() => _locales.value);
-  composer.localeCodes = computed(() => _localeCodes.value);
-  composer.baseUrl = computed(() => _baseUrl.value);
-  watch(
-    composer.locale,
-    () => {
-      _baseUrl.value = resolveBaseUrl(baseUrl, context);
-    },
-    { immediate: true }
-  );
-  if (options.hooks && options.hooks.onExtendComposer) {
-    options.hooks.onExtendComposer(composer);
-  }
-}
-function extendExportedGlobal(exported, g2, hook) {
-  const properties = [
-    {
-      locales: {
-        get() {
-          return g2.locales.value;
-        }
-      },
-      localeCodes: {
-        get() {
-          return g2.localeCodes.value;
-        }
-      },
-      baseUrl: {
-        get() {
-          return g2.baseUrl.value;
-        }
-      }
-    }
-  ];
-  hook && properties.push(hook(g2));
-  for (const property of properties) {
-    for (const [key, descriptor] of Object.entries(property)) {
-      Object.defineProperty(exported, key, descriptor);
-    }
-  }
-}
-function extendVueI18n(vueI18n, hook) {
-  const composer = getComposer(vueI18n);
-  const properties = [
-    {
-      locales: {
-        get() {
-          return composer.locales.value;
-        }
-      },
-      localeCodes: {
-        get() {
-          return composer.localeCodes.value;
-        }
-      },
-      baseUrl: {
-        get() {
-          return composer.baseUrl.value;
-        }
-      }
-    }
-  ];
-  hook && properties.push(hook(composer));
-  for (const property of properties) {
-    for (const [key, descriptor] of Object.entries(property)) {
-      Object.defineProperty(vueI18n, key, descriptor);
-    }
-  }
-}
-function isPluginOptions(options) {
-  return isObject(options) && "inject" in options && isBoolean(options.inject);
-}
-const GlobalOptionsRegistory = makeSymbol("vue-i18n-routing-gor");
-function registerGlobalOptions(router, options) {
-  const _options = router[GlobalOptionsRegistory];
-  if (_options) {
-    warn("already registered global options");
-  } else {
-    router[GlobalOptionsRegistory] = options;
-  }
-}
-function getGlobalOptions(router) {
-  var _a2;
-  return (_a2 = router[GlobalOptionsRegistory]) != null ? _a2 : {};
-}
-function getLocalesRegex(localeCodes2) {
-  return new RegExp(`^/(${localeCodes2.join("|")})(?:/|$)`, "i");
-}
-function createLocaleFromRouteGetter(localeCodes2, routesNameSeparator, defaultLocaleRouteNameSuffix) {
-  const localesPattern = `(${localeCodes2.join("|")})`;
-  const defaultSuffixPattern = `(?:${routesNameSeparator}${defaultLocaleRouteNameSuffix})?`;
-  const regexpName = new RegExp(`${routesNameSeparator}${localesPattern}${defaultSuffixPattern}$`, "i");
-  const regexpPath = getLocalesRegex(localeCodes2);
-  const getLocaleFromRoute = (route) => {
-    if (isObject(route)) {
-      if (route.name) {
-        const name = isString(route.name) ? route.name : route.name.toString();
-        const matches = name.match(regexpName);
-        if (matches && matches.length > 1) {
-          return matches[1];
-        }
-      } else if (route.path) {
-        const matches = route.path.match(regexpPath);
-        if (matches && matches.length > 1) {
-          return matches[1];
-        }
-      }
-    } else if (isString(route)) {
-      const matches = route.match(regexpPath);
-      if (matches && matches.length > 1) {
-        return matches[1];
-      }
-    }
-    return "";
-  };
-  return getLocaleFromRoute;
-}
-function getI18nRoutingOptions(router, proxy, {
-  defaultLocale = DEFAULT_LOCALE,
-  defaultDirection = DEFAULT_DETECTION_DIRECTION,
-  defaultLocaleRouteNameSuffix = DEFAULT_LOCALE_ROUTE_NAME_SUFFIX,
-  routesNameSeparator = DEFAULT_ROUTES_NAME_SEPARATOR,
-  strategy = DEFAULT_STRATEGY,
-  trailingSlash = DEFAULT_TRAILING_SLASH,
-  localeCodes: localeCodes2 = [],
-  prefixable: prefixable2 = DefaultPrefixable,
-  switchLocalePathIntercepter = DefaultSwitchLocalePathIntercepter,
-  dynamicRouteParamsKey = DEFAULT_DYNAMIC_PARAMS_KEY
-} = {}) {
-  const options = getGlobalOptions(router);
-  return {
-    defaultLocale: proxy.defaultLocale || options.defaultLocale || defaultLocale,
-    defaultDirection: proxy.defaultDirection || options.defaultDirection || defaultDirection,
-    defaultLocaleRouteNameSuffix: proxy.defaultLocaleRouteNameSuffix || options.defaultLocaleRouteNameSuffix || defaultLocaleRouteNameSuffix,
-    routesNameSeparator: proxy.routesNameSeparator || options.routesNameSeparator || routesNameSeparator,
-    strategy: proxy.strategy || options.strategy || strategy,
-    trailingSlash: proxy.trailingSlash || options.trailingSlash || trailingSlash,
-    localeCodes: proxy.localeCodes || options.localeCodes || localeCodes2,
-    prefixable: proxy.prefixable || options.prefixable || prefixable2,
-    switchLocalePathIntercepter: proxy.switchLocalePathIntercepter || options.switchLocalePathIntercepter || switchLocalePathIntercepter,
-    dynamicRouteParamsKey: proxy.dynamicRouteParamsKey || options.dynamicRouteParamsKey || dynamicRouteParamsKey
-  };
-}
-const RESOLVED_PREFIXED = /* @__PURE__ */ new Set(["prefix_and_default", "prefix_except_default"]);
-function prefixable(optons) {
-  const { currentLocale, defaultLocale, strategy } = optons;
-  const isDefaultLocale = currentLocale === defaultLocale;
-  return !(isDefaultLocale && RESOLVED_PREFIXED.has(strategy)) && !(strategy === "no_prefix");
-}
-const DefaultPrefixable = prefixable;
-function getRouteBaseName(givenRoute) {
-  const router = this.router;
-  const { routesNameSeparator } = getI18nRoutingOptions(router, this);
-  const route = givenRoute != null ? isRef(givenRoute) ? unref(givenRoute) : givenRoute : this.route;
-  if (route == null || !route.name) {
-    return;
-  }
-  const name = getRouteName(route.name);
-  return name.split(routesNameSeparator)[0];
-}
-function localePath(route, locale) {
-  const localizedRoute = resolveRoute.call(this, route, locale);
-  return localizedRoute == null ? "" : localizedRoute.redirectedFrom || localizedRoute.fullPath;
-}
-function localeRoute(route, locale) {
-  const resolved = resolveRoute.call(this, route, locale);
-  return resolved == null ? void 0 : resolved;
-}
-function localeLocation(route, locale) {
-  const resolved = resolveRoute.call(this, route, locale);
-  return resolved == null ? void 0 : resolved;
-}
-function resolveRoute(route, locale) {
-  const router = this.router;
-  const i18n = this.i18n;
-  const _locale = locale || getLocale(i18n);
-  const { routesNameSeparator, defaultLocale, defaultLocaleRouteNameSuffix, strategy, trailingSlash, prefixable: prefixable2 } = getI18nRoutingOptions(router, this);
-  let _route = route;
-  if (isString(route)) {
-    if (_route[0] === "/") {
-      _route = { path: route };
-    } else {
-      _route = { name: route };
-    }
-  }
-  let localizedRoute = assign$1({}, _route);
-  if (localizedRoute.path && !localizedRoute.name) {
-    let _resolvedRoute = null;
-    try {
-      _resolvedRoute = router.resolve(localizedRoute);
-    } catch {
-    }
-    const resolvedRoute = _resolvedRoute;
-    const resolvedRouteName = getRouteBaseName.call(this, resolvedRoute);
-    if (isString(resolvedRouteName)) {
-      localizedRoute = {
-        name: getLocaleRouteName(resolvedRouteName, _locale, {
-          defaultLocale,
-          strategy,
-          routesNameSeparator,
-          defaultLocaleRouteNameSuffix
-        }),
-        params: resolvedRoute.params,
-        query: resolvedRoute.query,
-        hash: resolvedRoute.hash
-      };
-      {
-        localizedRoute.state = resolvedRoute.state;
-      }
-    } else {
-      if (prefixable2({ currentLocale: _locale, defaultLocale, strategy })) {
-        localizedRoute.path = `/${_locale}${localizedRoute.path}`;
-      }
-      localizedRoute.path = trailingSlash ? withTrailingSlash(localizedRoute.path, true) : withoutTrailingSlash(localizedRoute.path, true);
-    }
-  } else {
-    if (!localizedRoute.name && !localizedRoute.path) {
-      localizedRoute.name = getRouteBaseName.call(this, this.route);
-    }
-    localizedRoute.name = getLocaleRouteName(localizedRoute.name, _locale, {
-      defaultLocale,
-      strategy,
-      routesNameSeparator,
-      defaultLocaleRouteNameSuffix
-    });
-  }
-  try {
-    const resolvedRoute = router.resolve(localizedRoute);
-    if (isVue3 ? resolvedRoute.name : resolvedRoute.route.name) {
-      return resolvedRoute;
-    }
-    return router.resolve(route);
-  } catch (e2) {
-    if (e2.type === 1) {
-      return null;
-    }
-  }
-}
-const DefaultSwitchLocalePathIntercepter = (path) => path;
-function getLocalizableMetaFromDynamicParams(route, key) {
-  const metaDefault = {};
-  if (key === DEFAULT_DYNAMIC_PARAMS_KEY) {
-    return metaDefault;
-  }
-  const meta = route.meta;
-  if (isRef(meta)) {
-    return meta.value[key] || metaDefault;
-  } else {
-    return meta[key] || metaDefault;
-  }
-}
-function switchLocalePath(locale) {
-  const route = this.route;
-  const name = getRouteBaseName.call(this, route);
-  if (!name) {
-    return "";
-  }
-  const { switchLocalePathIntercepter, dynamicRouteParamsKey } = getI18nRoutingOptions(this.router, this);
-  const { params, ...routeCopy } = route;
-  const langSwitchParams = getLocalizableMetaFromDynamicParams(route, dynamicRouteParamsKey)[locale] || {};
-  const _baseRoute = {
-    name,
-    params: {
-      ...params,
-      ...langSwitchParams
-    }
-  };
-  const baseRoute = assign$1({}, routeCopy, _baseRoute);
-  let path = localePath.call(this, baseRoute, locale);
-  path = switchLocalePathIntercepter(path, locale);
-  return path;
-}
-function localeHead({ addDirAttribute = false, addSeoAttributes = false, identifierAttribute = "hid" } = {}) {
-  const router = this.router;
-  const i18n = this.i18n;
-  const { defaultDirection } = getI18nRoutingOptions(router, this);
-  const metaObject = {
-    htmlAttrs: {},
-    link: [],
-    meta: []
-  };
-  if (i18n.locales == null || i18n.baseUrl == null) {
-    return metaObject;
-  }
-  const locale = getLocale(i18n);
-  const locales = getLocales(i18n);
-  const currentLocale = getNormalizedLocales(locales).find((l2) => l2.code === locale) || {
-    code: locale
-  };
-  const currentLocaleIso = currentLocale.iso;
-  const currentLocaleDir = currentLocale.dir || defaultDirection;
-  if (addDirAttribute) {
-    metaObject.htmlAttrs.dir = currentLocaleDir;
-  }
-  if (addSeoAttributes && locale && i18n.locales) {
-    if (currentLocaleIso) {
-      metaObject.htmlAttrs.lang = currentLocaleIso;
-    }
-    addHreflangLinks.call(this, locales, unref(i18n.baseUrl), metaObject.link, identifierAttribute);
-    addCanonicalLinks.call(this, unref(i18n.baseUrl), metaObject.link, identifierAttribute, addSeoAttributes);
-    addCurrentOgLocale(currentLocale, currentLocaleIso, metaObject.meta, identifierAttribute);
-    addAlternateOgLocales(locales, currentLocaleIso, metaObject.meta, identifierAttribute);
-  }
-  return metaObject;
-}
-function addHreflangLinks(locales, baseUrl, link, identifierAttribute) {
-  const router = this.router;
-  const { defaultLocale, strategy } = getI18nRoutingOptions(router, this);
-  if (strategy === STRATEGIES.NO_PREFIX) {
-    return;
-  }
-  const localeMap = /* @__PURE__ */ new Map();
-  for (const locale of locales) {
-    const localeIso = locale.iso;
-    if (!localeIso) {
-      warn("Locale ISO code is required to generate alternate link");
-      continue;
-    }
-    const [language, region] = localeIso.split("-");
-    if (language && region && (locale.isCatchallLocale || !localeMap.has(language))) {
-      localeMap.set(language, locale);
-    }
-    localeMap.set(localeIso, locale);
-  }
-  for (const [iso, mapLocale] of localeMap.entries()) {
-    const localePath2 = switchLocalePath.call(this, mapLocale.code);
-    if (localePath2) {
-      link.push({
-        [identifierAttribute]: `i18n-alt-${iso}`,
-        rel: "alternate",
-        href: toAbsoluteUrl(localePath2, baseUrl),
-        hreflang: iso
-      });
-    }
-  }
-  if (defaultLocale) {
-    const localePath2 = switchLocalePath.call(this, defaultLocale);
-    if (localePath2) {
-      link.push({
-        [identifierAttribute]: "i18n-xd",
-        rel: "alternate",
-        href: toAbsoluteUrl(localePath2, baseUrl),
-        hreflang: "x-default"
-      });
-    }
-  }
-}
-function addCanonicalLinks(baseUrl, link, identifierAttribute, seoAttributesOptions) {
-  const route = this.route;
-  const currentRoute = localeRoute.call(this, {
-    ...route,
-    name: getRouteBaseName.call(this, route)
-  });
-  if (currentRoute) {
-    let href = toAbsoluteUrl(currentRoute.path, baseUrl);
-    const canonicalQueries = isObject(seoAttributesOptions) && seoAttributesOptions.canonicalQueries || [];
-    if (canonicalQueries.length) {
-      const currentRouteQueryParams = currentRoute.query;
-      const params = new URLSearchParams();
-      for (const queryParamName of canonicalQueries) {
-        if (queryParamName in currentRouteQueryParams) {
-          const queryParamValue = currentRouteQueryParams[queryParamName];
-          if (isArray(queryParamValue)) {
-            queryParamValue.forEach((v2) => params.append(queryParamName, v2 || ""));
-          } else {
-            params.append(queryParamName, queryParamValue || "");
-          }
-        }
-      }
-      const queryString = params.toString();
-      if (queryString) {
-        href = `${href}?${queryString}`;
-      }
-    }
-    link.push({
-      [identifierAttribute]: "i18n-can",
-      rel: "canonical",
-      href
-    });
-  }
-}
-function addCurrentOgLocale(currentLocale, currentLocaleIso, meta, identifierAttribute) {
-  const hasCurrentLocaleAndIso = currentLocale && currentLocaleIso;
-  if (!hasCurrentLocaleAndIso) {
-    return;
-  }
-  meta.push({
-    [identifierAttribute]: "i18n-og",
-    property: "og:locale",
-    content: hypenToUnderscore(currentLocaleIso)
-  });
-}
-function addAlternateOgLocales(locales, currentLocaleIso, meta, identifierAttribute) {
-  const localesWithoutCurrent = locales.filter((locale) => {
-    const localeIso = locale.iso;
-    return localeIso && localeIso !== currentLocaleIso;
-  });
-  if (localesWithoutCurrent.length) {
-    const alternateLocales = localesWithoutCurrent.map((locale) => ({
-      [identifierAttribute]: `i18n-og-alt-${locale.iso}`,
-      property: "og:locale:alternate",
-      content: hypenToUnderscore(locale.iso)
-    }));
-    meta.push(...alternateLocales);
-  }
-}
-function hypenToUnderscore(str) {
-  return (str || "").replace(/-/g, "_");
-}
-function toAbsoluteUrl(urlOrPath, baseUrl) {
-  if (urlOrPath.match(/^https?:\/\//)) {
-    return urlOrPath;
-  }
-  return baseUrl + urlOrPath;
-}
-const locale_tr = {
-  "hello": (ctx) => {
-    const { normalize: _normalize } = ctx;
-    return _normalize(["merhaba"]);
-  },
-  "follow": (ctx) => {
-    const { normalize: _normalize } = ctx;
-    return _normalize(["Takip Et"]);
-  },
-  "modal": (ctx) => {
-    const { normalize: _normalize } = ctx;
-    return _normalize(["Ekran"]);
-  }
-};
-const localeCodes = ["en", "tr"];
-const localeMessages = {
-  "tr": () => Promise.resolve(locale_tr),
-  "en": () => import('./_nuxt/en-US.5829c3d6.mjs')
-};
-const additionalMessages = Object({ "en": [], "tr": [] });
-const resolveNuxtI18nOptions = async (context) => {
-  const nuxtI18nOptions = Object({});
-  const vueI18nOptionsLoader = async (context2) => Object({ "legacy": false, "locale": "tr", "fallbackLocale": "tr", "availableLocales": ["en", "tr"] });
-  nuxtI18nOptions.vueI18n = await vueI18nOptionsLoader();
-  nuxtI18nOptions.locales = [Object({ "code": "en", "file": "en-US.json" }), Object({ "code": "tr", "file": "tr-TR.json" })];
-  nuxtI18nOptions.defaultLocale = "tr";
-  nuxtI18nOptions.defaultDirection = "ltr";
-  nuxtI18nOptions.routesNameSeparator = "___";
-  nuxtI18nOptions.trailingSlash = false;
-  nuxtI18nOptions.defaultLocaleRouteNameSuffix = "default";
-  nuxtI18nOptions.strategy = "prefix_except_default";
-  nuxtI18nOptions.lazy = true;
-  nuxtI18nOptions.langDir = "locales/";
-  nuxtI18nOptions.rootRedirect = null;
-  nuxtI18nOptions.detectBrowserLanguage = Object({ "alwaysRedirect": false, "cookieCrossOrigin": false, "cookieDomain": null, "cookieKey": "i18n_redirected", "cookieSecure": false, "fallbackLocale": "", "redirectOn": "root", "useCookie": true });
-  nuxtI18nOptions.differentDomains = false;
-  nuxtI18nOptions.baseUrl = "";
-  nuxtI18nOptions.dynamicRouteParams = false;
-  nuxtI18nOptions.parsePages = true;
-  nuxtI18nOptions.pages = Object({});
-  nuxtI18nOptions.skipSettingLocaleOnNavigate = false;
-  nuxtI18nOptions.onBeforeLanguageSwitch = () => "";
-  nuxtI18nOptions.onLanguageSwitched = () => null;
-  nuxtI18nOptions.types = void 0;
-  nuxtI18nOptions.debug = false;
-  return nuxtI18nOptions;
-};
-const nuxtI18nOptionsDefault = Object({ vueI18n: void 0, locales: [], defaultLocale: "", defaultDirection: "ltr", routesNameSeparator: "___", trailingSlash: false, defaultLocaleRouteNameSuffix: "default", strategy: "prefix_except_default", lazy: false, langDir: null, rootRedirect: null, detectBrowserLanguage: Object({ "alwaysRedirect": false, "cookieCrossOrigin": false, "cookieDomain": null, "cookieKey": "i18n_redirected", "cookieSecure": false, "fallbackLocale": "", "redirectOn": "root", "useCookie": true }), differentDomains: false, baseUrl: "", dynamicRouteParams: false, parsePages: true, pages: Object({}), skipSettingLocaleOnNavigate: false, onBeforeLanguageSwitch: () => "", onLanguageSwitched: () => null, types: void 0, debug: false });
-const nuxtI18nInternalOptions = Object({ __normalizedLocales: [Object({ "code": "en", "file": "en-US.json" }), Object({ "code": "tr", "file": "tr-TR.json" })] });
-function formatMessage(message) {
-  return "[@nuxtjs/i18n] " + message;
-}
-function isLegacyVueI18n(target) {
-  return target != null && ("__VUE_I18N_BRIDGE__" in target || "_sync" in target);
-}
-function callVueI18nInterfaces(i18n, name, ...args) {
-  const target = isI18nInstance(i18n) ? i18n.global : i18n;
-  const [obj, method] = [target, target[name]];
-  return Reflect.apply(method, obj, [...args]);
-}
-function getVueI18nPropertyValue(i18n, name) {
-  const target = isI18nInstance(i18n) ? i18n.global : i18n;
-  const ret = isComposer(target) ? target[name].value : isExportedGlobalComposer(target) || isVueI18n(target) || isLegacyVueI18n(target) ? target[name] : target[name];
-  return ret;
-}
-function defineGetter(obj, key, val) {
-  Object.defineProperty(obj, key, { get: () => val });
-}
-function proxyNuxt(nuxt, target) {
-  return function() {
-    return Reflect.apply(
-      target,
-      {
-        i18n: nuxt.$i18n,
-        getRouteBaseName: nuxt.$getRouteBaseName,
-        localePath: nuxt.$localePath,
-        localeRoute: nuxt.$localeRoute,
-        switchLocalePath: nuxt.$switchLocalePath,
-        localeHead: nuxt.$localeHead,
-        route: nuxt.$router.currentRoute.value,
-        router: nuxt.$router,
-        store: void 0
-      },
-      arguments
-    );
-  };
-}
-function parseAcceptLanguage(input) {
-  return input.split(",").map((tag) => tag.split(";")[0]);
-}
-async function loadMessage(context, loader) {
-  let message = null;
-  try {
-    const getter = await loader().then((r2) => r2.default || r2);
-    if (isFunction$1(getter)) {
-      console.error(formatMessage("Not support executable file (e.g. js, cjs, mjs)"));
-    } else {
-      message = getter;
-    }
-  } catch (e2) {
-    console.error(formatMessage("Failed locale loading: " + e2.message));
-  }
-  return message;
-}
-async function loadLocale(context, locale, setter) {
-  {
-    const loader = localeMessages[locale];
-    if (loader != null) {
-      const message = await loadMessage(context, loader);
-      if (message != null) {
-        setter(locale, message);
-      }
-    } else {
-      console.warn(formatMessage("Could not find " + locale + " locale in localeMessages"));
-    }
-  }
-}
-async function loadAdditionalLocale(context, locale, merger) {
-  {
-    const additionalLoaders = additionalMessages[locale] || [];
-    for (const additionalLoader of additionalLoaders) {
-      const message = await loadMessage(context, additionalLoader);
-      if (message != null) {
-        merger(locale, message);
-      }
-    }
-  }
-}
-function getBrowserLocale(options, context) {
-  let ret;
-  {
-    const header = useRequestHeaders(["accept-language"]);
-    const accept = header["accept-language"];
-    if (accept) {
-      ret = findBrowserLocale(options.__normalizedLocales, parseAcceptLanguage(accept));
-    }
-  }
-  return ret;
-}
-function getLocaleCookie(context, {
-  useCookie: useCookie2 = nuxtI18nOptionsDefault.detectBrowserLanguage.useCookie,
-  cookieKey = nuxtI18nOptionsDefault.detectBrowserLanguage.cookieKey,
-  localeCodes: localeCodes2 = []
-} = {}) {
-  if (useCookie2) {
-    let localeCode;
-    {
-      const cookie = useRequestHeaders(["cookie"]);
-      if ("cookie" in cookie) {
-        const parsedCookie = parse(cookie["cookie"]);
-        localeCode = parsedCookie[cookieKey];
-      }
-    }
-    if (localeCode && localeCodes2.includes(localeCode)) {
-      return localeCode;
-    }
-  }
-}
-function setLocaleCookie(locale, context, {
-  useCookie: useCookie2 = nuxtI18nOptionsDefault.detectBrowserLanguage.useCookie,
-  cookieKey = nuxtI18nOptionsDefault.detectBrowserLanguage.cookieKey,
-  cookieDomain = nuxtI18nOptionsDefault.detectBrowserLanguage.cookieDomain,
-  cookieSecure = nuxtI18nOptionsDefault.detectBrowserLanguage.cookieSecure,
-  cookieCrossOrigin = nuxtI18nOptionsDefault.detectBrowserLanguage.cookieCrossOrigin
-} = {}) {
-  if (!useCookie2) {
-    return;
-  }
-  const date = new Date();
-  const cookieOptions = {
-    expires: new Date(date.setDate(date.getDate() + 365)),
-    path: "/",
-    sameSite: cookieCrossOrigin ? "none" : "lax",
-    secure: cookieCrossOrigin || cookieSecure
-  };
-  if (cookieDomain) {
-    cookieOptions.domain = cookieDomain;
-  }
-  {
-    if (context.res) {
-      const { res } = context;
-      let headers = res.getHeader("Set-Cookie") || [];
-      if (!isArray$1(headers)) {
-        headers = [String(headers)];
-      }
-      const redirectCookie = serialize(cookieKey, locale, cookieOptions);
-      headers.push(redirectCookie);
-      res.setHeader("Set-Cookie", headers);
-    }
-  }
-}
-function detectBrowserLanguage(route, context, nuxtI18nOptions, nuxtI18nInternalOptions2, localeCodes2 = [], locale = "") {
-  const { strategy } = nuxtI18nOptions;
-  const { redirectOn, alwaysRedirect, useCookie: useCookie2, fallbackLocale } = nuxtI18nOptions.detectBrowserLanguage;
-  const path = isString$1(route) ? route : route.path;
-  if (strategy !== "no_prefix") {
-    if (redirectOn === "root") {
-      if (path !== "/") {
-        return "";
-      }
-    } else if (redirectOn === "no prefix") {
-      if (!alwaysRedirect && path.match(getLocalesRegex(localeCodes2))) {
-        return "";
-      }
-    }
-  }
-  const cookieLocale = getLocaleCookie(context, { ...nuxtI18nOptions.detectBrowserLanguage, localeCodes: localeCodes2 });
-  let matchedLocale;
-  if (useCookie2 && (matchedLocale = cookieLocale))
-    ;
-  else {
-    matchedLocale = getBrowserLocale(nuxtI18nInternalOptions2);
-  }
-  const finalLocale = matchedLocale || fallbackLocale;
-  const vueI18nLocale = locale || nuxtI18nOptions.vueI18n.locale;
-  if (finalLocale && (!useCookie2 || alwaysRedirect || !cookieLocale)) {
-    if (strategy === "no_prefix") {
-      return finalLocale;
-    } else {
-      if (finalLocale !== vueI18nLocale && path !== "/") {
-        return finalLocale;
-      }
-    }
-  }
-  return "";
-}
-function getHost() {
-  let host;
-  {
-    const header = useRequestHeaders(["x-forwarded-host", "host"]);
-    let detectedHost;
-    if ("x-forwarded-host" in header) {
-      detectedHost = header["x-forwarded-host"];
-    } else if ("host" in header) {
-      detectedHost = header["host"];
-    }
-    host = isArray$1(detectedHost) ? detectedHost[0] : detectedHost;
-  }
-  return host;
-}
-function getLocaleDomain(locales) {
-  let host = getHost() || "";
-  if (host) {
-    const matchingLocale = locales.find((locale) => locale.domain === host);
-    if (matchingLocale) {
-      return matchingLocale.code;
-    } else {
-      host = "";
-    }
-  }
-  return host;
-}
-function getDomainFromLocale(localeCode, locales, nuxt) {
-  const lang = locales.find((locale) => locale.code === localeCode);
-  if (lang && lang.domain) {
-    if (hasProtocol(lang.domain)) {
-      return lang.domain;
-    }
-    let protocol;
-    {
-      const { req } = useRequestEvent(nuxt);
-      protocol = req && isHTTPS(req) ? "https" : "http";
-    }
-    return protocol + "://" + lang.domain;
-  }
-  console.warn(formatMessage("Could not find domain name for locale " + localeCode));
-}
-function setCookieLocale(i18n, locale) {
-  return callVueI18nInterfaces(i18n, "setLocaleCookie", locale);
-}
-function setLocaleMessage(i18n, locale, messages) {
-  return callVueI18nInterfaces(i18n, "setLocaleMessage", locale, messages);
-}
-function mergeLocaleMessage(i18n, locale, messages) {
-  return callVueI18nInterfaces(i18n, "mergeLocaleMessage", locale, messages);
-}
-function onBeforeLanguageSwitch(i18n, oldLocale, newLocale, initial, context) {
-  return callVueI18nInterfaces(i18n, "onBeforeLanguageSwitch", oldLocale, newLocale, initial, context);
-}
-function onLanguageSwitched(i18n, oldLocale, newLocale) {
-  return callVueI18nInterfaces(i18n, "onLanguageSwitched", oldLocale, newLocale);
-}
-function makeFallbackLocaleCodes(fallback, locales) {
-  let fallbackLocales = [];
-  if (isArray$1(fallback)) {
-    fallbackLocales = fallback;
-  } else if (isObject$1(fallback)) {
-    const targets = [...locales, "default"];
-    for (const locale of targets) {
-      if (fallback[locale]) {
-        fallbackLocales = [...fallbackLocales, ...fallback[locale].filter(Boolean)];
-      }
-    }
-  } else if (isString$1(fallback) && locales.every((locale) => locale !== fallback)) {
-    fallbackLocales.push(fallback);
-  }
-  return fallbackLocales;
-}
-async function loadInitialMessages(context, messages, options) {
-  const { defaultLocale, initialLocale, localeCodes: localeCodes2, fallbackLocale, langDir, lazy } = options;
-  const setter = (locale, message) => messages[locale] = message;
-  if (langDir) {
-    if (lazy && fallbackLocale) {
-      const fallbackLocales = makeFallbackLocaleCodes(fallbackLocale, [defaultLocale, initialLocale]);
-      await Promise.all(fallbackLocales.map((locale) => loadLocale(context, locale, setter)));
-    }
-    const locales = lazy ? [...(/* @__PURE__ */ new Set()).add(defaultLocale).add(initialLocale)] : localeCodes2;
-    await Promise.all(locales.map((locale) => loadLocale(context, locale, setter)));
-  }
-  return messages;
-}
-async function mergeAdditionalMessages(context, i18n, locale) {
-  await loadAdditionalLocale(
-    context,
-    locale,
-    (locale2, message) => mergeLocaleMessage(i18n, locale2, message)
-  );
-}
-async function loadAndSetLocale(newLocale, context, i18n, {
-  useCookie: useCookie2 = nuxtI18nOptionsDefault.detectBrowserLanguage.useCookie,
-  skipSettingLocaleOnNavigate = nuxtI18nOptionsDefault.skipSettingLocaleOnNavigate,
-  differentDomains = nuxtI18nOptionsDefault.differentDomains,
-  initial = false,
-  lazy = false,
-  langDir = null
-} = {}) {
-  let ret = false;
-  const oldLocale = getLocale(i18n);
-  if (!newLocale) {
-    return [ret, oldLocale];
-  }
-  if (!initial && differentDomains) {
-    return [ret, oldLocale];
-  }
-  if (oldLocale === newLocale) {
-    return [ret, oldLocale];
-  }
-  const localeOverride = onBeforeLanguageSwitch(i18n, oldLocale, newLocale, initial, context);
-  const localeCodes2 = getLocaleCodes(i18n);
-  if (localeOverride && localeCodes2 && localeCodes2.includes(localeOverride)) {
-    if (localeOverride === oldLocale) {
-      return [ret, oldLocale];
-    }
-    newLocale = localeOverride;
-  }
-  if (langDir) {
-    const i18nFallbackLocales = getVueI18nPropertyValue(i18n, "fallbackLocale");
-    if (lazy) {
-      const setter = (locale, message) => setLocaleMessage(i18n, locale, message);
-      if (i18nFallbackLocales) {
-        const fallbackLocales = makeFallbackLocaleCodes(i18nFallbackLocales, [newLocale]);
-        await Promise.all(fallbackLocales.map((locale) => loadLocale(context, locale, setter)));
-      }
-      await loadLocale(context, newLocale, setter);
-    }
-  }
-  await mergeAdditionalMessages(context, i18n, newLocale);
-  if (skipSettingLocaleOnNavigate) {
-    return [ret, oldLocale];
-  }
-  if (useCookie2) {
-    setCookieLocale(i18n, newLocale);
-  }
-  setLocale(i18n, newLocale);
-  onLanguageSwitched(i18n, oldLocale, newLocale);
-  ret = true;
-  return [ret, oldLocale];
-}
-function detectLocale(route, context, routeLocaleGetter, nuxtI18nOptions, initialLocaleLoader, normalizedLocales, localeCodes2 = []) {
-  const { strategy, defaultLocale, differentDomains } = nuxtI18nOptions;
-  const initialLocale = isFunction$1(initialLocaleLoader) ? initialLocaleLoader() : initialLocaleLoader;
-  const browserLocale = nuxtI18nOptions.detectBrowserLanguage ? detectBrowserLanguage(route, context, nuxtI18nOptions, nuxtI18nInternalOptions, localeCodes2, initialLocale) : "";
-  let finalLocale = browserLocale;
-  if (!finalLocale) {
-    if (differentDomains) {
-      finalLocale = getLocaleDomain(normalizedLocales);
-    } else if (strategy !== "no_prefix") {
-      finalLocale = routeLocaleGetter(route);
-    }
-  }
-  if (!finalLocale && nuxtI18nOptions.detectBrowserLanguage && nuxtI18nOptions.detectBrowserLanguage.useCookie) {
-    finalLocale = getLocaleCookie(context, { ...nuxtI18nOptions.detectBrowserLanguage, localeCodes: localeCodes2 });
-  }
-  if (!finalLocale) {
-    finalLocale = defaultLocale || "";
-  }
-  return finalLocale;
-}
-function detectRedirect(route, context, targetLocale, routeLocaleGetter, nuxtI18nOptions) {
-  const { strategy, defaultLocale, differentDomains } = nuxtI18nOptions;
-  let redirectPath = "";
-  if (!differentDomains && strategy !== "no_prefix" && (routeLocaleGetter(route) !== targetLocale || strategy === "prefix_and_default" && targetLocale === defaultLocale)) {
-    const { fullPath } = route;
-    const routePath = context.$switchLocalePath(targetLocale) || context.$localePath(fullPath, targetLocale);
-    if (isString$1(routePath) && routePath && routePath !== fullPath && !routePath.startsWith("//")) {
-      redirectPath = routePath;
-    }
-  }
-  if (differentDomains) {
-    const routePath = context.$switchLocalePath(targetLocale) || context.$localePath(route.fullPath, targetLocale);
-    if (isString$1(routePath)) {
-      redirectPath = routePath;
-    }
-  }
-  return redirectPath;
-}
-function isRootRedirectOptions(rootRedirect) {
-  return isObject$1(rootRedirect) && "path" in rootRedirect && "statusCode" in rootRedirect;
-}
-async function navigate(i18n, redirectPath, locale, route, {
-  status = 302,
-  rootRedirect = nuxtI18nOptionsDefault.rootRedirect,
-  differentDomains = nuxtI18nOptionsDefault.differentDomains,
-  skipSettingLocaleOnNavigate = nuxtI18nOptionsDefault.skipSettingLocaleOnNavigate
-} = {}) {
-  if (route.path === "/" && rootRedirect) {
-    if (isString$1(rootRedirect)) {
-      redirectPath = rootRedirect;
-    } else if (isRootRedirectOptions(rootRedirect)) {
-      redirectPath = "/" + rootRedirect.path;
-      status = rootRedirect.statusCode;
-    }
-    return navigateTo(redirectPath, { redirectCode: status });
-  }
-  if (!differentDomains) {
-    if (redirectPath) {
-      return navigateTo(redirectPath, { redirectCode: status });
-    }
-  }
-}
-function inejctNuxtHelpers(nuxt, i18n) {
-  defineGetter(nuxt, "$i18n", i18n.global);
-  for (const pair of [
-    ["getRouteBaseName", getRouteBaseName],
-    ["localePath", localePath],
-    ["localeRoute", localeRoute],
-    ["switchLocalePath", switchLocalePath],
-    ["localeHead", localeHead]
-  ]) {
-    defineGetter(nuxt, "$" + pair[0], proxyNuxt(nuxt, pair[1]));
-  }
-}
-function extendPrefixable(differentDomains) {
-  return (opts) => {
-    return DefaultPrefixable(opts) && !differentDomains;
-  };
-}
-function extendSwitchLocalePathIntercepter(differentDomains, normalizedLocales, nuxt) {
-  return (path, locale) => {
-    if (differentDomains) {
-      const domain = getDomainFromLocale(locale, normalizedLocales, nuxt);
-      if (domain) {
-        return joinURL(domain, path);
-      } else {
-        return path;
-      }
-    } else {
-      return DefaultSwitchLocalePathIntercepter(path);
-    }
-  };
-}
-function extendBaseUrl(baseUrl, options) {
-  return (context) => {
-    if (isFunction$1(baseUrl)) {
-      return baseUrl(context);
-    }
-    const { differentDomains, localeCodeLoader, normalizedLocales } = options;
-    const localeCode = isFunction$1(localeCodeLoader) ? localeCodeLoader() : localeCodeLoader;
-    if (differentDomains && localeCode) {
-      const domain = getDomainFromLocale(localeCode, normalizedLocales, options.nuxt);
-      if (domain) {
-        return domain;
-      }
-    }
-    return baseUrl;
-  };
-}
-const node_modules__64nuxtjs_i18n_dist_runtime_plugin_mjs_vyNBGOI7EC = defineNuxtPlugin(async (nuxt) => {
-  var _a2;
-  let __temp, __restore;
-  const router = useRouter();
-  const route = useRoute();
-  const { vueApp: app2 } = nuxt;
-  const nuxtContext = nuxt;
-  const nuxtI18nOptions = ([__temp, __restore] = executeAsync(() => resolveNuxtI18nOptions()), __temp = await __temp, __restore(), __temp);
-  const useCookie2 = nuxtI18nOptions.detectBrowserLanguage && nuxtI18nOptions.detectBrowserLanguage.useCookie;
-  const { __normalizedLocales: normalizedLocales } = nuxtI18nInternalOptions;
-  const {
-    defaultLocale,
-    differentDomains,
-    skipSettingLocaleOnNavigate,
-    lazy,
-    langDir,
-    routesNameSeparator,
-    defaultLocaleRouteNameSuffix,
-    rootRedirect
-  } = nuxtI18nOptions;
-  nuxtI18nOptions.baseUrl = extendBaseUrl(nuxtI18nOptions.baseUrl, {
-    differentDomains,
-    nuxt: nuxtContext,
-    localeCodeLoader: defaultLocale,
-    normalizedLocales
-  });
-  const getLocaleFromRoute = createLocaleFromRouteGetter(localeCodes, routesNameSeparator, defaultLocaleRouteNameSuffix);
-  const vueI18nOptions = nuxtI18nOptions.vueI18n;
-  vueI18nOptions.messages = vueI18nOptions.messages || {};
-  vueI18nOptions.fallbackLocale = (_a2 = vueI18nOptions.fallbackLocale) != null ? _a2 : false;
-  registerGlobalOptions(router, {
-    ...nuxtI18nOptions,
-    dynamicRouteParamsKey: isBoolean$1(nuxtI18nOptions.dynamicRouteParams) ? "nuxtI18n" : nuxtI18nOptions.dynamicRouteParams,
-    switchLocalePathIntercepter: extendSwitchLocalePathIntercepter(differentDomains, normalizedLocales, nuxtContext),
-    prefixable: extendPrefixable(differentDomains)
-  });
-  let initialLocale = detectLocale(
-    route,
-    nuxt.ssrContext,
-    getLocaleFromRoute,
-    nuxtI18nOptions,
-    defaultLocale || vueI18nOptions.locale || "en-US",
-    normalizedLocales,
-    localeCodes
-  );
-  vueI18nOptions.messages = ([__temp, __restore] = executeAsync(() => loadInitialMessages(nuxtContext, vueI18nOptions.messages, {
-    ...nuxtI18nOptions,
-    initialLocale,
-    fallbackLocale: vueI18nOptions.fallbackLocale,
-    localeCodes
-  })), __temp = await __temp, __restore(), __temp);
-  initialLocale = initialLocale || vueI18nOptions.locale || "en-US";
-  const i18n = createI18n({
-    ...vueI18nOptions,
-    locale: initialLocale
-  });
-  let notInitialSetup = true;
-  function isInitialLocaleSetup(locale) {
-    return initialLocale !== locale && notInitialSetup;
-  }
-  extendI18n(i18n, {
-    locales: nuxtI18nOptions.locales,
-    localeCodes,
-    baseUrl: nuxtI18nOptions.baseUrl,
-    context: nuxtContext,
-    hooks: {
-      onExtendComposer(composer) {
-        composer.strategy = nuxtI18nOptions.strategy;
-        composer.localeProperties = computed(() => {
-          return normalizedLocales.find((l2) => l2.code === composer.locale.value) || {
-            code: composer.locale.value
-          };
-        });
-        composer.setLocale = async (locale) => {
-          const localeSetup = isInitialLocaleSetup(locale);
-          const [modified] = await loadAndSetLocale(locale, nuxtContext, i18n, {
-            useCookie: useCookie2,
-            differentDomains,
-            initial: localeSetup,
-            skipSettingLocaleOnNavigate,
-            lazy,
-            langDir
-          });
-          if (modified && localeSetup) {
-            notInitialSetup = false;
-          }
-          const redirectPath = detectRedirect(route, nuxtContext, locale, getLocaleFromRoute, nuxtI18nOptions);
-          navigate(i18n, redirectPath, locale, route, {
-            differentDomains,
-            skipSettingLocaleOnNavigate,
-            rootRedirect
-          });
-        };
-        composer.differentDomains = differentDomains;
-        composer.getBrowserLocale = () => getBrowserLocale(nuxtI18nInternalOptions, nuxt.ssrContext);
-        composer.getLocaleCookie = () => getLocaleCookie(nuxt.ssrContext, { ...nuxtI18nOptions.detectBrowserLanguage, localeCodes });
-        composer.setLocaleCookie = (locale) => setLocaleCookie(locale, nuxt.ssrContext, nuxtI18nOptions.detectBrowserLanguage || void 0);
-        composer.onBeforeLanguageSwitch = nuxtI18nOptions.onBeforeLanguageSwitch;
-        composer.onLanguageSwitched = nuxtI18nOptions.onLanguageSwitched;
-        composer.finalizePendingLocaleChange = async () => {
-          if (!i18n.__pendingLocale) {
-            return;
-          }
-          setLocale(i18n, i18n.__pendingLocale);
-          if (i18n.__resolvePendingLocalePromise) {
-            await i18n.__resolvePendingLocalePromise();
-          }
-          i18n.__pendingLocale = void 0;
-        };
-        composer.waitForPendingLocaleChange = async () => {
-          if (i18n.__pendingLocale && i18n.__pendingLocalePromise) {
-            await i18n.__pendingLocalePromise;
-          }
-        };
-      },
-      onExtendExportedGlobal(g2) {
-        return {
-          strategy: {
-            get() {
-              return g2.strategy;
-            }
-          },
-          localeProperties: {
-            get() {
-              return g2.localeProperties.value;
-            }
-          },
-          setLocale: {
-            get() {
-              return async (locale) => Reflect.apply(g2.setLocale, g2, [locale]);
-            }
-          },
-          differentDomains: {
-            get() {
-              return g2.differentDomains;
-            }
-          },
-          getBrowserLocale: {
-            get() {
-              return () => Reflect.apply(g2.getBrowserLocale, g2, []);
-            }
-          },
-          getLocaleCookie: {
-            get() {
-              return () => Reflect.apply(g2.getLocaleCookie, g2, []);
-            }
-          },
-          setLocaleCookie: {
-            get() {
-              return (locale) => Reflect.apply(g2.setLocaleCookie, g2, [locale]);
-            }
-          },
-          onBeforeLanguageSwitch: {
-            get() {
-              return (oldLocale, newLocale, initialSetup, context) => Reflect.apply(g2.onBeforeLanguageSwitch, g2, [oldLocale, newLocale, initialSetup, context]);
-            }
-          },
-          onLanguageSwitched: {
-            get() {
-              return (oldLocale, newLocale) => Reflect.apply(g2.onLanguageSwitched, g2, [oldLocale, newLocale]);
-            }
-          },
-          finalizePendingLocaleChange: {
-            get() {
-              return () => Reflect.apply(g2.finalizePendingLocaleChange, g2, []);
-            }
-          },
-          waitForPendingLocaleChange: {
-            get() {
-              return () => Reflect.apply(g2.waitForPendingLocaleChange, g2, []);
-            }
-          }
-        };
-      },
-      onExtendVueI18n(composer) {
-        return {
-          strategy: {
-            get() {
-              return composer.strategy;
-            }
-          },
-          localeProperties: {
-            get() {
-              return composer.localeProperties.value;
-            }
-          },
-          setLocale: {
-            get() {
-              return async (locale) => Reflect.apply(composer.setLocale, composer, [locale]);
-            }
-          },
-          differentDomains: {
-            get() {
-              return composer.differentDomains;
-            }
-          },
-          getBrowserLocale: {
-            get() {
-              return () => Reflect.apply(composer.getBrowserLocale, composer, []);
-            }
-          },
-          getLocaleCookie: {
-            get() {
-              return () => Reflect.apply(composer.getLocaleCookie, composer, []);
-            }
-          },
-          setLocaleCookie: {
-            get() {
-              return (locale) => Reflect.apply(composer.setLocaleCookie, composer, [locale]);
-            }
-          },
-          onBeforeLanguageSwitch: {
-            get() {
-              return (oldLocale, newLocale, initialSetup, context) => Reflect.apply(composer.onBeforeLanguageSwitch, composer, [oldLocale, newLocale, initialSetup, context]);
-            }
-          },
-          onLanguageSwitched: {
-            get() {
-              return (oldLocale, newLocale) => Reflect.apply(composer.onLanguageSwitched, composer, [oldLocale, newLocale]);
-            }
-          },
-          finalizePendingLocaleChange: {
-            get() {
-              return () => Reflect.apply(composer.finalizePendingLocaleChange, composer, []);
-            }
-          },
-          waitForPendingLocaleChange: {
-            get() {
-              return () => Reflect.apply(composer.waitForPendingLocaleChange, composer, []);
-            }
-          }
-        };
-      }
-    }
-  });
-  app2.use(i18n);
-  inejctNuxtHelpers(nuxtContext, i18n);
-  [__temp, __restore] = executeAsync(() => mergeAdditionalMessages(nuxtContext, i18n, initialLocale)), await __temp, __restore();
-  addRouteMiddleware(
-    "locale-changing",
-    defineNuxtRouteMiddleware(async (to, from) => {
-      let __temp2, __restore2;
-      const locale = detectLocale(
-        to,
-        nuxt.ssrContext,
-        getLocaleFromRoute,
-        nuxtI18nOptions,
-        () => {
-          return getLocale(i18n) || defaultLocale || vueI18nOptions.locale || "en-US";
-        },
-        normalizedLocales,
-        localeCodes
-      );
-      const localeSetup = isInitialLocaleSetup(locale);
-      const [modified] = ([__temp2, __restore2] = executeAsync(() => loadAndSetLocale(locale, nuxtContext, i18n, {
-        useCookie: useCookie2,
-        differentDomains,
-        initial: localeSetup,
-        skipSettingLocaleOnNavigate,
-        lazy,
-        langDir
-      })), __temp2 = await __temp2, __restore2(), __temp2);
-      if (modified && localeSetup) {
-        notInitialSetup = false;
-      }
-      const redirectPath = detectRedirect(to, nuxtContext, locale, getLocaleFromRoute, nuxtI18nOptions);
-      navigate(i18n, redirectPath, locale, to, {
-        differentDomains,
-        skipSettingLocaleOnNavigate,
-        rootRedirect
-      });
-    }),
-    { global: true }
-  );
-});
-const _nuxt_unocss_mjs_MzCDxu9LMj = defineNuxtPlugin(() => {
+const unocss_MzCDxu9LMj = /* @__PURE__ */ defineNuxtPlugin(() => {
 });
 /*!
   * pinia v2.0.23
@@ -4335,7 +1440,10 @@ const _nuxt_unocss_mjs_MzCDxu9LMj = defineNuxtPlugin(() => {
   */
 let activePinia;
 const setActivePinia = (pinia) => activePinia = pinia;
-const piniaSymbol = Symbol();
+const piniaSymbol = (
+  /* istanbul ignore next */
+  Symbol()
+);
 function isPlainObject(o2) {
   return o2 && typeof o2 === "object" && Object.prototype.toString.call(o2) === "[object Object]" && typeof o2.toJSON !== "function";
 }
@@ -4348,16 +1456,16 @@ var MutationType;
 function createPinia() {
   const scope = effectScope(true);
   const state = scope.run(() => ref({}));
-  let _p2 = [];
+  let _p = [];
   let toBeInstalled = [];
   const pinia = markRaw({
-    install(app2) {
+    install(app) {
       setActivePinia(pinia);
       {
-        pinia._a = app2;
-        app2.provide(piniaSymbol, pinia);
-        app2.config.globalProperties.$pinia = pinia;
-        toBeInstalled.forEach((plugin2) => _p2.push(plugin2));
+        pinia._a = app;
+        app.provide(piniaSymbol, pinia);
+        app.config.globalProperties.$pinia = pinia;
+        toBeInstalled.forEach((plugin2) => _p.push(plugin2));
         toBeInstalled = [];
       }
     },
@@ -4365,11 +1473,13 @@ function createPinia() {
       if (!this._a && !isVue2) {
         toBeInstalled.push(plugin2);
       } else {
-        _p2.push(plugin2);
+        _p.push(plugin2);
       }
       return this;
     },
-    _p: _p2,
+    _p,
+    // it's actually undefined here
+    // @ts-expect-error
     _a: null,
     _e: scope,
     _s: /* @__PURE__ */ new Map(),
@@ -4418,7 +1528,10 @@ function mergeReactiveObjects(target, patchToApply) {
   }
   return target;
 }
-const skipHydrateSymbol = Symbol();
+const skipHydrateSymbol = (
+  /* istanbul ignore next */
+  Symbol()
+);
 function shouldHydrate(obj) {
   return !isPlainObject(obj) || !obj.hasOwnProperty(skipHydrateSymbol);
 }
@@ -4460,6 +1573,7 @@ function createSetupStore($id, setup2, options = {}, pinia, hot, isOptionsStore)
   const optionsForPlugin = assign({ actions: {} }, options);
   const $subscribeOptions = {
     deep: true
+    // flush: 'post',
   };
   let isListening;
   let isSyncListening;
@@ -4550,6 +1664,7 @@ function createSetupStore($id, setup2, options = {}, pinia, hot, isOptionsStore)
   }
   const partialStore = {
     _p: pinia,
+    // _s: scope,
     $id,
     $onAction: addSubscription.bind(null, actionSubscriptions),
     $patch,
@@ -4640,7 +1755,9 @@ function defineStore(idOrOptions, setup2, setupOptions) {
   }
   function useStore(pinia, hot) {
     const currentInstance = getCurrentInstance();
-    pinia = (pinia) || currentInstance && inject(piniaSymbol);
+    pinia = // in test mode, ignore the argument provided as we can always retrieve a
+    // pinia instance with getActivePinia()
+    (pinia) || currentInstance && inject(piniaSymbol);
     if (pinia)
       setActivePinia(pinia);
     pinia = activePinia;
@@ -4664,13 +1781,14 @@ function storeToRefs(store2) {
     for (const key in store2) {
       const value = store2[key];
       if (isRef(value) || isReactive(value)) {
-        refs[key] = toRef(store2, key);
+        refs[key] = // ---
+        toRef(store2, key);
       }
     }
     return refs;
   }
 }
-const node_modules__64pinia_nuxt_dist_runtime_plugin_vue3_mjs_A0OWXRrUgq = defineNuxtPlugin((nuxtApp) => {
+const plugin_vue3_A0OWXRrUgq = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
   const pinia = createPinia();
   nuxtApp.vueApp.use(pinia);
   setActivePinia(pinia);
@@ -4683,61 +1801,23 @@ const node_modules__64pinia_nuxt_dist_runtime_plugin_vue3_mjs_A0OWXRrUgq = defin
     }
   };
 });
-const _plugins = [
-  _nuxt_components_plugin_mjs_KR1HBZs4kY,
-  node_modules_nuxt_dist_head_runtime_lib_vueuse_head_plugin_mjs_D7WGfuP1A0,
-  node_modules_nuxt_dist_head_runtime_mixin_plugin_mjs_prWV5EzJWI,
-  node_modules_nuxt_dist_pages_runtime_router_mjs_qNv5Ky2ZmB,
-  node_modules__64huntersofbook_naive_ui_nuxt_dist_runtime_config_mjs_hyx03WSFRE,
-  node_modules__64huntersofbook_naive_ui_nuxt_dist_runtime_plugin_mjs_dUrdF0P1fL,
-  node_modules__64nuxtjs_color_mode_dist_runtime_plugin_server_mjs_XNCxeHyTuP,
-  node_modules__64nuxtjs_i18n_dist_runtime_plugin_mjs_vyNBGOI7EC,
-  _nuxt_unocss_mjs_MzCDxu9LMj,
-  node_modules__64pinia_nuxt_dist_runtime_plugin_vue3_mjs_A0OWXRrUgq
+const plugins = [
+  plugin$1,
+  revive_payload_server_eJ33V7gbc6,
+  components_plugin_KR1HBZs4kY,
+  unhead_KgADcZ0jPj,
+  config_hyx03WSFRE,
+  plugin_dUrdF0P1fL,
+  plugin_server_XNCxeHyTuP,
+  unocss_MzCDxu9LMj,
+  plugin_vue3_A0OWXRrUgq
 ];
-const _sfc_main$9 = {
-  __name: "nuxt-root",
-  __ssrInlineRender: true,
-  setup(__props) {
-    const ErrorComponent = defineAsyncComponent(() => import('./_nuxt/error-component.4b63b83e.mjs').then((r2) => r2.default || r2));
-    const nuxtApp = useNuxtApp();
-    nuxtApp.deferHydration();
-    provide("_route", useRoute());
-    nuxtApp.hooks.callHookWith((hooks) => hooks.map((hook) => hook()), "vue:setup");
-    const error = useError();
-    onErrorCaptured((err, target, info) => {
-      nuxtApp.hooks.callHook("vue:error", err, target, info).catch((hookError) => console.error("[nuxt] Error in `vue:error` hook", hookError));
-      {
-        callWithNuxt(nuxtApp, showError, [err]);
-      }
-    });
-    return (_ctx, _push, _parent, _attrs) => {
-      const _component_App = resolveComponent("App");
-      ssrRenderSuspense(_push, {
-        default: () => {
-          if (unref(error)) {
-            _push(ssrRenderComponent(unref(ErrorComponent), { error: unref(error) }, null, _parent));
-          } else {
-            _push(ssrRenderComponent(_component_App, null, null, _parent));
-          }
-        },
-        _: 1
-      });
-    };
-  }
-};
-const _sfc_setup$9 = _sfc_main$9.setup;
-_sfc_main$9.setup = (props, ctx) => {
-  const ssrContext = useSSRContext();
-  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("../node_modules/nuxt/dist/app/components/nuxt-root.vue");
-  return _sfc_setup$9 ? _sfc_setup$9(props, ctx) : void 0;
-};
 const removeUndefinedProps = (props) => Object.fromEntries(Object.entries(props).filter(([, value]) => value !== void 0));
 const setupForUseMeta = (metaFactory, renderChild) => (props, ctx) => {
   useHead(() => metaFactory({ ...removeUndefinedProps(props), ...ctx.attrs }, ctx));
   return () => {
-    var _a2, _b2;
-    return renderChild ? (_b2 = (_a2 = ctx.slots).default) == null ? void 0 : _b2.call(_a2) : null;
+    var _a, _b;
+    return renderChild ? (_b = (_a = ctx.slots).default) == null ? void 0 : _b.call(_a) : null;
   };
 };
 const globalProps = {
@@ -4747,7 +1827,7 @@ const globalProps = {
     type: Boolean,
     default: void 0
   },
-  class: String,
+  class: [String, Object, Array],
   contenteditable: {
     type: Boolean,
     default: void 0
@@ -4785,178 +1865,8 @@ const globalProps = {
   title: String,
   translate: String
 };
-defineComponent({
-  name: "Script",
-  inheritAttrs: false,
-  props: {
-    ...globalProps,
-    async: Boolean,
-    crossorigin: {
-      type: [Boolean, String],
-      default: void 0
-    },
-    defer: Boolean,
-    fetchpriority: String,
-    integrity: String,
-    nomodule: Boolean,
-    nonce: String,
-    referrerpolicy: String,
-    src: String,
-    type: String,
-    charset: String,
-    language: String,
-    body: Boolean,
-    renderPriority: [String, Number]
-  },
-  setup: setupForUseMeta((props, { slots }) => {
-    var _a2;
-    const script = { ...props };
-    const textContent = (((_a2 = slots.default) == null ? void 0 : _a2.call(slots)) || []).filter(({ children }) => children).map(({ children }) => children).join("");
-    if (textContent) {
-      script.children = textContent;
-    }
-    return {
-      script: [script]
-    };
-  })
-});
-defineComponent({
-  name: "NoScript",
-  inheritAttrs: false,
-  props: {
-    ...globalProps,
-    title: String,
-    body: Boolean,
-    renderPriority: [String, Number]
-  },
-  setup: setupForUseMeta((props, { slots }) => {
-    var _a2;
-    const noscript = { ...props };
-    const textContent = (((_a2 = slots.default) == null ? void 0 : _a2.call(slots)) || []).filter(({ children }) => children).map(({ children }) => children).join("");
-    if (textContent) {
-      noscript.children = textContent;
-    }
-    return {
-      noscript: [noscript]
-    };
-  })
-});
-defineComponent({
-  name: "Link",
-  inheritAttrs: false,
-  props: {
-    ...globalProps,
-    as: String,
-    crossorigin: String,
-    disabled: Boolean,
-    fetchpriority: String,
-    href: String,
-    hreflang: String,
-    imagesizes: String,
-    imagesrcset: String,
-    integrity: String,
-    media: String,
-    prefetch: {
-      type: Boolean,
-      default: void 0
-    },
-    referrerpolicy: String,
-    rel: String,
-    sizes: String,
-    title: String,
-    type: String,
-    methods: String,
-    target: String,
-    body: Boolean,
-    renderPriority: [String, Number]
-  },
-  setup: setupForUseMeta((link) => ({
-    link: [link]
-  }))
-});
-defineComponent({
-  name: "Base",
-  inheritAttrs: false,
-  props: {
-    ...globalProps,
-    href: String,
-    target: String
-  },
-  setup: setupForUseMeta((base) => ({
-    base
-  }))
-});
-defineComponent({
-  name: "Title",
-  inheritAttrs: false,
-  setup: setupForUseMeta((_, { slots }) => {
-    var _a2, _b2, _c2;
-    const title = ((_c2 = (_b2 = (_a2 = slots.default) == null ? void 0 : _a2.call(slots)) == null ? void 0 : _b2[0]) == null ? void 0 : _c2.children) || null;
-    return {
-      title
-    };
-  })
-});
-defineComponent({
-  name: "Meta",
-  inheritAttrs: false,
-  props: {
-    ...globalProps,
-    charset: String,
-    content: String,
-    httpEquiv: String,
-    name: String,
-    body: Boolean,
-    renderPriority: [String, Number]
-  },
-  setup: setupForUseMeta((props) => {
-    const meta = { ...props };
-    if (meta.httpEquiv) {
-      meta["http-equiv"] = meta.httpEquiv;
-      delete meta.httpEquiv;
-    }
-    return {
-      meta: [meta]
-    };
-  })
-});
-defineComponent({
-  name: "Style",
-  inheritAttrs: false,
-  props: {
-    ...globalProps,
-    type: String,
-    media: String,
-    nonce: String,
-    title: String,
-    scoped: {
-      type: Boolean,
-      default: void 0
-    },
-    body: Boolean,
-    renderPriority: [String, Number]
-  },
-  setup: setupForUseMeta((props, { slots }) => {
-    var _a2, _b2, _c2;
-    const style = { ...props };
-    const textContent = (_c2 = (_b2 = (_a2 = slots.default) == null ? void 0 : _a2.call(slots)) == null ? void 0 : _b2[0]) == null ? void 0 : _c2.children;
-    if (textContent) {
-      style.children = textContent;
-    }
-    return {
-      style: [style]
-    };
-  })
-});
-defineComponent({
-  name: "Head",
-  inheritAttrs: false,
-  setup: (_props, ctx) => () => {
-    var _a2, _b2;
-    return (_b2 = (_a2 = ctx.slots).default) == null ? void 0 : _b2.call(_a2);
-  }
-});
-const Html = defineComponent({
+const Html = /* @__PURE__ */ defineComponent({
+  // eslint-disable-next-line vue/no-reserved-component-names
   name: "Html",
   inheritAttrs: false,
   props: {
@@ -4968,7 +1878,8 @@ const Html = defineComponent({
   },
   setup: setupForUseMeta((htmlAttrs) => ({ htmlAttrs }), true)
 });
-const Body = defineComponent({
+const Body = /* @__PURE__ */ defineComponent({
+  // eslint-disable-next-line vue/no-reserved-component-names
   name: "Body",
   inheritAttrs: false,
   props: {
@@ -4977,7 +1888,7 @@ const Body = defineComponent({
   },
   setup: setupForUseMeta((bodyAttrs) => ({ bodyAttrs }), true)
 });
-const _sfc_main$8 = /* @__PURE__ */ defineComponent({
+const _sfc_main$s = /* @__PURE__ */ defineComponent({
   __name: "Anchor",
   __ssrInlineRender: true,
   props: {
@@ -4996,14 +1907,14 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent({
   },
   setup(__props) {
     return (_ctx, _push, _parent, _attrs) => {
-      const _component_NuxtLink = __nuxt_component_0$1;
+      const _component_NuxtLink = __nuxt_component_0$3;
       if (__props.to) {
         _push(ssrRenderComponent(_component_NuxtLink, mergeProps({
           tag: "a",
           to: __props.to,
           class: "transition-colors duration-300 dark:hover:text-white hover:text-gray-900 hover:underline"
         }, _attrs), {
-          default: withCtx((_, _push2, _parent2, _scopeId) => {
+          default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
               ssrRenderSlot(_ctx.$slots, "default", {}, () => {
                 _push2(`${ssrInterpolate(__props.text)}`);
@@ -5031,13 +1942,19 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$8 = _sfc_main$8.setup;
-_sfc_main$8.setup = (props, ctx) => {
+const _sfc_setup$s = _sfc_main$s.setup;
+_sfc_main$s.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Anchor.vue");
-  return _sfc_setup$8 ? _sfc_setup$8(props, ctx) : void 0;
+  return _sfc_setup$s ? _sfc_setup$s(props, ctx) : void 0;
 };
-const _sfc_main$7 = /* @__PURE__ */ defineComponent({
+const defaultStyle$2 = `
+  cursor-pointer
+  border transition-color duration-300
+  focus:outline-none focus:ring-1 focus:ring-offset-1 focus:dark:ring-offset-gray-50 focus:dark:ring-gray-400 focus:ring-gray-600/[0.6] focus:ring-offset-gray-800/[0.6]
+  flex items-center justify-center
+`;
+const _sfc_main$r = /* @__PURE__ */ defineComponent({
   __name: "Button",
   __ssrInlineRender: true,
   props: {
@@ -5064,12 +1981,6 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
   },
   setup(__props) {
     const props = __props;
-    const defaultStyle = `
-  cursor-pointer
-  border transition-color duration-300
-  focus:outline-none focus:ring-1 focus:ring-offset-1 focus:dark:ring-offset-gray-50 focus:dark:ring-gray-400 focus:ring-gray-600/[0.6] focus:ring-offset-gray-800/[0.6]
-  flex items-center justify-center
-`;
     const styles = reactive({
       primary: "text-white bg-gray-800 hover:bg-white hover:text-gray-800 hover:border-gray-900 dark:text-gray-800 dark:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:border-white",
       secondary: "text-gray-800 bg-white hover:border-gray-900  dark:border-gray-900 dark:text-white dark:bg-gray-800 dark:hover:border-white"
@@ -5083,14 +1994,14 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
     const selectedStyle = computed(() => styles[props.type] || styles.primary);
     const selectedSize = computed(() => sizes[props.size] || sizes.lg);
     return (_ctx, _push, _parent, _attrs) => {
-      const _component_NuxtLink = __nuxt_component_0$1;
+      const _component_NuxtLink = __nuxt_component_0$3;
       if (__props.to) {
         _push(ssrRenderComponent(_component_NuxtLink, mergeProps({
           tag: "a",
           to: __props.to,
-          class: `${defaultStyle} ${unref(selectedStyle)} ${unref(selectedSize)}`
+          class: `${defaultStyle$2} ${unref(selectedStyle)} ${unref(selectedSize)}`
         }, _attrs), {
-          default: withCtx((_, _push2, _parent2, _scopeId) => {
+          default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
               ssrRenderSlot(_ctx.$slots, "default", {}, () => {
                 _push2(`${ssrInterpolate(__props.text)}`);
@@ -5107,7 +2018,7 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
         }, _parent));
       } else {
         _push(`<a${ssrRenderAttrs(mergeProps({
-          class: `${defaultStyle} ${unref(selectedStyle)} ${unref(selectedSize)}`,
+          class: `${defaultStyle$2} ${unref(selectedStyle)} ${unref(selectedSize)}`,
           href: __props.href
         }, _attrs))}>`);
         ssrRenderSlot(_ctx.$slots, "default", {}, () => {
@@ -5118,11 +2029,11 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$7 = _sfc_main$7.setup;
-_sfc_main$7.setup = (props, ctx) => {
+const _sfc_setup$r = _sfc_main$r.setup;
+_sfc_main$r.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Button.vue");
-  return _sfc_setup$7 ? _sfc_setup$7(props, ctx) : void 0;
+  return _sfc_setup$r ? _sfc_setup$r(props, ctx) : void 0;
 };
 const _export_sfc = (sfc, props) => {
   const target = sfc.__vccOpts || sfc;
@@ -5131,17 +2042,17 @@ const _export_sfc = (sfc, props) => {
   }
   return target;
 };
-const _sfc_main$6 = {};
-function _sfc_ssrRender(_ctx, _push, _parent, _attrs) {
+const _sfc_main$q = {};
+function _sfc_ssrRender$1(_ctx, _push, _parent, _attrs) {
   _push(`<div${ssrRenderAttrs(_attrs)}></div>`);
 }
-const _sfc_setup$6 = _sfc_main$6.setup;
-_sfc_main$6.setup = (props, ctx) => {
+const _sfc_setup$q = _sfc_main$q.setup;
+_sfc_main$q.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("../node_modules/@unocss/nuxt/runtime/UnoIcon.vue");
-  return _sfc_setup$6 ? _sfc_setup$6(props, ctx) : void 0;
+  return _sfc_setup$q ? _sfc_setup$q(props, ctx) : void 0;
 };
-const __nuxt_component_1 = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["ssrRender", _sfc_ssrRender]]);
+const __nuxt_component_1 = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["ssrRender", _sfc_ssrRender$1]]);
 function u(r2, n2, ...a2) {
   if (r2 in n2) {
     let e2 = n2[r2];
@@ -5168,7 +2079,7 @@ function P({ visible: r2 = true, features: t2 = 0, ourProps: e2, theirProps: o2,
 }
 function p$1({ props: r2, attrs: t2, slots: e2, slot: o2, name: i }) {
   var y2;
-  let { as: n2, ...s2 } = w(r2, ["unmount", "static"]), a2 = (y2 = e2.default) == null ? void 0 : y2.call(e2, o2), l2 = {};
+  let { as: n2, ...s2 } = w$1(r2, ["unmount", "static"]), a2 = (y2 = e2.default) == null ? void 0 : y2.call(e2, o2), l2 = {};
   if (o2) {
     let d2 = false, u2 = [];
     for (let [f2, c2] of Object.entries(o2))
@@ -5176,7 +2087,7 @@ function p$1({ props: r2, attrs: t2, slots: e2, slot: o2, name: i }) {
     d2 && (l2["data-headlessui-state"] = u2.join(" "));
   }
   if (n2 === "template") {
-    if (a2 = g(a2 != null ? a2 : []), Object.keys(s2).length > 0 || Object.keys(t2).length > 0) {
+    if (a2 = g$1(a2 != null ? a2 : []), Object.keys(s2).length > 0 || Object.keys(t2).length > 0) {
       let [d2, ...u2] = a2 != null ? a2 : [];
       if (!x$1(d2) || u2.length > 0)
         throw new Error(['Passing props on "template"!', "", `The current component <${i} /> is rendering a "template".`, "However we need to passthrough the following props:", Object.keys(s2).concat(Object.keys(t2)).sort((f2, c2) => f2.localeCompare(c2)).map((f2) => `  - ${f2}`).join(`
@@ -5189,8 +2100,8 @@ function p$1({ props: r2, attrs: t2, slots: e2, slot: o2, name: i }) {
   }
   return h$1(n2, Object.assign({}, s2, l2), { default: () => a2 });
 }
-function g(r2) {
-  return r2.flatMap((t2) => t2.type === Fragment$1 ? g(t2.children) : [t2]);
+function g$1(r2) {
+  return r2.flatMap((t2) => t2.type === Fragment ? g$1(t2.children) : [t2]);
 }
 function k(...r2) {
   if (r2.length === 0)
@@ -5220,7 +2131,7 @@ function V$1(r2) {
     t2[e2] === void 0 && delete t2[e2];
   return t2;
 }
-function w(r2, t2 = []) {
+function w$1(r2, t2 = []) {
   let e2 = Object.assign({}, r2);
   for (let o2 of t2)
     o2 in e2 && delete e2[o2];
@@ -5229,9 +2140,9 @@ function w(r2, t2 = []) {
 function x$1(r2) {
   return r2 == null ? false : typeof r2.type == "string" || typeof r2.type == "object" || typeof r2.type == "function";
 }
-let e$2 = 0;
+let e$1 = 0;
 function n$1() {
-  return ++e$2;
+  return ++e$1;
 }
 function t() {
   return n$1();
@@ -5274,7 +2185,7 @@ function o(n2) {
   return n2 == null || n2.value == null ? null : (l2 = n2.value.$el) != null ? l2 : n2.value;
 }
 let n = Symbol("Context");
-var l = ((e2) => (e2[e2.Open = 0] = "Open", e2[e2.Closed = 1] = "Closed", e2))(l || {});
+var l$1 = ((e2) => (e2[e2.Open = 0] = "Open", e2[e2.Closed = 1] = "Closed", e2))(l$1 || {});
 function f$2() {
   return p() !== null;
 }
@@ -5300,20 +2211,20 @@ function b$1(t2, e2) {
     n2.value || !o(e2) || o(e2) instanceof HTMLButtonElement && !((o$12 = o(e2)) != null && o$12.hasAttribute("type")) && (n2.value = "button");
   }), n2;
 }
-function m$1(r2) {
+function m$2(r2) {
   return null;
 }
-let m = ["[contentEditable=true]", "[tabindex]", "a[href]", "area[href]", "button:not([disabled])", "iframe", "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])"].map((e2) => `${e2}:not([tabindex='-1'])`).join(",");
+let m$1 = ["[contentEditable=true]", "[tabindex]", "a[href]", "area[href]", "button:not([disabled])", "iframe", "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])"].map((e2) => `${e2}:not([tabindex='-1'])`).join(",");
 var M = ((n2) => (n2[n2.First = 1] = "First", n2[n2.Previous = 2] = "Previous", n2[n2.Next = 4] = "Next", n2[n2.Last = 8] = "Last", n2[n2.WrapAround = 16] = "WrapAround", n2[n2.NoScroll = 32] = "NoScroll", n2))(M || {}), N = ((o2) => (o2[o2.Error = 0] = "Error", o2[o2.Overflow = 1] = "Overflow", o2[o2.Success = 2] = "Success", o2[o2.Underflow = 3] = "Underflow", o2))(N || {}), b = ((r2) => (r2[r2.Previous = -1] = "Previous", r2[r2.Next = 1] = "Next", r2))(b || {});
-var F = ((r2) => (r2[r2.Strict = 0] = "Strict", r2[r2.Loose = 1] = "Loose", r2))(F || {});
+var F$2 = ((r2) => (r2[r2.Strict = 0] = "Strict", r2[r2.Loose = 1] = "Loose", r2))(F$2 || {});
 function h(e2, t2 = 0) {
   var r2;
-  return e2 === ((r2 = m$1()) == null ? void 0 : r2.body) ? false : u(t2, { [0]() {
-    return e2.matches(m);
+  return e2 === ((r2 = m$2()) == null ? void 0 : r2.body) ? false : u(t2, { [0]() {
+    return e2.matches(m$1);
   }, [1]() {
     let l2 = e2;
     for (; l2 !== null; ) {
-      if (l2.matches(m))
+      if (l2.matches(m$1))
         return true;
       l2 = l2.parentElement;
     }
@@ -5341,30 +2252,56 @@ let f$1 = defineComponent({ name: "Hidden", props: { as: { type: [Object, String
 } });
 function e(n2 = {}, r2 = null, t2 = []) {
   for (let [i, o2] of Object.entries(n2))
-    f(t2, s(r2, i), o2);
+    f(t2, s$1(r2, i), o2);
   return t2;
 }
-function s(n2, r2) {
+function s$1(n2, r2) {
   return n2 ? n2 + "[" + r2 + "]" : r2;
 }
 function f(n2, r2, t2) {
   if (Array.isArray(t2))
     for (let [i, o2] of t2.entries())
-      f(n2, s(r2, i.toString()), o2);
+      f(n2, s$1(r2, i.toString()), o2);
   else
     t2 instanceof Date ? n2.push([r2, t2.toISOString()]) : typeof t2 == "boolean" ? n2.push([r2, t2 ? "1" : "0"]) : typeof t2 == "string" ? n2.push([r2, t2]) : typeof t2 == "number" ? n2.push([r2, `${t2}`]) : t2 == null ? n2.push([r2, ""]) : e(t2, r2, n2);
 }
-function d(u2, e2, r2) {
+function d$2(u2, e2, r2) {
   let i = ref(r2 == null ? void 0 : r2.value), f2 = computed(() => u2.value !== void 0);
   return [computed(() => f2.value ? u2.value : i.value), function(t2) {
     return f2.value || (i.value = t2), e2 == null ? void 0 : e2(t2);
   }];
 }
-function ue(o2, m2) {
+function s() {
+  let a2 = [], i = [], t2 = { enqueue(e2) {
+    i.push(e2);
+  }, addEventListener(e2, n2, o2, r2) {
+    return e2.addEventListener(n2, o2, r2), t2.add(() => e2.removeEventListener(n2, o2, r2));
+  }, requestAnimationFrame(...e2) {
+    let n2 = requestAnimationFrame(...e2);
+    t2.add(() => cancelAnimationFrame(n2));
+  }, nextFrame(...e2) {
+    t2.requestAnimationFrame(() => {
+      t2.requestAnimationFrame(...e2);
+    });
+  }, setTimeout(...e2) {
+    let n2 = setTimeout(...e2);
+    t2.add(() => clearTimeout(n2));
+  }, add(e2) {
+    a2.push(e2);
+  }, dispose() {
+    for (let e2 of a2.splice(0))
+      e2();
+  }, async workQueue() {
+    for (let e2 of i.splice(0))
+      await e2();
+  } };
+  return t2;
+}
+function ue$1(o2, m2) {
   return o2 === m2;
 }
-var re = ((l2) => (l2[l2.Open = 0] = "Open", l2[l2.Closed = 1] = "Closed", l2))(re || {}), se = ((l2) => (l2[l2.Single = 0] = "Single", l2[l2.Multi = 1] = "Multi", l2))(se || {}), de = ((l2) => (l2[l2.Pointer = 0] = "Pointer", l2[l2.Other = 1] = "Other", l2))(de || {});
-function fe(o2) {
+var re = ((l2) => (l2[l2.Open = 0] = "Open", l2[l2.Closed = 1] = "Closed", l2))(re || {}), se$1 = ((l2) => (l2[l2.Single = 0] = "Single", l2[l2.Multi = 1] = "Multi", l2))(se$1 || {}), de = ((l2) => (l2[l2.Pointer = 0] = "Pointer", l2[l2.Other = 1] = "Other", l2))(de || {});
+function fe$1(o2) {
   requestAnimationFrame(() => requestAnimationFrame(o2));
 }
 let H = Symbol("ListboxContext");
@@ -5376,19 +2313,19 @@ function V(o2) {
   }
   return m2;
 }
-let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) => true }, props: { as: { type: [Object, String], default: "template" }, disabled: { type: [Boolean], default: false }, by: { type: [String, Function], default: () => ue }, horizontal: { type: [Boolean], default: false }, modelValue: { type: [Object, String, Number, Boolean], default: void 0 }, defaultValue: { type: [Object, String, Number, Boolean], default: void 0 }, name: { type: String, optional: true }, multiple: { type: [Boolean], default: false } }, inheritAttrs: false, setup(o$12, { slots: m2, attrs: l$1, emit: L }) {
-  let e$12 = ref(1), p2 = ref(null), s2 = ref(null), O$12 = ref(null), d$1 = ref([]), S = ref(""), t2 = ref(null), i = ref(1);
+let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) => true }, props: { as: { type: [Object, String], default: "template" }, disabled: { type: [Boolean], default: false }, by: { type: [String, Function], default: () => ue$1 }, horizontal: { type: [Boolean], default: false }, modelValue: { type: [Object, String, Number, Boolean], default: void 0 }, defaultValue: { type: [Object, String, Number, Boolean], default: void 0 }, name: { type: String, optional: true }, multiple: { type: [Boolean], default: false } }, inheritAttrs: false, setup(o$12, { slots: m2, attrs: l2, emit: L2 }) {
+  let e$12 = ref(1), p2 = ref(null), s2 = ref(null), O$12 = ref(null), d2 = ref([]), S = ref(""), t2 = ref(null), i = ref(1);
   function k2(a2 = (n2) => n2) {
-    let n2 = t2.value !== null ? d$1.value[t2.value] : null, u2 = O(a2(d$1.value.slice()), (y2) => o(y2.dataRef.domRef)), c2 = n2 ? u2.indexOf(n2) : null;
+    let n2 = t2.value !== null ? d2.value[t2.value] : null, u2 = O(a2(d2.value.slice()), (y2) => o(y2.dataRef.domRef)), c2 = n2 ? u2.indexOf(n2) : null;
     return c2 === -1 && (c2 = null), { options: u2, activeOptionIndex: c2 };
   }
-  let h$2 = computed(() => o$12.multiple ? 1 : 0), [w$1, r2] = d(computed(() => o$12.modelValue), (a2) => L("update:modelValue", a2), computed(() => o$12.defaultValue)), f2 = { listboxState: e$12, value: w$1, mode: h$2, compare(a2, n2) {
+  let h$2 = computed(() => o$12.multiple ? 1 : 0), [w2, r2] = d$2(computed(() => o$12.modelValue), (a2) => L2("update:modelValue", a2), computed(() => o$12.defaultValue)), f2 = { listboxState: e$12, value: w2, mode: h$2, compare(a2, n2) {
     if (typeof o$12.by == "string") {
       let u2 = o$12.by;
       return (a2 == null ? void 0 : a2[u2]) === (n2 == null ? void 0 : n2[u2]);
     }
     return o$12.by(a2, n2);
-  }, orientation: computed(() => o$12.horizontal ? "horizontal" : "vertical"), labelRef: p2, buttonRef: s2, optionsRef: O$12, disabled: computed(() => o$12.disabled), options: d$1, searchQuery: S, activeOptionIndex: t2, activationTrigger: i, closeListbox() {
+  }, orientation: computed(() => o$12.horizontal ? "horizontal" : "vertical"), labelRef: p2, buttonRef: s2, optionsRef: O$12, disabled: computed(() => o$12.disabled), options: d2, searchQuery: S, activeOptionIndex: t2, activationTrigger: i, closeListbox() {
     o$12.disabled || e$12.value !== 1 && (e$12.value = 1, t2.value = null);
   }, openListbox() {
     o$12.disabled || e$12.value !== 0 && (e$12.value = 0);
@@ -5396,25 +2333,25 @@ let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) =
     if (o$12.disabled || e$12.value === 1)
       return;
     let c2 = k2(), y2 = x(a2 === a$1.Specific ? { focus: a$1.Specific, id: n2 } : { focus: a2 }, { resolveItems: () => c2.options, resolveActiveIndex: () => c2.activeOptionIndex, resolveId: (T) => T.id, resolveDisabled: (T) => T.dataRef.disabled });
-    S.value = "", t2.value = y2, i.value = u2 != null ? u2 : 1, d$1.value = c2.options;
+    S.value = "", t2.value = y2, i.value = u2 != null ? u2 : 1, d2.value = c2.options;
   }, search(a2) {
     if (o$12.disabled || e$12.value === 1)
       return;
     let u2 = S.value !== "" ? 0 : 1;
     S.value += a2.toLowerCase();
-    let y2 = (t2.value !== null ? d$1.value.slice(t2.value + u2).concat(d$1.value.slice(0, t2.value + u2)) : d$1.value).find((A) => A.dataRef.textValue.startsWith(S.value) && !A.dataRef.disabled), T = y2 ? d$1.value.indexOf(y2) : -1;
+    let y2 = (t2.value !== null ? d2.value.slice(t2.value + u2).concat(d2.value.slice(0, t2.value + u2)) : d2.value).find((A) => A.dataRef.textValue.startsWith(S.value) && !A.dataRef.disabled), T = y2 ? d2.value.indexOf(y2) : -1;
     T === -1 || T === t2.value || (t2.value = T, i.value = 1);
   }, clearSearch() {
     o$12.disabled || e$12.value !== 1 && S.value !== "" && (S.value = "");
   }, registerOption(a2, n2) {
     let u2 = k2((c2) => [...c2, { id: a2, dataRef: n2 }]);
-    d$1.value = u2.options, t2.value = u2.activeOptionIndex;
+    d2.value = u2.options, t2.value = u2.activeOptionIndex;
   }, unregisterOption(a2) {
     let n2 = k2((u2) => {
       let c2 = u2.findIndex((y2) => y2.id === a2);
       return c2 !== -1 && u2.splice(c2, 1), u2;
     });
-    d$1.value = n2.options, t2.value = n2.activeOptionIndex, i.value = 1;
+    d2.value = n2.options, t2.value = n2.activeOptionIndex, i.value = 1;
   }, select(a2) {
     o$12.disabled || r2(u(h$2.value, { [0]: () => a2, [1]: () => {
       let n2 = toRaw(f2.value.value).slice(), u2 = toRaw(a2), c2 = n2.findIndex((y2) => f2.compare(u2, toRaw(y2)));
@@ -5423,24 +2360,24 @@ let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) =
   } };
   return y([s2, O$12], (a2, n2) => {
     var u2;
-    f2.closeListbox(), h(n2, F.Loose) || (a2.preventDefault(), (u2 = o(s2)) == null || u2.focus());
-  }, computed(() => e$12.value === 0)), provide(H, f2), c(computed(() => u(e$12.value, { [0]: l.Open, [1]: l.Closed }))), () => {
-    let { name: a$12, modelValue: n2, disabled: u2, ...c2 } = o$12, y2 = { open: e$12.value === 0, disabled: u2, value: w$1.value };
-    return h$1(Fragment$1, [...a$12 != null && w$1.value != null ? e({ [a$12]: w$1.value }).map(([T, A]) => h$1(f$1, V$1({ features: a.Hidden, key: T, as: "input", type: "hidden", hidden: true, readOnly: true, name: T, value: A }))) : [], P({ ourProps: {}, theirProps: { ...l$1, ...w(c2, ["defaultValue", "onUpdate:modelValue", "horizontal", "multiple", "by"]) }, slot: y2, slots: m2, attrs: l$1, name: "Listbox" })]);
+    f2.closeListbox(), h(n2, F$2.Loose) || (a2.preventDefault(), (u2 = o(s2)) == null || u2.focus());
+  }, computed(() => e$12.value === 0)), provide(H, f2), c(computed(() => u(e$12.value, { [0]: l$1.Open, [1]: l$1.Closed }))), () => {
+    let { name: a$12, modelValue: n2, disabled: u2, ...c2 } = o$12, y2 = { open: e$12.value === 0, disabled: u2, value: w2.value };
+    return h$1(Fragment, [...a$12 != null && w2.value != null ? e({ [a$12]: w2.value }).map(([T, A]) => h$1(f$1, V$1({ features: a.Hidden, key: T, as: "input", type: "hidden", hidden: true, readOnly: true, name: T, value: A }))) : [], P({ ourProps: {}, theirProps: { ...l2, ...w$1(c2, ["defaultValue", "onUpdate:modelValue", "horizontal", "multiple", "by"]) }, slot: y2, slots: m2, attrs: l2, name: "Listbox" })]);
   };
 } }), Pe = defineComponent({ name: "ListboxLabel", props: { as: { type: [Object, String], default: "label" } }, setup(o$12, { attrs: m2, slots: l2 }) {
-  let L = V("ListboxLabel"), e2 = `headlessui-listbox-label-${t()}`;
+  let L2 = V("ListboxLabel"), e2 = `headlessui-listbox-label-${t()}`;
   function p2() {
     var s2;
-    (s2 = o(L.buttonRef)) == null || s2.focus({ preventScroll: true });
+    (s2 = o(L2.buttonRef)) == null || s2.focus({ preventScroll: true });
   }
   return () => {
-    let s2 = { open: L.listboxState.value === 0, disabled: L.disabled.value }, O2 = { id: e2, ref: L.labelRef, onClick: p2 };
+    let s2 = { open: L2.listboxState.value === 0, disabled: L2.disabled.value }, O2 = { id: e2, ref: L2.labelRef, onClick: p2 };
     return P({ ourProps: O2, theirProps: o$12, slot: s2, attrs: m2, slots: l2, name: "ListboxLabel" });
   };
-} }), Ie = defineComponent({ name: "ListboxButton", props: { as: { type: [Object, String], default: "button" } }, setup(o$2, { attrs: m2, slots: l2, expose: L }) {
+} }), Ie = defineComponent({ name: "ListboxButton", props: { as: { type: [Object, String], default: "button" } }, setup(o$2, { attrs: m2, slots: l2, expose: L2 }) {
   let e2 = V("ListboxButton"), p2 = `headlessui-listbox-button-${t()}`;
-  L({ el: e2.buttonRef, $el: e2.buttonRef });
+  L2({ el: e2.buttonRef, $el: e2.buttonRef });
   function s2(t2) {
     switch (t2.key) {
       case o$1.Space:
@@ -5470,7 +2407,7 @@ let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) =
     e2.disabled.value || (e2.listboxState.value === 0 ? (e2.closeListbox(), nextTick(() => {
       var i;
       return (i = o(e2.buttonRef)) == null ? void 0 : i.focus({ preventScroll: true });
-    })) : (t2.preventDefault(), e2.openListbox(), fe(() => {
+    })) : (t2.preventDefault(), e2.openListbox(), fe$1(() => {
       var i;
       return (i = o(e2.optionsRef)) == null ? void 0 : i.focus({ preventScroll: true });
     })));
@@ -5481,9 +2418,9 @@ let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) =
     let t2 = { open: e2.listboxState.value === 0, disabled: e2.disabled.value, value: e2.value.value }, i = { ref: e2.buttonRef, id: p2, type: S.value, "aria-haspopup": true, "aria-controls": (k2 = o(e2.optionsRef)) == null ? void 0 : k2.id, "aria-expanded": e2.disabled.value ? void 0 : e2.listboxState.value === 0, "aria-labelledby": e2.labelRef.value ? [(h2 = o(e2.labelRef)) == null ? void 0 : h2.id, p2].join(" ") : void 0, disabled: e2.disabled.value === true ? true : void 0, onKeydown: s2, onKeyup: O2, onClick: d2 };
     return P({ ourProps: i, theirProps: o$2, slot: t2, attrs: m2, slots: l2, name: "ListboxButton" });
   };
-} }), Ve = defineComponent({ name: "ListboxOptions", props: { as: { type: [Object, String], default: "ul" }, static: { type: Boolean, default: false }, unmount: { type: Boolean, default: true } }, setup(o$2, { attrs: m2, slots: l$1, expose: L }) {
+} }), Ve = defineComponent({ name: "ListboxOptions", props: { as: { type: [Object, String], default: "ul" }, static: { type: Boolean, default: false }, unmount: { type: Boolean, default: true } }, setup(o$2, { attrs: m2, slots: l2, expose: L2 }) {
   let e2 = V("ListboxOptions"), p$12 = `headlessui-listbox-options-${t()}`, s2 = ref(null);
-  L({ el: e2.optionsRef, $el: e2.optionsRef });
+  L2({ el: e2.optionsRef, $el: e2.optionsRef });
   function O2(t2) {
     switch (s2.value && clearTimeout(s2.value), t2.key) {
       case o$1.Space:
@@ -5523,15 +2460,15 @@ let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) =
         break;
     }
   }
-  let d2 = p(), S = computed(() => d2 !== null ? d2.value === l.Open : e2.listboxState.value === 0);
+  let d2 = p(), S = computed(() => d2 !== null ? d2.value === l$1.Open : e2.listboxState.value === 0);
   return () => {
     var h2, w2, r2, f2;
     let t2 = { open: e2.listboxState.value === 0 }, i = { "aria-activedescendant": e2.activeOptionIndex.value === null || (h2 = e2.options.value[e2.activeOptionIndex.value]) == null ? void 0 : h2.id, "aria-multiselectable": e2.mode.value === 1 ? true : void 0, "aria-labelledby": (f2 = (w2 = o(e2.labelRef)) == null ? void 0 : w2.id) != null ? f2 : (r2 = o(e2.buttonRef)) == null ? void 0 : r2.id, "aria-orientation": e2.orientation.value, id: p$12, onKeydown: O2, role: "listbox", tabIndex: 0, ref: e2.optionsRef };
-    return P({ ourProps: i, theirProps: o$2, slot: t2, attrs: m2, slots: l$1, features: R.RenderStrategy | R.Static, visible: S.value, name: "ListboxOptions" });
+    return P({ ourProps: i, theirProps: o$2, slot: t2, attrs: m2, slots: l2, features: R.RenderStrategy | R.Static, visible: S.value, name: "ListboxOptions" });
   };
-} }), Ae = defineComponent({ name: "ListboxOption", props: { as: { type: [Object, String], default: "li" }, value: { type: [Object, String, Number, Boolean] }, disabled: { type: Boolean, default: false } }, setup(o$12, { slots: m2, attrs: l2, expose: L }) {
+} }), Ae = defineComponent({ name: "ListboxOption", props: { as: { type: [Object, String], default: "li" }, value: { type: [Object, String, Number, Boolean] }, disabled: { type: Boolean, default: false } }, setup(o$12, { slots: m2, attrs: l2, expose: L2 }) {
   let e2 = V("ListboxOption"), p2 = `headlessui-listbox-option-${t()}`, s2 = ref(null);
-  L({ el: s2, $el: s2 });
+  L2({ el: s2, $el: s2 });
   let O2 = computed(() => e2.activeOptionIndex.value !== null ? e2.options.value[e2.activeOptionIndex.value].id === p2 : false), d2 = computed(() => u(e2.mode.value, { [0]: () => e2.compare(toRaw(e2.value.value), toRaw(o$12.value)), [1]: () => toRaw(e2.value.value).some((r2) => e2.compare(toRaw(r2), toRaw(o$12.value))) })), S = computed(() => u(e2.mode.value, { [1]: () => {
     var f2;
     let r2 = toRaw(e2.value.value);
@@ -5571,29 +2508,165 @@ let Me = defineComponent({ name: "Listbox", emits: { "update:modelValue": (o2) =
   function h2() {
     o$12.disabled || O2.value || e2.goToOption(a$1.Specific, p2, 0);
   }
-  function w$1() {
+  function w2() {
     o$12.disabled || !O2.value || e2.goToOption(a$1.Nothing);
   }
   return () => {
-    let { disabled: r2 } = o$12, f2 = { active: O2.value, selected: d2.value, disabled: r2 }, a2 = { id: p2, ref: s2, role: "option", tabIndex: r2 === true ? void 0 : -1, "aria-disabled": r2 === true ? true : void 0, "aria-selected": d2.value, disabled: void 0, onClick: i, onFocus: k2, onPointermove: h2, onMousemove: h2, onPointerleave: w$1, onMouseleave: w$1 };
-    return P({ ourProps: a2, theirProps: w(o$12, ["value", "disabled"]), slot: f2, attrs: l2, slots: m2, name: "ListboxOption" });
+    let { disabled: r2 } = o$12, f2 = { active: O2.value, selected: d2.value, disabled: r2 }, a2 = { id: p2, ref: s2, role: "option", tabIndex: r2 === true ? void 0 : -1, "aria-disabled": r2 === true ? true : void 0, "aria-selected": d2.value, disabled: void 0, onClick: i, onFocus: k2, onPointermove: h2, onMousemove: h2, onPointerleave: w2, onMouseleave: w2 };
+    return P({ ourProps: a2, theirProps: w$1(o$12, ["value", "disabled"]), slot: f2, attrs: l2, slots: m2, name: "ListboxOption" });
+  };
+} });
+function l(r2) {
+  let e2 = { called: false };
+  return (...t2) => {
+    if (!e2.called)
+      return e2.called = true, r2(...t2);
+  };
+}
+function m(e2, ...t2) {
+  e2 && t2.length > 0 && e2.classList.add(...t2);
+}
+function d$1(e2, ...t2) {
+  e2 && t2.length > 0 && e2.classList.remove(...t2);
+}
+var g = ((i) => (i.Finished = "finished", i.Cancelled = "cancelled", i))(g || {});
+function F$1(e2, t2) {
+  let i = s();
+  if (!e2)
+    return i.dispose;
+  let { transitionDuration: n2, transitionDelay: a2 } = getComputedStyle(e2), [l2, s$12] = [n2, a2].map((o2) => {
+    let [u2 = 0] = o2.split(",").filter(Boolean).map((r2) => r2.includes("ms") ? parseFloat(r2) : parseFloat(r2) * 1e3).sort((r2, c2) => c2 - r2);
+    return u2;
+  });
+  return l2 !== 0 ? i.setTimeout(() => t2("finished"), l2 + s$12) : t2("finished"), i.add(() => t2("cancelled")), i.dispose;
+}
+function L(e2, t2, i, n2, a2, l$12) {
+  let s$12 = s(), o2 = l$12 !== void 0 ? l(l$12) : () => {
+  };
+  return d$1(e2, ...a2), m(e2, ...t2, ...i), s$12.nextFrame(() => {
+    d$1(e2, ...i), m(e2, ...n2), s$12.add(F$1(e2, (u2) => (d$1(e2, ...n2, ...t2), m(e2, ...a2), o2(u2))));
+  }), s$12.add(() => d$1(e2, ...t2, ...i, ...n2, ...a2)), s$12.add(() => o2("cancelled")), s$12.dispose;
+}
+function d(e2 = "") {
+  return e2.split(" ").filter((t2) => t2.trim().length > 1);
+}
+let B = Symbol("TransitionContext");
+var ae = ((a2) => (a2.Visible = "visible", a2.Hidden = "hidden", a2))(ae || {});
+function le() {
+  return inject(B, null) !== null;
+}
+function ie() {
+  let e2 = inject(B, null);
+  if (e2 === null)
+    throw new Error("A <TransitionChild /> is used but it is missing a parent <TransitionRoot />.");
+  return e2;
+}
+function se() {
+  let e2 = inject(F, null);
+  if (e2 === null)
+    throw new Error("A <TransitionChild /> is used but it is missing a parent <TransitionRoot />.");
+  return e2;
+}
+let F = Symbol("NestingContext");
+function w(e2) {
+  return "children" in e2 ? w(e2.children) : e2.value.filter(({ state: t2 }) => t2 === "visible").length > 0;
+}
+function K(e2) {
+  let t2 = ref([]), a2 = ref(false);
+  onMounted(() => a2.value = true), onUnmounted(() => a2.value = false);
+  function s2(r2, n2 = O$1.Hidden) {
+    let l2 = t2.value.findIndex(({ id: i }) => i === r2);
+    l2 !== -1 && (u(n2, { [O$1.Unmount]() {
+      t2.value.splice(l2, 1);
+    }, [O$1.Hidden]() {
+      t2.value[l2].state = "hidden";
+    } }), !w(t2) && a2.value && (e2 == null || e2()));
+  }
+  function v(r2) {
+    let n2 = t2.value.find(({ id: l2 }) => l2 === r2);
+    return n2 ? n2.state !== "visible" && (n2.state = "visible") : t2.value.push({ id: r2, state: "visible" }), () => s2(r2, O$1.Unmount);
+  }
+  return { children: t2, register: v, unregister: s2 };
+}
+let _ = R.RenderStrategy, oe = defineComponent({ props: { as: { type: [Object, String], default: "div" }, show: { type: [Boolean], default: null }, unmount: { type: [Boolean], default: true }, appear: { type: [Boolean], default: false }, enter: { type: [String], default: "" }, enterFrom: { type: [String], default: "" }, enterTo: { type: [String], default: "" }, entered: { type: [String], default: "" }, leave: { type: [String], default: "" }, leaveFrom: { type: [String], default: "" }, leaveTo: { type: [String], default: "" } }, emits: { beforeEnter: () => true, afterEnter: () => true, beforeLeave: () => true, afterLeave: () => true }, setup(e2, { emit: t$1, attrs: a2, slots: s2, expose: v }) {
+  if (!le() && f$2())
+    return () => h$1(fe, { ...e2, onBeforeEnter: () => t$1("beforeEnter"), onAfterEnter: () => t$1("afterEnter"), onBeforeLeave: () => t$1("beforeLeave"), onAfterLeave: () => t$1("afterLeave") }, s2);
+  let r2 = ref(null), n2 = ref("visible"), l2 = computed(() => e2.unmount ? O$1.Unmount : O$1.Hidden);
+  v({ el: r2, $el: r2 });
+  let { show: i, appear: x2 } = ie(), { register: g$12, unregister: p2 } = se(), R2 = { value: true }, m2 = t(), S = { value: false }, N2 = K(() => {
+    S.value || (n2.value = "hidden", p2(m2), t$1("afterLeave"));
+  });
+  onMounted(() => {
+    let o2 = g$12(m2);
+    onUnmounted(o2);
+  }), watchEffect(() => {
+    if (l2.value === O$1.Hidden && !!m2) {
+      if (i && n2.value !== "visible") {
+        n2.value = "visible";
+        return;
+      }
+      u(n2.value, { ["hidden"]: () => p2(m2), ["visible"]: () => g$12(m2) });
+    }
+  });
+  let k2 = d(e2.enter), $ = d(e2.enterFrom), q = d(e2.enterTo), O2 = d(e2.entered), z = d(e2.leave), G = d(e2.leaveFrom), J = d(e2.leaveTo);
+  onMounted(() => {
+    watchEffect(() => {
+      if (n2.value === "visible") {
+        let o$12 = o(r2);
+        if (o$12 instanceof Comment && o$12.data === "")
+          throw new Error("Did you forget to passthrough the `ref` to the actual DOM node?");
+      }
+    });
+  });
+  function Q(o$12) {
+    let c2 = R2.value && !x2.value, u2 = o(r2);
+    !u2 || !(u2 instanceof HTMLElement) || c2 || (S.value = true, i.value && t$1("beforeEnter"), i.value || t$1("beforeLeave"), o$12(i.value ? L(u2, k2, $, q, O2, (C) => {
+      S.value = false, C === g.Finished && t$1("afterEnter");
+    }) : L(u2, z, G, J, O2, (C) => {
+      S.value = false, C === g.Finished && (w(N2) || (n2.value = "hidden", p2(m2), t$1("afterLeave")));
+    })));
+  }
+  return onMounted(() => {
+    watch([i], (o2, c2, u2) => {
+      Q(u2), R2.value = false;
+    }, { immediate: true });
+  }), provide(F, N2), c(computed(() => u(n2.value, { ["visible"]: l$1.Open, ["hidden"]: l$1.Closed }))), () => {
+    let { appear: o2, show: c2, enter: u2, enterFrom: C, enterTo: de2, entered: ve, leave: pe, leaveFrom: me, leaveTo: Te, ...W } = e2;
+    return P({ theirProps: W, ourProps: { ref: r2 }, slot: {}, slots: s2, attrs: a2, features: _, visible: n2.value === "visible", name: "TransitionChild" });
+  };
+} }), ue = oe, fe = defineComponent({ inheritAttrs: false, props: { as: { type: [Object, String], default: "div" }, show: { type: [Boolean], default: null }, unmount: { type: [Boolean], default: true }, appear: { type: [Boolean], default: false }, enter: { type: [String], default: "" }, enterFrom: { type: [String], default: "" }, enterTo: { type: [String], default: "" }, entered: { type: [String], default: "" }, leave: { type: [String], default: "" }, leaveFrom: { type: [String], default: "" }, leaveTo: { type: [String], default: "" } }, emits: { beforeEnter: () => true, afterEnter: () => true, beforeLeave: () => true, afterLeave: () => true }, setup(e2, { emit: t2, attrs: a2, slots: s2 }) {
+  let v = p(), r2 = computed(() => e2.show === null && v !== null ? u(v.value, { [l$1.Open]: true, [l$1.Closed]: false }) : e2.show);
+  watchEffect(() => {
+    if (![true, false].includes(r2.value))
+      throw new Error('A <Transition /> is used but it is missing a `:show="true | false"` prop.');
+  });
+  let n2 = ref(r2.value ? "visible" : "hidden"), l2 = K(() => {
+    n2.value = "hidden";
+  }), i = ref(true), x2 = { show: r2, appear: computed(() => e2.appear || !i.value) };
+  return onMounted(() => {
+    watchEffect(() => {
+      i.value = false, r2.value ? n2.value = "visible" : w(l2) || (n2.value = "hidden");
+    });
+  }), provide(F, l2), provide(B, x2), () => {
+    let g2 = w$1(e2, ["show", "appear", "unmount", "onBeforeEnter", "onBeforeLeave", "onAfterEnter", "onAfterLeave"]), p2 = { unmount: e2.unmount };
+    return P({ ourProps: { ...p2, as: "template" }, theirProps: {}, slot: {}, slots: { ...s2, default: () => [h$1(ue, { onBeforeEnter: () => t2("beforeEnter"), onAfterEnter: () => t2("afterEnter"), onBeforeLeave: () => t2("beforeLeave"), onAfterLeave: () => t2("afterLeave"), ...a2, ...p2, ...g2 }, s2.default)] }, attrs: {}, features: _, visible: n2.value === "visible", name: "Transition" });
   };
 } });
 const availableSizes = {
   sm: {
-    name: "\u5C0F",
+    name: "小",
     iso: "14px"
   },
   md: {
-    name: "\u4E2D",
+    name: "中",
     iso: "16px"
   },
   lg: {
-    name: "\u5927",
+    name: "大",
     iso: "18px"
   },
   xl: {
-    name: "\u8D85\u5927",
+    name: "超大",
     iso: "20px"
   }
 };
@@ -5617,7 +2690,7 @@ function sizeController() {
     init
   };
 }
-const _sfc_main$5 = /* @__PURE__ */ defineComponent({
+const _sfc_main$p = /* @__PURE__ */ defineComponent({
   __name: "SizeChange",
   __ssrInlineRender: true,
   props: {
@@ -5640,10 +2713,10 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
           as: "div",
           class: "relative flex items-center"
         }, {
-          default: withCtx((_, _push2, _parent2, _scopeId) => {
+          default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(unref(Pe), { class: "sr-only" }, {
-                default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+                default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
                     _push3(` Theme `);
                   } else {
@@ -5657,9 +2730,9 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
               _push2(ssrRenderComponent(unref(Ie), {
                 type: "button",
                 class: "flex w-7 h-7 items-center justify-center",
-                title: "\u66F4\u6539\u6587\u5B57\u5927\u5C0F"
+                title: "更改文字大小"
               }, {
-                default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+                default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
                     _push3(`<span class="flex items-center justify-center"${_scopeId2}>`);
                     _push3(ssrRenderComponent(_component_UnoIcon, { class: "i-octicon-text-size" }, null, _parent3, _scopeId2));
@@ -5675,7 +2748,7 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
                 _: 1
               }, _parent2, _scopeId));
               _push2(ssrRenderComponent(unref(Ve), { class: "absolute mt-3 ring-1 ring-black ring-opacity-5 top-full right-0 z-20 mt-2 w-40 overflow-hidden rounded-sm bg-white text-sm font-semibold text-gray-700 shadow-md shadow-gray-300/[0.2] outline-none dark:bg-gray-800 dark:text-white dark:shadow-gray-500/[0.2] dark:ring-0" }, {
-                default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+                default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
                     _push3(`<!--[-->`);
                     ssrRenderList(unref(availableSizes), (size) => {
@@ -5705,7 +2778,7 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
                     _push3(`<!--]-->`);
                   } else {
                     return [
-                      (openBlock(true), createBlock(Fragment$1, null, renderList(unref(availableSizes), (size) => {
+                      (openBlock(true), createBlock(Fragment, null, renderList(unref(availableSizes), (size) => {
                         return openBlock(), createBlock(unref(Ae), {
                           key: size.iso,
                           value: size.iso,
@@ -5739,7 +2812,7 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
                 createVNode(unref(Ie), {
                   type: "button",
                   class: "flex w-7 h-7 items-center justify-center",
-                  title: "\u66F4\u6539\u6587\u5B57\u5927\u5C0F"
+                  title: "更改文字大小"
                 }, {
                   default: withCtx(() => [
                     createVNode("span", { class: "flex items-center justify-center" }, [
@@ -5750,7 +2823,7 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
                 }),
                 createVNode(unref(Ve), { class: "absolute mt-3 ring-1 ring-black ring-opacity-5 top-full right-0 z-20 mt-2 w-40 overflow-hidden rounded-sm bg-white text-sm font-semibold text-gray-700 shadow-md shadow-gray-300/[0.2] outline-none dark:bg-gray-800 dark:text-white dark:shadow-gray-500/[0.2] dark:ring-0" }, {
                   default: withCtx(() => [
-                    (openBlock(true), createBlock(Fragment$1, null, renderList(unref(availableSizes), (size) => {
+                    (openBlock(true), createBlock(Fragment, null, renderList(unref(availableSizes), (size) => {
                       return openBlock(), createBlock(unref(Ae), {
                         key: size.iso,
                         value: size.iso,
@@ -5792,16 +2865,16 @@ const _sfc_main$5 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$5 = _sfc_main$5.setup;
-_sfc_main$5.setup = (props, ctx) => {
+const _sfc_setup$p = _sfc_main$p.setup;
+_sfc_main$p.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/tem/SizeChange.vue");
-  return _sfc_setup$5 ? _sfc_setup$5(props, ctx) : void 0;
+  return _sfc_setup$p ? _sfc_setup$p(props, ctx) : void 0;
 };
 const useColorMode = () => {
   return useState("color-mode").value;
 };
-const _sfc_main$4 = /* @__PURE__ */ defineComponent({
+const _sfc_main$o = /* @__PURE__ */ defineComponent({
   __name: "ThemeChange",
   __ssrInlineRender: true,
   setup(__props) {
@@ -5810,19 +2883,25 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
       {
         id: 1,
         name: "dark",
-        text: "\u6DF1\u8272\u6A21\u5F0F",
+        text: "深色模式",
         icon: "i-ph-moon-stars-duotone"
       },
       {
         id: 2,
         name: "light",
-        text: "\u6DFA\u8272\u6A21\u5F0F",
+        text: "淺色模式",
         icon: "i-ph-sun-dim-duotone"
       },
+      // {
+      //   id: 3,
+      //   name: 'sepia',
+      //   text: '護眼模式',
+      //   icon: 'i-ph-coffee',
+      // },
       {
         id: 4,
         name: "system",
-        text: "\u6839\u64DA\u7CFB\u7D71\u8A2D\u5B9A",
+        text: "根據系統設定",
         icon: "i-ph-laptop-duotone"
       }
     ]);
@@ -5835,10 +2914,10 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
         as: "div",
         class: "relative flex items-center"
       }, {
-        default: withCtx((_, _push2, _parent2, _scopeId) => {
+        default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
             _push2(ssrRenderComponent(unref(Pe), { class: "sr-only" }, {
-              default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+              default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(` Theme `);
                 } else {
@@ -5853,7 +2932,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
               type: "button",
               title: "Change Color"
             }, {
-              default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+              default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(`<div class="flex w-7 h-7 items-center justify-center"${_scopeId2}>`);
                   _push3(ssrRenderComponent(_component_UnoIcon, { class: "i-ph-palette-duotone text-lg dark:text-white" }, null, _parent3, _scopeId2));
@@ -5869,10 +2948,10 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
               _: 1
             }, _parent2, _scopeId));
             _push2(ssrRenderComponent(unref(Ve), { class: "absolute mt-3 ring-1 ring-black ring-opacity-5 top-full right-0 z-20 mt-2 w-40 overflow-hidden rounded-sm bg-white text-sm font-semibold text-gray-700 shadow-md shadow-gray-300/[0.2] outline-none dark:bg-gray-800 dark:text-white dark:shadow-gray-500/[0.2] dark:ring-0" }, {
-              default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+              default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(`<!--[-->`);
-                  ssrRenderList(availableColor.value, (color) => {
+                  ssrRenderList(unref(availableColor), (color) => {
                     _push3(ssrRenderComponent(unref(Ae), {
                       key: color.id,
                       value: color.name,
@@ -5902,7 +2981,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
                   _push3(`<!--]-->`);
                 } else {
                   return [
-                    (openBlock(true), createBlock(Fragment$1, null, renderList(availableColor.value, (color) => {
+                    (openBlock(true), createBlock(Fragment, null, renderList(unref(availableColor), (color) => {
                       return openBlock(), createBlock(unref(Ae), {
                         key: color.id,
                         value: color.name,
@@ -5945,7 +3024,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
               }),
               createVNode(unref(Ve), { class: "absolute mt-3 ring-1 ring-black ring-opacity-5 top-full right-0 z-20 mt-2 w-40 overflow-hidden rounded-sm bg-white text-sm font-semibold text-gray-700 shadow-md shadow-gray-300/[0.2] outline-none dark:bg-gray-800 dark:text-white dark:shadow-gray-500/[0.2] dark:ring-0" }, {
                 default: withCtx(() => [
-                  (openBlock(true), createBlock(Fragment$1, null, renderList(availableColor.value, (color) => {
+                  (openBlock(true), createBlock(Fragment, null, renderList(unref(availableColor), (color) => {
                     return openBlock(), createBlock(unref(Ae), {
                       key: color.id,
                       value: color.name,
@@ -5974,18 +3053,26 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$4 = _sfc_main$4.setup;
-_sfc_main$4.setup = (props, ctx) => {
+const _sfc_setup$o = _sfc_main$o.setup;
+_sfc_main$o.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/tem/ThemeChange.vue");
-  return _sfc_setup$4 ? _sfc_setup$4(props, ctx) : void 0;
+  return _sfc_setup$o ? _sfc_setup$o(props, ctx) : void 0;
 };
-const _imports_0$1 = "" + globalThis.__publicAssetsURL("user.png");
+const _imports_0$1 = "" + __publicAssetsURL("user.png");
 const storage = {
+  // 后缀标识
   suffix: "_deadtime",
+  /**
+   * 获取
+   * @param {string} key 關鍵字
+   */
   get(key) {
     return store.get(key);
   },
+  /**
+   * 获取全部
+   */
   info() {
     const d2 = {};
     store.each((value, key) => {
@@ -5993,28 +3080,53 @@ const storage = {
     });
     return d2;
   },
+  /**
+   * 设置
+   * @param {string} key 關鍵字
+   * @param {*} value 值
+   * @param {number} expires 过期时间
+   */
   set(key, value, expires) {
     store.set(key, value);
     if (expires) {
       store.set(
         `${key}${this.suffix}`,
-        Date.parse(String(new Date())) + expires * 1e3
+        Date.parse(String(/* @__PURE__ */ new Date())) + expires * 1e3
       );
     }
   },
+  /**
+   * 是否过期
+   * @param {string} key 關鍵字
+   */
   isExpired(key) {
-    return (this.getExpiration(key) || 0) - Date.parse(String(new Date())) <= 2e3;
+    return (this.getExpiration(key) || 0) - Date.parse(String(/* @__PURE__ */ new Date())) <= 2e3;
   },
+  /**
+   * 获取到期时间
+   * @param {string} key 關鍵字
+   */
   getExpiration(key) {
     return this.get(key + this.suffix);
   },
+  /**
+   * 移除
+   * @param {string} key 關鍵字
+   */
   remove(key) {
     store.remove(key);
     this.removeExpiration(key);
   },
+  /**
+   * 移除到期时间
+   * @param {string} key 關鍵字
+   */
   removeExpiration(key) {
     store.remove(key + this.suffix);
   },
+  /**
+   * 清理
+   */
   clearAll() {
     store.clearAll();
   }
@@ -6023,12 +3135,11 @@ const fetchConfig = {
   baseURL: "/api"
 };
 function useGetFetchOptions(options = {}) {
-  var _a2, _b2, _c2, _d2, _e2;
-  options.baseURL = (_a2 = options.baseURL) != null ? _a2 : fetchConfig.baseURL;
-  options.headers = (_b2 = options.headers) != null ? _b2 : {};
-  options.initialCache = (_c2 = options.initialCache) != null ? _c2 : false;
-  options.lazy = (_d2 = options.lazy) != null ? _d2 : false;
-  options.async = (_e2 = options.async) != null ? _e2 : false;
+  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
+  options.headers = options.headers ?? {};
+  options.initialCache = options.initialCache ?? false;
+  options.lazy = options.lazy ?? false;
+  options.async = options.async ?? false;
   options.body = { ...options.body, server: true };
   if (options.multipart) {
     options.headers = {
@@ -6071,8 +3182,8 @@ async function useHttp(key, url, options = {}) {
         error
       };
     }).catch((err) => {
-      var _a2;
-      const msg = (_a2 = err == null ? void 0 : err.data) == null ? void 0 : _a2.data;
+      var _a;
+      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
       error.value = msg;
       return {
         data,
@@ -6085,6 +3196,7 @@ async function useHttp(key, url, options = {}) {
     onRequest({ options: options2 }) {
       return useGetFetchOptions(options2);
     },
+    // 相當於響應攔截器
     transform: (res2) => {
       return res2.data;
     }
@@ -6099,16 +3211,16 @@ async function useHttpFetch(url, options = {}) {
   options = useGetFetchOptions(options);
   const {
     error,
-    code: code2,
+    code,
     message = "",
     data = null
   } = await $fetch(fetchConfig.baseURL + url, { ...options });
-  if (error && code2 === 1005) {
+  if (error && code === 1005) {
     const router = useRouter();
     router.push("/");
   }
   return {
-    code: code2,
+    code,
     error,
     message,
     data
@@ -6124,7 +3236,7 @@ const idCardRegex = /^[A-Z]+[0-9]{9}$/;
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 const htmlTag = /<[^>]*>/g;
 function getTodayExpired() {
-  const current = new Date();
+  const current = /* @__PURE__ */ new Date();
   const full = 24 * 60 * 60;
   const hours = current.getHours();
   const minutes = current.getMinutes();
@@ -6199,9 +3311,9 @@ const useUserStore = defineStore("user", () => {
   }
   const info = ref(null);
   async function get() {
-    const { code: code2, error, data } = await useHttpFetchPost("/user/person");
+    const { code, error, data } = await useHttpFetchPost("/user/person");
     if (error) {
-      if (code2 === 1005) {
+      if (code === 1005) {
         const storeRefreshToken = storage.get("refreshToken");
         await refreshToken(storeRefreshToken);
       } else {
@@ -6229,7 +3341,7 @@ const useUserStore = defineStore("user", () => {
     if (JSON.stringify(form) === JSON.stringify(updatePick)) {
       return $alert.value = {
         type: "info",
-        text: "\u672A\u4FEE\u6539\u500B\u4EBA\u8CC7\u6599",
+        text: "未修改個人資料",
         center: true
       };
     }
@@ -6254,7 +3366,7 @@ const useUserStore = defineStore("user", () => {
       gender: form.gender,
       intro: form.intro
     });
-    $alert.value = { type: "success", text: "\u500B\u4EBA\u8CC7\u6599\u5DF2\u66F4\u65B0", center: true };
+    $alert.value = { type: "success", text: "個人資料已更新", center: true };
   }
   function updateField(obj) {
     for (const key in obj)
@@ -6281,7 +3393,7 @@ const useUserStore = defineStore("user", () => {
       await get();
       const tip = useTipStore();
       await tip.get();
-      $alert.value = { type: "success", title: "\u767B\u5165\u6210\u529F" };
+      $alert.value = { type: "success", title: "登入成功" };
       if (loginForm.rememberMe)
         storage.set("loginData", loginForm);
       else
@@ -6293,7 +3405,7 @@ const useUserStore = defineStore("user", () => {
     if (!passwordRegex.test(registerForm.password)) {
       return $alert.value = {
         type: "error",
-        text: "\u5BC6\u78BC\u9808\u70BA\u82F1\u6578\u6DF7\u54088\u4F4D\u6578\u4EE5\u4E0A",
+        text: "密碼須為英數混合8位數以上",
         center: true
       };
     }
@@ -6316,7 +3428,9 @@ const useUserStore = defineStore("user", () => {
       $auth.value = false;
       await setToken(data);
       await get();
-      $alert.value = { type: "success", title: "\u767B\u5165\u6210\u529F" };
+      const tip = useTipStore();
+      await tip.get();
+      $alert.value = { type: "success", title: "登入成功" };
       if (data.rememberMe)
         storage.set("loginData", data);
       else
@@ -6326,7 +3440,7 @@ const useUserStore = defineStore("user", () => {
       const $alert2 = useState("alert");
       $alert2.value = {
         type: "error",
-        title: "\u9A57\u8B49\u932F\u8AA4",
+        title: "驗證錯誤",
         text: message,
         center: true
       };
@@ -6338,7 +3452,7 @@ const useUserStore = defineStore("user", () => {
     if (!passwordRegex.test(forgotForm.password)) {
       return $alert.value = {
         type: "error",
-        text: "\u5BC6\u78BC\u9808\u70BA\u82F1\u6578\u6DF7\u54088\u4F4D\u6578\u4EE5\u4E0A",
+        text: "密碼須為英數混合8位數以上",
         center: true
       };
     }
@@ -6357,7 +3471,7 @@ const useUserStore = defineStore("user", () => {
       $auth.value = false;
       await setToken(data);
       await get();
-      $alert.value = { type: "success", title: "\u4FEE\u6539\u6210\u529F\uFF0C\u5DF2\u767B\u5165" };
+      $alert.value = { type: "success", title: "修改成功，已登入" };
       if (data.rememberMe)
         storage.set("loginData", forgotForm);
       else
@@ -6367,7 +3481,7 @@ const useUserStore = defineStore("user", () => {
       const $alert2 = useState("alert");
       $alert2.value = {
         type: "error",
-        title: "\u9A57\u8B49\u932F\u8AA4",
+        title: "驗證錯誤",
         text: message,
         center: true
       };
@@ -6379,13 +3493,12 @@ const useUserStore = defineStore("user", () => {
     await useHttpFetchPost("/user/logout");
     $alert.value = {
       type: "success",
-      title: "\u767B\u51FA\u6210\u529F"
+      title: "登出成功"
     };
     clear();
   }
   async function clear() {
     return await new Promise((resolve) => {
-      var _a2;
       storage.remove("userInfo");
       storage.remove("token");
       storage.remove("tip");
@@ -6397,7 +3510,7 @@ const useUserStore = defineStore("user", () => {
       token.value = "";
       const route = useRoute();
       const router = useRouter();
-      const middleware = (_a2 = route.meta.middleware) != null ? _a2 : [];
+      const middleware = route.meta.middleware ?? [];
       if (middleware && middleware.includes("auth"))
         router.push("/");
       resolve("");
@@ -6424,11 +3537,13 @@ function useBaseStore() {
   const user = useUserStore();
   const tip = useTipStore();
   return {
+    // app,
+    // process,
     user,
     tip
   };
 }
-const _sfc_main$3 = /* @__PURE__ */ defineComponent({
+const _sfc_main$n = /* @__PURE__ */ defineComponent({
   __name: "User",
   __ssrInlineRender: true,
   props: {
@@ -6444,11 +3559,11 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
     const { info, isLogin } = storeToRefs(user);
     const showAuth = useState("showAuth", () => false);
     const userMenu = ref([
-      { id: 1, icon: "i-uil-user", label: "\u500B\u4EBA\u8CC7\u6599", path: "/my/account" },
-      { id: 2, icon: "i-uil-file-alt", label: "\u700F\u89BD\u7D00\u9304", path: "/my/history" },
-      { id: 3, icon: "i-ion-heart-outline", label: "\u6211\u7684\u6536\u85CF", path: "/my/collections" },
-      { id: 4, icon: "i-uil-lightbulb-alt", label: "\u5C0F\u77E5\u8B58", path: "/my/tips" },
-      { id: 5, icon: "i-uil-sign-out-alt", label: "\u767B\u51FA", action: () => user.logout() }
+      { id: 1, icon: "i-uil-user", label: "個人資料", path: "/my/account" },
+      { id: 2, icon: "i-uil-file-alt", label: "瀏覽紀錄", path: "/my/history" },
+      { id: 3, icon: "i-ion-heart-outline", label: "我的收藏", path: "/my/collections" },
+      { id: 4, icon: "i-uil-lightbulb-alt", label: "小知識", path: "/my/tips" },
+      { id: 5, icon: "i-uil-sign-out-alt", label: "登出", action: () => user.logout() }
     ]);
     const clickNav = (id) => {
       const item = userMenu.value.find((item2) => item2.id === id);
@@ -6469,15 +3584,15 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
           as: "div",
           class: "flex items-center"
         }, {
-          default: withCtx((_, _push2, _parent2, _scopeId) => {
+          default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(unref(Pe), { class: "sr-only" }, {
-                default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+                default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                   if (_push3) {
-                    _push3(` \u7528\u6236 `);
+                    _push3(` 用戶 `);
                   } else {
                     return [
-                      createTextVNode(" \u7528\u6236 ")
+                      createTextVNode(" 用戶 ")
                     ];
                   }
                 }),
@@ -6486,19 +3601,19 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
               _push2(ssrRenderComponent(unref(Ie), {
                 class: "block",
                 type: "button",
-                title: "\u7528\u6236\u4E2D\u5FC3"
+                title: "用戶中心"
               }, {
-                default: withCtx((_2, _push3, _parent3, _scopeId2) => {
-                  var _a2, _b2, _c2, _d2;
+                default: withCtx((_22, _push3, _parent3, _scopeId2) => {
+                  var _a, _b, _c, _d;
                   if (_push3) {
                     if (unref(isLogin)) {
-                      _push3(`<div class="flex items-center justify-center cursor-pointer"${_scopeId2}><img class="w-6 h-6 rounded-full"${ssrRenderAttr("src", _imports_0$1)}${_scopeId2}><span class="ml-2 text-sm font-semibold"${_scopeId2}>${ssrInterpolate(`${((_a2 = unref(info)) == null ? void 0 : _a2.firstName) || ""}${((_b2 = unref(info)) == null ? void 0 : _b2.lastName) || ""}`)}</span>`);
+                      _push3(`<div class="flex items-center justify-center cursor-pointer"${_scopeId2}><img class="w-6 h-6 rounded-full"${ssrRenderAttr("src", _imports_0$1)}${_scopeId2}><span class="ml-2 text-sm font-semibold"${_scopeId2}>${ssrInterpolate(`${((_a = unref(info)) == null ? void 0 : _a.firstName) || ""}${((_b = unref(info)) == null ? void 0 : _b.lastName) || ""}`)}</span>`);
                       _push3(ssrRenderComponent(_component_UnoIcon, { class: "i-uil-angle-down" }, null, _parent3, _scopeId2));
                       _push3(`</div>`);
                     } else {
                       _push3(`<div class="flex items-center justify-center h-full cursor-pointer"${_scopeId2}>`);
                       _push3(ssrRenderComponent(_component_UnoIcon, { class: "i-ph-user-circle w-6 h-6" }, null, _parent3, _scopeId2));
-                      _push3(`<span class="ml-2 text-sm font-semibold"${_scopeId2}>\u672A\u767B\u5165</span>`);
+                      _push3(`<span class="ml-2 text-sm font-semibold"${_scopeId2}>未登入</span>`);
                       _push3(ssrRenderComponent(_component_UnoIcon, { class: "i-uil-angle-down" }, null, _parent3, _scopeId2));
                       _push3(`</div>`);
                     }
@@ -6512,7 +3627,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
                           class: "w-6 h-6 rounded-full",
                           src: _imports_0$1
                         }),
-                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, toDisplayString(`${((_c2 = unref(info)) == null ? void 0 : _c2.firstName) || ""}${((_d2 = unref(info)) == null ? void 0 : _d2.lastName) || ""}`), 1),
+                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, toDisplayString(`${((_c = unref(info)) == null ? void 0 : _c.firstName) || ""}${((_d = unref(info)) == null ? void 0 : _d.lastName) || ""}`), 1),
                         createVNode(_component_UnoIcon, { class: "i-uil-angle-down" })
                       ])) : (openBlock(), createBlock("div", {
                         key: 1,
@@ -6520,7 +3635,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => showAuth.value = true
                       }, [
                         createVNode(_component_UnoIcon, { class: "i-ph-user-circle w-6 h-6" }),
-                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, "\u672A\u767B\u5165"),
+                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, "未登入"),
                         createVNode(_component_UnoIcon, { class: "i-uil-angle-down" })
                       ], 8, ["onClick"]))
                     ];
@@ -6530,10 +3645,10 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
               }, _parent2, _scopeId));
               if (unref(isLogin)) {
                 _push2(ssrRenderComponent(unref(Ve), { class: "absolute ring-1 ring-black mt-3 ring-opacity-5 top-full right-0 z-[999] mt-2 w-32 overflow-hidden rounded-sm bg-white text-sm font-semibold text-gray-700 shadow-md shadow-gray-300/[0.2] outline-none dark:bg-gray-800 dark:text-white dark:shadow-gray-500/[0.2] dark:ring-0" }, {
-                  default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+                  default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                     if (_push3) {
                       _push3(`<!--[-->`);
-                      ssrRenderList(userMenu.value, (menu, index) => {
+                      ssrRenderList(unref(userMenu), (menu, index) => {
                         _push3(ssrRenderComponent(unref(Ae), { key: index }, {
                           default: withCtx((_3, _push4, _parent4, _scopeId3) => {
                             if (_push4) {
@@ -6562,7 +3677,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
                       _push3(`<!--]-->`);
                     } else {
                       return [
-                        (openBlock(true), createBlock(Fragment$1, null, renderList(userMenu.value, (menu, index) => {
+                        (openBlock(true), createBlock(Fragment, null, renderList(unref(userMenu), (menu, index) => {
                           return openBlock(), createBlock(unref(Ae), { key: index }, {
                             default: withCtx(() => [
                               createVNode("div", {
@@ -6590,17 +3705,17 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
               return [
                 createVNode(unref(Pe), { class: "sr-only" }, {
                   default: withCtx(() => [
-                    createTextVNode(" \u7528\u6236 ")
+                    createTextVNode(" 用戶 ")
                   ]),
                   _: 1
                 }),
                 createVNode(unref(Ie), {
                   class: "block",
                   type: "button",
-                  title: "\u7528\u6236\u4E2D\u5FC3"
+                  title: "用戶中心"
                 }, {
                   default: withCtx(() => {
-                    var _a2, _b2;
+                    var _a, _b;
                     return [
                       unref(isLogin) ? (openBlock(), createBlock("div", {
                         key: 0,
@@ -6610,7 +3725,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
                           class: "w-6 h-6 rounded-full",
                           src: _imports_0$1
                         }),
-                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, toDisplayString(`${((_a2 = unref(info)) == null ? void 0 : _a2.firstName) || ""}${((_b2 = unref(info)) == null ? void 0 : _b2.lastName) || ""}`), 1),
+                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, toDisplayString(`${((_a = unref(info)) == null ? void 0 : _a.firstName) || ""}${((_b = unref(info)) == null ? void 0 : _b.lastName) || ""}`), 1),
                         createVNode(_component_UnoIcon, { class: "i-uil-angle-down" })
                       ])) : (openBlock(), createBlock("div", {
                         key: 1,
@@ -6618,7 +3733,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
                         onClick: ($event) => showAuth.value = true
                       }, [
                         createVNode(_component_UnoIcon, { class: "i-ph-user-circle w-6 h-6" }),
-                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, "\u672A\u767B\u5165"),
+                        createVNode("span", { class: "ml-2 text-sm font-semibold" }, "未登入"),
                         createVNode(_component_UnoIcon, { class: "i-uil-angle-down" })
                       ], 8, ["onClick"]))
                     ];
@@ -6630,7 +3745,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
                   class: "absolute ring-1 ring-black mt-3 ring-opacity-5 top-full right-0 z-[999] mt-2 w-32 overflow-hidden rounded-sm bg-white text-sm font-semibold text-gray-700 shadow-md shadow-gray-300/[0.2] outline-none dark:bg-gray-800 dark:text-white dark:shadow-gray-500/[0.2] dark:ring-0"
                 }, {
                   default: withCtx(() => [
-                    (openBlock(true), createBlock(Fragment$1, null, renderList(userMenu.value, (menu, index) => {
+                    (openBlock(true), createBlock(Fragment, null, renderList(unref(userMenu), (menu, index) => {
                       return openBlock(), createBlock(unref(Ae), { key: index }, {
                         default: withCtx(() => [
                           createVNode("div", {
@@ -6661,28 +3776,28 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$3 = _sfc_main$3.setup;
-_sfc_main$3.setup = (props, ctx) => {
+const _sfc_setup$n = _sfc_main$n.setup;
+_sfc_main$n.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/Navbar/User.vue");
-  return _sfc_setup$3 ? _sfc_setup$3(props, ctx) : void 0;
+  return _sfc_setup$n ? _sfc_setup$n(props, ctx) : void 0;
 };
-const _imports_0 = "" + globalThis.__publicAssetsURL("logo.png");
-const _sfc_main$2 = /* @__PURE__ */ defineComponent({
+const _imports_0 = "" + __publicAssetsURL("logo.png");
+const _sfc_main$m = /* @__PURE__ */ defineComponent({
   __name: "Navbar",
   __ssrInlineRender: true,
   setup(__props) {
-    const app2 = useState("app");
+    const app = useState("app");
     const menus = ref([
-      { type: "link", text: "\u65B0\u805E", route: "/" }
+      { type: "link", text: "新聞", route: "/" }
     ]);
     return (_ctx, _push, _parent, _attrs) => {
-      const _component_NuxtLink = __nuxt_component_0$1;
-      const _component_UIAnchor = _sfc_main$8;
-      const _component_UIButton = _sfc_main$7;
-      const _component_TemSizeChange = _sfc_main$5;
-      const _component_TemThemeChange = _sfc_main$4;
-      const _component_LayoutNavbarUser = _sfc_main$3;
+      const _component_NuxtLink = __nuxt_component_0$3;
+      const _component_UIAnchor = _sfc_main$s;
+      const _component_UIButton = _sfc_main$r;
+      const _component_TemSizeChange = _sfc_main$p;
+      const _component_TemThemeChange = _sfc_main$o;
+      const _component_LayoutNavbarUser = _sfc_main$n;
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "h-12" }, _attrs))}><div class="h-12 fixed flex items-center w-screen top-0 left-0 backdrop-filter backdrop-blur top-0 flex-none transition-colors duration-300 z-20 border-b border-gray-900/10 dark:border-gray-50/[0.2] bg-white dark:bg-slate-900/[0.7]"><div class="cma"><div class="lg:px-8 lg:mx-0"><div class="relative flex items-center">`);
       ssrRenderSlot(_ctx.$slots, "title", {}, () => {
         _push(ssrRenderComponent(_component_NuxtLink, {
@@ -6690,9 +3805,9 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
           class: "flex-none mr-3 overflow-hidden font-bold text-gray-900 md:w-auto text-md dark:text-gray-200",
           to: "/"
         }, {
-          default: withCtx((_, _push2, _parent2, _scopeId) => {
+          default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`<span class="sr-only"${_scopeId}>home</span><span class="flex items-center"${_scopeId}><img class="w-18 mr-2"${ssrRenderAttr("src", _imports_0)}${_scopeId}><span class="leading-7 mt-[1px]"${_scopeId}>${ssrInterpolate(unref(app2).name)}</span></span>`);
+              _push2(`<span class="sr-only"${_scopeId}>home</span><span class="flex items-center"${_scopeId}><img class="w-18 mr-2"${ssrRenderAttr("src", _imports_0)}${_scopeId}><span class="leading-7 mt-[1px]"${_scopeId}>${ssrInterpolate(unref(app).name)}</span></span>`);
             } else {
               return [
                 createVNode("span", { class: "sr-only" }, "home"),
@@ -6701,7 +3816,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
                     class: "w-18 mr-2",
                     src: _imports_0
                   }),
-                  createVNode("span", { class: "leading-7 mt-[1px]" }, toDisplayString(unref(app2).name), 1)
+                  createVNode("span", { class: "leading-7 mt-[1px]" }, toDisplayString(unref(app).name), 1)
                 ])
               ];
             }
@@ -6710,7 +3825,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
         }, _parent));
       }, _push, _parent);
       _push(`<div class="relative ml-auto flex lt-lg:hidden"><nav class="flex items-center text-sm font-semibold leading-6 text-gray-600 dark:text-gray-300" role="navigation"><ul class="flex items-center space-x-8"><!--[-->`);
-      ssrRenderList(menus.value, (item, i) => {
+      ssrRenderList(unref(menus), (item, i) => {
         _push(`<li>`);
         if (item.type === "link") {
           _push(ssrRenderComponent(_component_UIAnchor, {
@@ -6718,7 +3833,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
             href: item.href ? item.href : void 0,
             class: "capitalize hover:no-underline hover:text-slate-900 hover:dark:text-white"
           }, {
-            default: withCtx((_, _push2, _parent2, _scopeId) => {
+            default: withCtx((_2, _push2, _parent2, _scopeId) => {
               if (_push2) {
                 _push2(`${ssrInterpolate(item.text)}`);
               } else {
@@ -6753,40 +3868,38 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$2 = _sfc_main$2.setup;
-_sfc_main$2.setup = (props, ctx) => {
+const _sfc_setup$m = _sfc_main$m.setup;
+_sfc_main$m.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/Navbar.vue");
-  return _sfc_setup$2 ? _sfc_setup$2(props, ctx) : void 0;
+  return _sfc_setup$m ? _sfc_setup$m(props, ctx) : void 0;
 };
-const Fragment = defineComponent({
-  setup(_props, { slots }) {
-    return () => {
-      var _a2;
-      return (_a2 = slots.default) == null ? void 0 : _a2.call(slots);
-    };
-  }
-});
 const _wrapIf = (component, props, slots) => {
-  return { default: () => props ? h$1(component, props === true ? {} : props, slots) : h$1(Fragment, {}, slots) };
+  props = props === true ? {} : props;
+  return { default: () => {
+    var _a;
+    return props ? h$1(component, props, slots) : (_a = slots.default) == null ? void 0 : _a.call(slots);
+  } };
 };
 const layouts = {
-  blog: () => import('./_nuxt/blog.b1e323a7.mjs').then((m2) => m2.default || m2),
-  default: () => import('./_nuxt/default.9e5a69b0.mjs').then((m2) => m2.default || m2)
+  blog: () => import('./_nuxt/blog-9fae3b72.mjs').then((m2) => m2.default || m2),
+  default: () => import('./_nuxt/default-dacc9f7f.mjs').then((m2) => m2.default || m2)
 };
-const LayoutLoader = defineComponent({
+const LayoutLoader = /* @__PURE__ */ defineComponent({
+  name: "LayoutLoader",
+  inheritAttrs: false,
   props: {
     name: String,
-    ...{}
+    layoutProps: Object
   },
   async setup(props, context) {
     const LayoutComponent = await layouts[props.name]().then((r2) => r2.default || r2);
-    return () => {
-      return h$1(LayoutComponent, {}, context.slots);
-    };
+    return () => h$1(LayoutComponent, props.layoutProps, context.slots);
   }
 });
-const __nuxt_component_3 = defineComponent({
+const __nuxt_component_3 = /* @__PURE__ */ defineComponent({
+  name: "NuxtLayout",
+  inheritAttrs: false,
   props: {
     name: {
       type: [String, Boolean, Object],
@@ -6794,23 +3907,76 @@ const __nuxt_component_3 = defineComponent({
     }
   },
   setup(props, context) {
-    const injectedRoute = inject("_route");
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
+    const injectedRoute = inject(PageRouteSymbol);
     const route = injectedRoute === useRoute() ? useRoute$1() : injectedRoute;
-    const layout = computed(() => {
-      var _a2, _b2;
-      return (_b2 = (_a2 = unref(props.name)) != null ? _a2 : route.meta.layout) != null ? _b2 : "default";
-    });
+    const layout = computed(() => unref(props.name) ?? route.meta.layout ?? "default");
+    const layoutRef = ref();
+    context.expose({ layoutRef });
+    const done = nuxtApp.deferHydration();
     return () => {
-      var _a2;
       const hasLayout = layout.value && layout.value in layouts;
-      const transitionProps = (_a2 = route.meta.layoutTransition) != null ? _a2 : appLayoutTransition;
+      const transitionProps = route.meta.layoutTransition ?? appLayoutTransition;
       return _wrapIf(Transition, hasLayout && transitionProps, {
-        default: () => _wrapIf(LayoutLoader, hasLayout && { key: layout.value, name: layout.value, hasTransition: void 0 }, context.slots).default()
+        default: () => h$1(Suspense, { suspensible: true, onResolve: () => {
+          nextTick(done);
+        } }, {
+          default: () => h$1(
+            // @ts-expect-error seems to be an issue in vue types
+            LayoutProvider,
+            {
+              layoutProps: mergeProps(context.attrs, { ref: layoutRef }),
+              key: layout.value,
+              name: layout.value,
+              shouldProvide: !props.name,
+              hasTransition: !!transitionProps
+            },
+            context.slots
+          )
+        })
       }).default();
     };
   }
 });
-const __nuxt_component_4 = defineComponent({
+const LayoutProvider = /* @__PURE__ */ defineComponent({
+  name: "NuxtLayoutProvider",
+  inheritAttrs: false,
+  props: {
+    name: {
+      type: [String, Boolean]
+    },
+    layoutProps: {
+      type: Object
+    },
+    hasTransition: {
+      type: Boolean
+    },
+    shouldProvide: {
+      type: Boolean
+    }
+  },
+  setup(props, context) {
+    const name = props.name;
+    if (props.shouldProvide) {
+      provide(LayoutMetaSymbol, {
+        isCurrent: (route) => name === (route.meta.layout ?? "default")
+      });
+    }
+    return () => {
+      var _a, _b;
+      if (!name || typeof name === "string" && !(name in layouts)) {
+        return (_b = (_a = context.slots).default) == null ? void 0 : _b.call(_a);
+      }
+      return h$1(
+        // @ts-expect-error seems to be an issue in vue types
+        LayoutLoader,
+        { key: name, layoutProps: props.layoutProps, name },
+        context.slots
+      );
+    };
+  }
+});
+const __nuxt_component_4$2 = /* @__PURE__ */ defineComponent({
   name: "NuxtLoadingIndicator",
   props: {
     throttle: {
@@ -6826,7 +3992,7 @@ const __nuxt_component_4 = defineComponent({
       default: 3
     },
     color: {
-      type: String,
+      type: [String, Boolean],
       default: "repeating-linear-gradient(to right,#00dc82 0%,#34cdfe 50%,#0047e1 100%)"
     }
   },
@@ -6835,9 +4001,27 @@ const __nuxt_component_4 = defineComponent({
       duration: props.duration,
       throttle: props.throttle
     });
-    const nuxtApp = useNuxtApp();
-    nuxtApp.hook("page:start", indicator.start);
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
+    const router = useRouter();
+    globalMiddleware.unshift(indicator.start);
+    router.onError(() => {
+      indicator.finish();
+    });
+    router.beforeResolve((to, from) => {
+      if (to === from || to.matched.every((comp, index) => {
+        var _a, _b, _c;
+        return comp.components && ((_a = comp.components) == null ? void 0 : _a.default) === ((_c = (_b = from.matched[index]) == null ? void 0 : _b.components) == null ? void 0 : _c.default);
+      })) {
+        indicator.finish();
+      }
+    });
+    router.afterEach((_to, _from, failure) => {
+      if (failure) {
+        indicator.finish();
+      }
+    });
     nuxtApp.hook("page:finish", indicator.finish);
+    nuxtApp.hook("vue:error", indicator.finish);
     return () => h$1("div", {
       class: "nuxt-loading-indicator",
       style: {
@@ -6846,12 +4030,14 @@ const __nuxt_component_4 = defineComponent({
         right: 0,
         left: 0,
         pointerEvents: "none",
-        width: `${indicator.progress.value}%`,
+        width: "auto",
         height: `${props.height}px`,
         opacity: indicator.isLoading.value ? 1 : 0,
-        background: props.color,
+        background: props.color || void 0,
         backgroundSize: `${100 / indicator.progress.value * 100}% auto`,
-        transition: "width 0.1s, height 0.4s, opacity 0.4s",
+        transform: `scaleX(${indicator.progress.value}%)`,
+        transformOrigin: "left",
+        transition: "transform 0.1s, height 0.4s, opacity 0.4s",
         zIndex: 999999
       }
     }, slots);
@@ -6866,9 +4052,13 @@ function useLoadingIndicator(opts) {
   function start() {
     clear();
     progress.value = 0;
-    isLoading.value = true;
-    if (opts.throttle)
-      ;
+    if (opts.throttle && false) {
+      _throttle = setTimeout(() => {
+        isLoading.value = true;
+      }, opts.throttle);
+    } else {
+      isLoading.value = true;
+    }
   }
   function finish() {
     progress.value = 100;
@@ -6893,23 +4083,52 @@ function useLoadingIndicator(opts) {
 }
 const interpolatePath = (route, match) => {
   return match.path.replace(/(:\w+)\([^)]+\)/g, "$1").replace(/(:\w+)[?+*]/g, "$1").replace(/:\w+/g, (r2) => {
-    var _a2;
-    return ((_a2 = route.params[r2.slice(1)]) == null ? void 0 : _a2.toString()) || "";
+    var _a;
+    return ((_a = route.params[r2.slice(1)]) == null ? void 0 : _a.toString()) || "";
   });
 };
-const generateRouteKey = (override, routeProps) => {
-  var _a2;
+const generateRouteKey = (routeProps, override) => {
   const matchedRoute = routeProps.route.matched.find((m2) => {
-    var _a3;
-    return ((_a3 = m2.components) == null ? void 0 : _a3.default) === routeProps.Component.type;
+    var _a;
+    return ((_a = m2.components) == null ? void 0 : _a.default) === routeProps.Component.type;
   });
-  const source = (_a2 = override != null ? override : matchedRoute == null ? void 0 : matchedRoute.meta.key) != null ? _a2 : matchedRoute && interpolatePath(routeProps.route, matchedRoute);
+  const source = override ?? (matchedRoute == null ? void 0 : matchedRoute.meta.key) ?? (matchedRoute && interpolatePath(routeProps.route, matchedRoute));
   return typeof source === "function" ? source(routeProps.route) : source;
 };
 const wrapInKeepAlive = (props, children) => {
   return { default: () => children };
 };
-const __nuxt_component_2 = defineComponent({
+const RouteProvider = /* @__PURE__ */ defineComponent({
+  name: "RouteProvider",
+  props: {
+    vnode: {
+      type: Object,
+      required: true
+    },
+    route: {
+      type: Object,
+      required: true
+    },
+    vnodeRef: Object,
+    renderKey: String,
+    trackRootNodes: Boolean
+  },
+  setup(props) {
+    const previousKey = props.renderKey;
+    const previousRoute = props.route;
+    const route = {};
+    for (const key in props.route) {
+      Object.defineProperty(route, key, {
+        get: () => previousKey === props.renderKey ? props.route[key] : previousRoute[key]
+      });
+    }
+    provide(PageRouteSymbol, shallowReactive(route));
+    return () => {
+      return h$1(props.vnode, { ref: props.vnodeRef });
+    };
+  }
+});
+const __nuxt_component_2$4 = /* @__PURE__ */ defineComponent({
   name: "NuxtPage",
   inheritAttrs: false,
   props: {
@@ -6932,18 +4151,22 @@ const __nuxt_component_2 = defineComponent({
       default: null
     }
   },
-  setup(props, { attrs }) {
-    const nuxtApp = useNuxtApp();
+  setup(props, { attrs, expose }) {
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
+    const pageRef = ref();
+    inject(PageRouteSymbol, null);
+    expose({ pageRef });
+    inject(LayoutMetaSymbol, null);
+    let vnode;
+    const done = nuxtApp.deferHydration();
     return () => {
       return h$1(RouterView, { name: props.name, route: props.route, ...attrs }, {
         default: (routeProps) => {
-          var _a2, _b2, _c2, _d2;
           if (!routeProps.Component) {
             return;
           }
-          const key = generateRouteKey(props.pageKey, routeProps);
-          const done = nuxtApp.deferHydration();
-          const hasTransition = !!((_b2 = (_a2 = props.transition) != null ? _a2 : routeProps.route.meta.pageTransition) != null ? _b2 : appPageTransition);
+          const key = generateRouteKey(routeProps, props.pageKey);
+          const hasTransition = !!(props.transition ?? routeProps.route.meta.pageTransition ?? appPageTransition);
           const transitionProps = hasTransition && _mergeTransitionProps([
             props.transition,
             routeProps.route.meta.pageTransition,
@@ -6952,19 +4175,31 @@ const __nuxt_component_2 = defineComponent({
               nuxtApp.callHook("page:transition:finish", routeProps.Component);
             } }
           ].filter(Boolean));
-          return _wrapIf(
+          vnode = _wrapIf(
             Transition,
             hasTransition && transitionProps,
             wrapInKeepAlive(
-              (_d2 = (_c2 = props.keepalive) != null ? _c2 : routeProps.route.meta.keepalive) != null ? _d2 : appKeepalive,
+              props.keepalive ?? routeProps.route.meta.keepalive ?? appKeepalive,
               h$1(Suspense, {
+                suspensible: true,
                 onPending: () => nuxtApp.callHook("page:start", routeProps.Component),
                 onResolve: () => {
                   nextTick(() => nuxtApp.callHook("page:finish", routeProps.Component).finally(done));
                 }
-              }, { default: () => h$1(Component, { key, routeProps, pageKey: key, hasTransition }) })
+              }, {
+                // @ts-expect-error seems to be an issue in vue types
+                default: () => h$1(RouteProvider, {
+                  key,
+                  vnode: routeProps.Component,
+                  route: routeProps.route,
+                  renderKey: key,
+                  trackRootNodes: hasTransition,
+                  vnodeRef: pageRef
+                })
+              })
             )
           ).default();
+          return vnode;
         }
       });
     };
@@ -6980,43 +4215,28 @@ function _mergeTransitionProps(routeProps) {
   }));
   return defu(..._props);
 }
-const Component = defineComponent({
-  props: ["routeProps", "pageKey", "hasTransition"],
-  setup(props) {
-    const previousKey = props.pageKey;
-    const previousRoute = props.routeProps.route;
-    const route = {};
-    for (const key in props.routeProps.route) {
-      route[key] = computed(() => previousKey === props.pageKey ? props.routeProps.route[key] : previousRoute[key]);
-    }
-    provide("_route", reactive(route));
-    return () => {
-      return h$1(props.routeProps.Component);
-    };
-  }
-});
-const _sfc_main$1 = /* @__PURE__ */ defineComponent({
+const _sfc_main$l = /* @__PURE__ */ defineComponent({
   __name: "NavbarMobile",
   __ssrInlineRender: true,
   setup(__props) {
     useState("app");
     const menus = ref([
-      { type: "link", text: "\u9996\u9801", icon: "i-uil-home-alt", route: "/" },
-      { type: "link", text: "\u5206\u985E", icon: "i-uil-create-dashboard", route: "/news/categories" },
-      { type: "link", text: "\u6536\u85CF", icon: "i-uil-heart", route: "/my/collections" },
-      { type: "link", text: "\u500B\u4EBA", icon: "i-uil-user", route: "/my" }
+      { type: "link", text: "首頁", icon: "i-uil-home-alt", route: "/" },
+      { type: "link", text: "分類", icon: "i-uil-create-dashboard", route: "/news/categories" },
+      { type: "link", text: "收藏", icon: "i-uil-heart", route: "/my/collections" },
+      { type: "link", text: "個人", icon: "i-uil-user", route: "/my" }
     ]);
     return (_ctx, _push, _parent, _attrs) => {
-      const _component_NuxtLink = __nuxt_component_0$1;
+      const _component_NuxtLink = __nuxt_component_0$3;
       const _component_UnoIcon = __nuxt_component_1;
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "md:hidden h-15 fixed flex items-center w-screen bottom-0 left-0 flex-none transition-colors duration-300 z-20 bg-white border-t border-gray-900/10 dark:bg-gray-900 dark:border-gray-700" }, _attrs))}><div class="flex justify-around w-full"><!--[-->`);
-      ssrRenderList(menus.value, (menu, index) => {
+      ssrRenderList(unref(menus), (menu, index) => {
         _push(ssrRenderComponent(_component_NuxtLink, {
           key: index,
           class: "text-center px-2",
           to: menu.route
         }, {
-          default: withCtx((_, _push2, _parent2, _scopeId) => {
+          default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
               _push2(ssrRenderComponent(_component_UnoIcon, {
                 class: ["mx-auto text-xl", menu.icon]
@@ -7038,21 +4258,23 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$1 = _sfc_main$1.setup;
-_sfc_main$1.setup = (props, ctx) => {
+const _sfc_setup$l = _sfc_main$l.setup;
+_sfc_main$l.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/NavbarMobile.vue");
-  return _sfc_setup$1 ? _sfc_setup$1(props, ctx) : void 0;
+  return _sfc_setup$l ? _sfc_setup$l(props, ctx) : void 0;
 };
-const __nuxt_component_0 = defineComponent({
+const __nuxt_component_0$2 = /* @__PURE__ */ defineComponent({
   name: "ClientOnly",
+  inheritAttrs: false,
+  // eslint-disable-next-line vue/require-prop-types
   props: ["fallback", "placeholder", "placeholderTag", "fallbackTag"],
-  setup(_, { slots }) {
+  setup(_2, { slots, attrs }) {
     const mounted = ref(false);
     return (props) => {
-      var _a2;
+      var _a;
       if (mounted.value) {
-        return (_a2 = slots.default) == null ? void 0 : _a2.call(slots);
+        return (_a = slots.default) == null ? void 0 : _a.call(slots);
       }
       const slot = slots.fallback || slots.placeholder;
       if (slot) {
@@ -7060,10 +4282,1934 @@ const __nuxt_component_0 = defineComponent({
       }
       const fallbackStr = props.fallback || props.placeholder || "";
       const fallbackTag = props.fallbackTag || props.placeholderTag || "span";
-      return createElementBlock(fallbackTag, null, fallbackStr);
+      return createElementBlock(fallbackTag, attrs, fallbackStr);
     };
   }
 });
+const _sfc_main$k = /* @__PURE__ */ defineComponent({
+  __name: "Form",
+  __ssrInlineRender: true,
+  emits: ["submit"],
+  setup(__props, { emit }) {
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<form${ssrRenderAttrs(_attrs)}>`);
+      ssrRenderSlot(_ctx.$slots, "default", {}, null, _push, _parent);
+      _push(`<button type="submit" hidden></button></form>`);
+    };
+  }
+});
+const _sfc_setup$k = _sfc_main$k.setup;
+_sfc_main$k.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form.vue");
+  return _sfc_setup$k ? _sfc_setup$k(props, ctx) : void 0;
+};
+const _sfc_main$j = {
+  __name: "Text",
+  __ssrInlineRender: true,
+  props: {
+    modelValue: {
+      type: String,
+      default: ""
+    },
+    label: {
+      type: String,
+      default: ""
+    },
+    placeholder: {
+      type: String,
+      default: ""
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    value: {
+      type: String,
+      default: ""
+    },
+    center: {
+      type: Boolean,
+      default: false
+    },
+    size: {
+      type: String,
+      default: "md"
+    },
+    id: {
+      type: String,
+      default: ""
+    },
+    required: {
+      type: Boolean,
+      default: false
+    },
+    isPhone: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ["update:modelValue", "captcha"],
+  setup(__props, { emit }) {
+    const props = __props;
+    const defaultStyle2 = computed(
+      () => props.disabled ? `
+  block w-full border cursor-not-allowed
+  duration-200
+  border-gray-600/[0.3] bg-gray-100
+  text-opacity-50
+  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
+  block w-full border
+  duration-200
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
+    );
+    const labelSizeStyles = reactive({
+      lg: "text-base",
+      md: "text-sm",
+      sm: "text-xs",
+      xs: "text-xs"
+    });
+    const inputSizeStyles = reactive({
+      lg: "h-12 px-4 text-lg rounded-lg",
+      md: "h-10 px-4 text-base rounded",
+      sm: "h-8 px-4 text-sm rounded",
+      xs: "h-7 px-4 text-xs rounded"
+    });
+    const labelSize = computed(
+      () => labelSizeStyles[props.size] || labelSizeStyles.md
+    );
+    const inputSize = computed(
+      () => inputSizeStyles[props.size] || inputSizeStyles.md
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(_attrs)}><div class="${ssrRenderClass([unref(labelSize), "flex items-center mb-2 empty:hidden"])}">`);
+      if (!!__props.label) {
+        _push(`<label${ssrRenderAttr("for", __props.id)} class="${ssrRenderClass([[{ "cursor-pointer": __props.id }], "block font-bold tracking-wide"])}">${ssrInterpolate(__props.label)}</label>`);
+      } else {
+        _push(`<!---->`);
+      }
+      ssrRenderSlot(_ctx.$slots, "label", {}, null, _push, _parent);
+      _push(`</div><div class="relative model flex"><input${ssrRenderAttr("id", __props.id)} type="text" class="${ssrRenderClass([{ "text-center": __props.center }, unref(defaultStyle2), unref(inputSize)])}"${ssrRenderAttr("placeholder", __props.placeholder)}${ssrRenderAttr("value", __props.modelValue || __props.value)}${ssrIncludeBooleanAttr(__props.disabled) ? " disabled" : ""}${ssrIncludeBooleanAttr(__props.required) ? " required" : ""}><div class="absolute transform -translate-y-1/2 right-2 top-1/2">`);
+      ssrRenderSlot(_ctx.$slots, "symbol", {}, null, _push, _parent);
+      _push(`</div>`);
+      if (__props.isPhone) {
+        _push(`<div class="flex cursor-pointer items-center justify-center rounded bg-blue-500 text-light-200 opacity-80 hover:opacity-100 duration-150 ml-4 text-sm truncate w-20"> 發送 </div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</div></div>`);
+    };
+  }
+};
+const _sfc_setup$j = _sfc_main$j.setup;
+_sfc_main$j.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Text.vue");
+  return _sfc_setup$j ? _sfc_setup$j(props, ctx) : void 0;
+};
+const __nuxt_component_2$3 = _sfc_main$j;
+const _sfc_main$i = {
+  __name: "Password",
+  __ssrInlineRender: true,
+  props: {
+    modelValue: {
+      type: String,
+      default: ""
+    },
+    value: {
+      type: String,
+      default: ""
+    },
+    label: {
+      type: String,
+      default: ""
+    },
+    placeholder: {
+      type: String,
+      default: ""
+    },
+    size: {
+      type: String,
+      default: "md"
+    },
+    id: {
+      type: String,
+      default: ""
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ["update:modelValue"],
+  setup(__props, { emit }) {
+    const props = __props;
+    const showPw = ref$1(true);
+    const defaultStyle2 = computed(
+      () => props.disabled ? `
+  block w-full border cursor-not-allowed
+  duration-200
+  border-gray-600/[0.3] bg-gray-100
+  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
+  block w-full border
+  duration-200 
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
+    );
+    const labelSizeStyles = reactive({
+      lg: "text-base",
+      md: "text-sm",
+      sm: "text-xs",
+      xs: "text-xs"
+    });
+    const inputSizeStyles = reactive({
+      lg: "h-12 px-4 text-lg rounded-lg",
+      md: "h-10 px-4 text-base rounded",
+      sm: "h-8 px-4 text-sm rounded",
+      xs: "h-7 px-4 text-xs rounded"
+    });
+    const labelSize = computed(
+      () => labelSizeStyles[props.size] || labelSizeStyles.md
+    );
+    const inputSize = computed(
+      () => inputSizeStyles[props.size] || inputSizeStyles.md
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_UnoIcon = __nuxt_component_1;
+      _push(`<div${ssrRenderAttrs(_attrs)}><div class="${ssrRenderClass([unref(labelSize), "flex items-center mb-2"])}"><label${ssrRenderAttr("for", __props.id)} class="${ssrRenderClass([[{ "cursor-pointer": __props.id }], "block font-bold tracking-wide"])}">${ssrInterpolate(__props.label)}</label>`);
+      ssrRenderSlot(_ctx.$slots, "label", {}, null, _push, _parent);
+      _push(`</div><div class="flex items-center"><div class="relative model flex-1"><input${ssrRenderAttr("id", __props.id)} class="${ssrRenderClass([unref(defaultStyle2), unref(inputSize)])}"${ssrRenderAttr("type", unref(showPw) ? "password" : "text")}${ssrRenderAttr("placeholder", __props.placeholder)}${ssrRenderAttr("value", __props.modelValue || __props.value)}${ssrIncludeBooleanAttr(__props.disabled) ? " disabled" : ""} autocomplete="on"><div class="absolute flex transform -translate-y-1/2 icon top-1/2 right-2 cursor-pointer">`);
+      _push(ssrRenderComponent(_component_UnoIcon, {
+        style: unref(showPw) ? null : { display: "none" },
+        class: ["i-ion-eye-outline", { disabled: __props.disabled }]
+      }, null, _parent));
+      _push(ssrRenderComponent(_component_UnoIcon, {
+        style: !unref(showPw) ? null : { display: "none" }
+      }, null, _parent));
+      _push(`</div></div>`);
+      ssrRenderSlot(_ctx.$slots, "default", {}, null, _push, _parent);
+      _push(`</div></div>`);
+    };
+  }
+};
+const _sfc_setup$i = _sfc_main$i.setup;
+_sfc_main$i.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Password.vue");
+  return _sfc_setup$i ? _sfc_setup$i(props, ctx) : void 0;
+};
+const __nuxt_component_2$2 = _sfc_main$i;
+const defaultStyle$1 = `
+  block w-full border outline-none font-bold
+  bg-blue-500 text-light-200
+  opacity-80 hover:opacity-100 duration-150
+`;
+const _sfc_main$h = /* @__PURE__ */ defineComponent({
+  __name: "Submit",
+  __ssrInlineRender: true,
+  props: {
+    text: {
+      type: String,
+      default: ""
+    },
+    center: {
+      type: Boolean,
+      default: false
+    },
+    size: {
+      type: String,
+      default: "md"
+    }
+  },
+  setup(__props) {
+    const props = __props;
+    const sizeStyles = reactive({
+      lg: "h-12 leading-12 px-4 text-lg rounded-lg",
+      md: "h-10 leading-10 px-4 text-base rounded",
+      sm: "h-8 leading-8 px-4 text-sm rounded",
+      xs: "h-7 leading-7 px-4 text-xs rounded"
+    });
+    const selectSize = computed(() => sizeStyles[props.size] || sizeStyles.md);
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(_attrs)}><div class="${ssrRenderClass([[{ "text-center": __props.center }, unref(selectSize), defaultStyle$1], "cursor-pointer"])}">${ssrInterpolate(__props.text)}</div></div>`);
+    };
+  }
+});
+const _sfc_setup$h = _sfc_main$h.setup;
+_sfc_main$h.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Submit.vue");
+  return _sfc_setup$h ? _sfc_setup$h(props, ctx) : void 0;
+};
+const _sfc_main$g = /* @__PURE__ */ defineComponent({
+  __name: "LoginForm",
+  __ssrInlineRender: true,
+  emits: ["register", "forgot", "close"],
+  setup(__props, { emit }) {
+    const loginStorage = storage.get("loginData");
+    const loginForm = reactive({
+      phone: (loginStorage == null ? void 0 : loginStorage.phone) || "",
+      password: (loginStorage == null ? void 0 : loginStorage.password) || "",
+      rememberMe: !!(loginStorage == null ? void 0 : loginStorage.rememberMe)
+    });
+    const login = async () => {
+      const { user } = useBaseStore();
+      await user.login({
+        phone: loginForm.phone,
+        password: loginForm.password,
+        rememberMe: loginForm.rememberMe
+      });
+    };
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_UnoIcon = __nuxt_component_1;
+      const _component_UIForm = _sfc_main$k;
+      const _component_UIFormText = __nuxt_component_2$3;
+      const _component_UIFormPassword = __nuxt_component_2$2;
+      const _component_UIFormSubmit = _sfc_main$h;
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-5132e79f><div class="flex items-center justify-between mb-7" data-v-5132e79f><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-5132e79f> 登入帳號 </div>`);
+      _push(ssrRenderComponent(_component_UnoIcon, {
+        class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
+        onClick: ($event) => _ctx.$emit("close")
+      }, null, _parent));
+      _push(`</div>`);
+      _push(ssrRenderComponent(_component_UIForm, { onSubmit: login }, {
+        default: withCtx((_2, _push2, _parent2, _scopeId) => {
+          if (_push2) {
+            _push2(ssrRenderComponent(_component_UIFormText, {
+              id: "account",
+              modelValue: unref(loginForm).phone,
+              "onUpdate:modelValue": ($event) => unref(loginForm).phone = $event,
+              label: "手機號碼",
+              class: "mb-3",
+              placeholder: "輸入手機號碼"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormPassword, {
+              id: "password",
+              modelValue: unref(loginForm).password,
+              "onUpdate:modelValue": ($event) => unref(loginForm).password = $event,
+              label: "密碼",
+              placeholder: "長度至少為8,英數組合"
+            }, null, _parent2, _scopeId));
+            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-5132e79f${_scopeId}><div data-v-5132e79f${_scopeId}><label class="flex items-center cursor-pointer check" data-v-5132e79f${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-5132e79f${_scopeId}>`);
+            if (unref(loginForm).rememberMe) {
+              _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-checkbox-outline" }, null, _parent2, _scopeId));
+            } else {
+              _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-android-checkbox-outline-blank" }, null, _parent2, _scopeId));
+            }
+            _push2(`<span class="ml-2" data-v-5132e79f${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-5132e79f${_scopeId}>忘記密碼</span></div>`);
+            _push2(ssrRenderComponent(_component_UIFormSubmit, {
+              class: "mb-7",
+              text: "送出",
+              center: true,
+              onClick: login
+            }, null, _parent2, _scopeId));
+            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-5132e79f${_scopeId}> 註冊新帳號 </div>`);
+          } else {
+            return [
+              createVNode(_component_UIFormText, {
+                id: "account",
+                modelValue: unref(loginForm).phone,
+                "onUpdate:modelValue": ($event) => unref(loginForm).phone = $event,
+                label: "手機號碼",
+                class: "mb-3",
+                placeholder: "輸入手機號碼"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormPassword, {
+                id: "password",
+                modelValue: unref(loginForm).password,
+                "onUpdate:modelValue": ($event) => unref(loginForm).password = $event,
+                label: "密碼",
+                placeholder: "長度至少為8,英數組合"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode("div", { class: "flex items-center justify-between py-4 mb-2 text-sm" }, [
+                createVNode("div", null, [
+                  createVNode("label", { class: "flex items-center cursor-pointer check" }, [
+                    withDirectives(createVNode("input", {
+                      "onUpdate:modelValue": ($event) => unref(loginForm).rememberMe = $event,
+                      type: "checkbox",
+                      name: "checkbox-forced-colors-checked"
+                    }, null, 8, ["onUpdate:modelValue"]), [
+                      [vModelCheckbox, unref(loginForm).rememberMe]
+                    ]),
+                    unref(loginForm).rememberMe ? (openBlock(), createBlock(_component_UnoIcon, {
+                      key: 0,
+                      class: "i-ion-checkbox-outline"
+                    })) : (openBlock(), createBlock(_component_UnoIcon, {
+                      key: 1,
+                      class: "i-ion-android-checkbox-outline-blank"
+                    })),
+                    createVNode("span", { class: "ml-2" }, "記住我")
+                  ])
+                ]),
+                createVNode("span", {
+                  class: "cursor-pointer",
+                  onClick: ($event) => emit("forgot")
+                }, "忘記密碼", 8, ["onClick"])
+              ]),
+              createVNode(_component_UIFormSubmit, {
+                class: "mb-7",
+                text: "送出",
+                center: true,
+                onClick: login
+              }),
+              createVNode("div", {
+                class: "text-sm font-bold tracking-wide text-center cursor-pointer",
+                onClick: ($event) => _ctx.$emit("register")
+              }, " 註冊新帳號 ", 8, ["onClick"])
+            ];
+          }
+        }),
+        _: 1
+      }, _parent));
+      _push(`</div>`);
+    };
+  }
+});
+const _sfc_setup$g = _sfc_main$g.setup;
+_sfc_main$g.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/LoginForm.vue");
+  return _sfc_setup$g ? _sfc_setup$g(props, ctx) : void 0;
+};
+const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["__scopeId", "data-v-5132e79f"]]);
+const _sfc_main$f = {
+  __name: "Select",
+  __ssrInlineRender: true,
+  props: [
+    "modelValue",
+    "label",
+    "placeholder",
+    "options",
+    "disabled",
+    "selected"
+  ],
+  emits: ["update:modelValue"],
+  setup(__props, { emit }) {
+    const props = __props;
+    const defaultStyle2 = computed(
+      () => props.disabled ? `
+  block w-full border cursor-not-allowed
+  duration-200
+  border-gray-600/[0.3] bg-gray-100
+  text-opacity-50
+  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
+  block w-full border
+  duration-200
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
+    );
+    const labelSizeStyles = reactive({
+      lg: "text-base",
+      md: "text-sm",
+      sm: "text-xs",
+      xs: "text-xs"
+    });
+    const inputSizeStyles = reactive({
+      lg: "h-12 px-4 text-lg rounded-lg",
+      md: "h-10 px-4 text-base rounded",
+      sm: "h-8 px-4 text-sm rounded",
+      xs: "h-7 px-4 text-xs rounded"
+    });
+    const labelSize = computed(
+      () => labelSizeStyles[props.size] || labelSizeStyles.md
+    );
+    const inputSize = computed(
+      () => inputSizeStyles[props.size] || inputSizeStyles.md
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(_attrs)} data-v-20ac6568><div class="${ssrRenderClass([unref(labelSize), "flex items-center mb-2 empty:hidden"])}" data-v-20ac6568>`);
+      if (!!__props.label) {
+        _push(`<label${ssrRenderAttr("for", _ctx.id)} class="${ssrRenderClass([[{ "cursor-pointer": _ctx.id }], "block font-bold tracking-wide"])}" data-v-20ac6568>${ssrInterpolate(__props.label)}</label>`);
+      } else {
+        _push(`<!---->`);
+      }
+      ssrRenderSlot(_ctx.$slots, "label", {}, null, _push, _parent);
+      _push(`</div><div class="relative model flex" data-v-20ac6568><select${ssrRenderAttr("value", __props.modelValue)} class="${ssrRenderClass([{ "text-center": _ctx.center }, unref(defaultStyle2), unref(inputSize)])}" data-v-20ac6568><!--[-->`);
+      ssrRenderList(__props.options, (option) => {
+        _push(`<option${ssrRenderAttr("value", option)} data-v-20ac6568>${ssrInterpolate(option)}</option>`);
+      });
+      _push(`<!--]--></select></div></div>`);
+    };
+  }
+};
+const _sfc_setup$f = _sfc_main$f.setup;
+_sfc_main$f.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Select.vue");
+  return _sfc_setup$f ? _sfc_setup$f(props, ctx) : void 0;
+};
+const __nuxt_component_2$1 = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["__scopeId", "data-v-20ac6568"]]);
+const defaultStyle = `
+  block w-full border
+  duration-200 
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800
+`;
+const _sfc_main$e = {
+  __name: "Captcha",
+  __ssrInlineRender: true,
+  props: {
+    modelValue: {
+      type: String,
+      default: ""
+    },
+    id: {
+      type: String,
+      default: ""
+    },
+    label: {
+      type: String,
+      default: ""
+    },
+    placeholder: {
+      type: String,
+      default: ""
+    },
+    length: {
+      type: Number,
+      default: 6
+    },
+    getCaptcha: {
+      type: Function,
+      default: () => {
+      }
+    }
+  },
+  emits: ["update:modelValue", "captcha"],
+  setup(__props, { emit }) {
+    ref("");
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "mb-1 form-group form-group__captcha" }, _attrs))}><label${ssrRenderAttr("for", __props.id)} class="block mb-2 font-bold tracking-wide cursor-pointer text-sm">${ssrInterpolate(__props.label)}</label><div class="flex"><input${ssrRenderAttr("placeholder", __props.placeholder)} class="${ssrRenderClass([defaultStyle, "h-10 px-4 text-base rounded"])}" type="text"${ssrRenderAttr("value", __props.modelValue)}></div></div>`);
+    };
+  }
+};
+const _sfc_setup$e = _sfc_main$e.setup;
+_sfc_main$e.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Captcha.vue");
+  return _sfc_setup$e ? _sfc_setup$e(props, ctx) : void 0;
+};
+const __nuxt_component_4$1 = _sfc_main$e;
+const _sfc_main$d = {
+  __name: "Date",
+  __ssrInlineRender: true,
+  props: {
+    modelValue: {
+      type: String,
+      default: ""
+    },
+    label: {
+      type: String,
+      default: ""
+    },
+    placeholder: {
+      type: String,
+      default: ""
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    value: {
+      type: String,
+      default: ""
+    },
+    size: {
+      type: String,
+      default: "md"
+    },
+    id: {
+      type: String,
+      default: ""
+    },
+    required: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ["update:modelValue"],
+  setup(__props, { emit }) {
+    const props = __props;
+    const defaultStyle2 = computed(
+      () => props.disabled ? `
+  block w-full border cursor-not-allowed
+  duration-200
+  border-gray-600/[0.3] bg-gray-100
+  text-opacity-50
+  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
+  block w-full border
+  duration-200 
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
+    );
+    const labelSizeStyles = reactive({
+      lg: "text-base",
+      md: "text-sm",
+      sm: "text-xs",
+      xs: "text-xs"
+    });
+    const inputSizeStyles = reactive({
+      lg: "h-12 px-4 text-lg rounded-lg",
+      md: "h-10 px-4 text-base rounded",
+      sm: "h-8 px-4 text-sm rounded",
+      xs: "h-7 px-4 text-xs rounded"
+    });
+    const labelSize = computed(
+      () => labelSizeStyles[props.size] || labelSizeStyles.md
+    );
+    const inputSize = computed(
+      () => inputSizeStyles[props.size] || inputSizeStyles.md
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "form-group form-group_select" }, _attrs))} data-v-85ac86be><div class="${ssrRenderClass([unref(labelSize), "flex items-center mb-2"])}" data-v-85ac86be><label${ssrRenderAttr("for", __props.id)} class="${ssrRenderClass([[{ "cursor-pointer": __props.id }], "block font-bold tracking-wide"])}" data-v-85ac86be>${ssrInterpolate(__props.label)}</label>`);
+      ssrRenderSlot(_ctx.$slots, "label", {}, null, _push, _parent);
+      _push(`</div><div class="model relative" data-v-85ac86be><input${ssrRenderAttr("id", __props.id)} type="date" class="${ssrRenderClass([unref(defaultStyle2), unref(inputSize)])}"${ssrRenderAttr("placeholder", __props.placeholder)}${ssrRenderAttr("value", props.modelValue || __props.value)}${ssrIncludeBooleanAttr(__props.disabled) ? " disabled" : ""}${ssrIncludeBooleanAttr(__props.required) ? " required" : ""} data-v-85ac86be></div></div>`);
+    };
+  }
+};
+const _sfc_setup$d = _sfc_main$d.setup;
+_sfc_main$d.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Date.vue");
+  return _sfc_setup$d ? _sfc_setup$d(props, ctx) : void 0;
+};
+const __nuxt_component_4 = /* @__PURE__ */ _export_sfc(_sfc_main$d, [["__scopeId", "data-v-85ac86be"]]);
+const _sfc_main$c = {
+  __name: "Radio",
+  __ssrInlineRender: true,
+  props: {
+    id: {
+      type: String,
+      default: ""
+    },
+    modelValue: {
+      type: Number,
+      default: NaN
+    },
+    label: {
+      type: String,
+      default: ""
+    },
+    options: {
+      type: Array,
+      default: () => []
+    },
+    border: {
+      type: Boolean,
+      default: false
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ["update:modelValue"],
+  setup(__props, { emit }) {
+    const props = __props;
+    const defaultStyle2 = computed(
+      () => props.disabled ? `
+  w-full border cursor-not-allowed
+  duration-200
+  border-gray-600/[0.3] bg-gray-100
+  text-opacity-50
+  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
+  w-full border
+  duration-200 
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
+    );
+    const inputSizeStyles = reactive({
+      lg: "h-12 px-4 text-lg rounded-lg",
+      md: "h-10 px-4 text-base rounded",
+      sm: "h-8 px-4 text-sm rounded",
+      xs: "h-7 px-4 text-xs rounded"
+    });
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "form-group form-group_input__radio" }, _attrs))} data-v-e8c98730><label${ssrRenderAttr("for", __props.id)} class="block mb-2 font-bold tracking-wide cursor-pointer text-sm" data-v-e8c98730>${ssrInterpolate(__props.label)}</label><div role="radiogroup" class="${ssrRenderClass([[unref(defaultStyle2), unref(inputSizeStyles).md], "flex flex-wrap space-x-3"])}" data-v-e8c98730><!--[-->`);
+      ssrRenderList(__props.options, (option, index) => {
+        _push(`<div class="flex items-center py-3" data-v-e8c98730><div class="bg-white dark:bg-gray-100 rounded-full w-4 h-4 flex flex-shrink-0 justify-center items-center relative" data-v-e8c98730><input${ssrRenderAttr("id", option.value)}${ssrIncludeBooleanAttr(__props.modelValue === option.value || index === 0) ? " checked" : ""}${ssrRenderAttr("value", option.value)} type="radio" name="radio" class="checkbox appearance-none border rounded-full border-gray-400 absolute cursor-pointer w-full h-full checked:border-none" data-v-e8c98730><div class="check-icon hidden border-4 border-indigo-700 rounded-full w-full h-full z-1" data-v-e8c98730></div></div><label${ssrRenderAttr("for", option.value)} class="ml-2 text-sm leading-4 font-normal text-gray-800 dark:text-gray-100" data-v-e8c98730>${ssrInterpolate(option.label)}</label></div>`);
+      });
+      _push(`<!--]--></div></div>`);
+    };
+  }
+};
+const _sfc_setup$c = _sfc_main$c.setup;
+_sfc_main$c.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Radio.vue");
+  return _sfc_setup$c ? _sfc_setup$c(props, ctx) : void 0;
+};
+const __nuxt_component_5 = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["__scopeId", "data-v-e8c98730"]]);
+const _sfc_main$b = /* @__PURE__ */ defineComponent({
+  __name: "RegisterForm",
+  __ssrInlineRender: true,
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ["cancel", "close"],
+  setup(__props, { emit }) {
+    const cancel = () => {
+      emit("cancel");
+    };
+    const close = () => {
+      emit("close");
+    };
+    const genderOptions = ref([
+      { value: 13, label: "男性" },
+      { value: 14, label: "女性" }
+    ]);
+    const registerForm = reactive({
+      firstName: "",
+      lastName: "",
+      birthday: "",
+      area: "",
+      phone: "",
+      password: "",
+      passwordConfirm: "",
+      gender: genderOptions.value[0].value,
+      verifyCode: ""
+    });
+    const { user } = useBaseStore();
+    const $alert = useState("alert");
+    const $loading = useState("loading");
+    const getCaptcha = async () => {
+      $loading.value = true;
+      const { error, message, data } = await useHttpFetchPost(
+        "/auth/register-captcha",
+        {
+          body: { area: registerForm.area, phone: registerForm.phone }
+        }
+      );
+      $loading.value = false;
+      if (error) {
+        const $alert2 = useState("alert");
+        $alert2.value = {
+          type: "error",
+          title: "驗證錯誤",
+          text: message,
+          center: true
+        };
+      }
+      if (data)
+        $alert.value = { type: "success", title: "發送成功", center: true };
+    };
+    const openMemberRule = (path) => {
+      const $showAuth = useState("showAuth");
+      const router = useRouter();
+      $showAuth.value = false;
+      router.push(path);
+    };
+    const options = [
+      "+1",
+      "+1264",
+      "+1268",
+      "+1441",
+      "+1473",
+      "+1758",
+      "+1767",
+      "+1876",
+      "+20",
+      "+212",
+      "+233",
+      "+234",
+      "+237",
+      "+243",
+      "+248",
+      "+249",
+      "+250",
+      "+254",
+      "+256",
+      "+261",
+      "+297",
+      "+30",
+      "+32",
+      "+33",
+      "+34",
+      "+351",
+      "+352",
+      "+353",
+      "+354",
+      "+358",
+      "+380",
+      "+381",
+      "+389",
+      "+39",
+      "+40",
+      "+41",
+      "+43",
+      "+44",
+      "+45",
+      "+46",
+      "+47",
+      "+49",
+      "+502",
+      "+503",
+      "+504",
+      "+505",
+      "+507",
+      "+509",
+      "+52",
+      "+54",
+      "+55",
+      "+57",
+      "+58",
+      "+591",
+      "+595",
+      "+598",
+      "+60",
+      "+61",
+      "+62",
+      "+64",
+      "+65",
+      "+66",
+      "+674",
+      "+675",
+      "+676",
+      "+679",
+      "+7",
+      "+7",
+      "+81",
+      "+82",
+      "+852",
+      "+853",
+      "+86",
+      "+880",
+      "+886",
+      "+90",
+      "+91",
+      "+92",
+      "+93",
+      "+94",
+      "+960",
+      "+962",
+      "+964",
+      "+965",
+      "+966",
+      "+967",
+      "+967",
+      "+971",
+      "+973",
+      "+975",
+      "+975",
+      "+995",
+      "+998"
+    ];
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_UnoIcon = __nuxt_component_1;
+      const _component_UIForm = _sfc_main$k;
+      const _component_UIFormText = __nuxt_component_2$3;
+      const _component_UIFormSelect = __nuxt_component_2$1;
+      const _component_UIFormCaptcha = __nuxt_component_4$1;
+      const _component_UIFormPassword = __nuxt_component_2$2;
+      const _component_UIFormDate = __nuxt_component_4;
+      const _component_UIFormRadio = __nuxt_component_5;
+      const _component_UIFormSubmit = _sfc_main$h;
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "p-12" }, _attrs))}><div class="flex items-center justify-between mb-7"><div class="text-xl font-bold text-gray-800 dark:text-gray-200">註冊</div>`);
+      _push(ssrRenderComponent(_component_UnoIcon, {
+        class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
+        onClick: close
+      }, null, _parent));
+      _push(`</div>`);
+      _push(ssrRenderComponent(_component_UIForm, {
+        onSubmit: ($event) => unref(user).register(unref(registerForm))
+      }, {
+        default: withCtx((_2, _push2, _parent2, _scopeId) => {
+          if (_push2) {
+            _push2(`<div class="flex space-x-4 mb-3"${_scopeId}>`);
+            _push2(ssrRenderComponent(_component_UIFormText, {
+              id: "firstName",
+              modelValue: unref(registerForm).firstName,
+              "onUpdate:modelValue": ($event) => unref(registerForm).firstName = $event,
+              label: "姓氏",
+              class: "flex-1"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormText, {
+              id: "lastName",
+              modelValue: unref(registerForm).lastName,
+              "onUpdate:modelValue": ($event) => unref(registerForm).lastName = $event,
+              label: "名字",
+              class: "flex-1"
+            }, null, _parent2, _scopeId));
+            _push2(`</div><div${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}"${_scopeId}><label${ssrRenderAttr("for", _ctx.phone)} class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}"${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="flex flex-wrap"${_scopeId}>`);
+            _push2(ssrRenderComponent(_component_UIFormSelect, {
+              class: "mr-2 w-24",
+              id: "phone",
+              options,
+              modelValue: unref(registerForm).area,
+              "onUpdate:modelValue": ($event) => unref(registerForm).area = $event
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormText, {
+              id: "phone",
+              modelValue: unref(registerForm).phone,
+              "onUpdate:modelValue": ($event) => unref(registerForm).phone = $event,
+              class: "mb-3 flex-1",
+              "is-phone": true,
+              onCaptcha: getCaptcha
+            }, null, _parent2, _scopeId));
+            _push2(`</div></div>`);
+            _push2(ssrRenderComponent(_component_UIFormCaptcha, {
+              modelValue: unref(registerForm).verifyCode,
+              "onUpdate:modelValue": ($event) => unref(registerForm).verifyCode = $event,
+              class: "mb-3",
+              label: "驗證碼",
+              placeholder: "請輸入手機驗證碼"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormPassword, {
+              id: "password",
+              modelValue: unref(registerForm).password,
+              "onUpdate:modelValue": ($event) => unref(registerForm).password = $event,
+              label: "密碼",
+              class: "mb-3",
+              placeholder: "長度至少為8,英數組合"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormPassword, {
+              id: "password",
+              modelValue: unref(registerForm).passwordConfirm,
+              "onUpdate:modelValue": ($event) => unref(registerForm).passwordConfirm = $event,
+              label: "確認密碼",
+              class: "mb-3",
+              placeholder: "再次輸入密碼"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormDate, {
+              id: "birthday",
+              modelValue: unref(registerForm).birthday,
+              "onUpdate:modelValue": ($event) => unref(registerForm).birthday = $event,
+              label: "生日",
+              class: "mb-3"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormRadio, {
+              modelValue: unref(registerForm).gender,
+              "onUpdate:modelValue": ($event) => unref(registerForm).gender = $event,
+              class: "mb-10",
+              label: "性別",
+              options: unref(genderOptions)
+            }, null, _parent2, _scopeId));
+            _push2(`<div class="text-center text-sm mb-5"${_scopeId}> 繼續使用代表您同意與接受 鍵結科技 的 <span class="text-blue-300 cursor-pointer"${_scopeId}> 《會員條款》 </span></div>`);
+            _push2(ssrRenderComponent(_component_UIFormSubmit, {
+              class: "mb-7",
+              text: "送出",
+              center: true,
+              onClick: ($event) => unref(user).register(unref(registerForm))
+            }, null, _parent2, _scopeId));
+            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer"${_scopeId}> 已有帳號，前往登入 </div>`);
+          } else {
+            return [
+              createVNode("div", { class: "flex space-x-4 mb-3" }, [
+                createVNode(_component_UIFormText, {
+                  id: "firstName",
+                  modelValue: unref(registerForm).firstName,
+                  "onUpdate:modelValue": ($event) => unref(registerForm).firstName = $event,
+                  label: "姓氏",
+                  class: "flex-1"
+                }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+                createVNode(_component_UIFormText, {
+                  id: "lastName",
+                  modelValue: unref(registerForm).lastName,
+                  "onUpdate:modelValue": ($event) => unref(registerForm).lastName = $event,
+                  label: "名字",
+                  class: "flex-1"
+                }, null, 8, ["modelValue", "onUpdate:modelValue"])
+              ]),
+              createVNode("div", null, [
+                createVNode("div", {
+                  class: ["flex items-center mb-2", _ctx.labelSize]
+                }, [
+                  createVNode("label", {
+                    for: _ctx.phone,
+                    class: ["block font-bold tracking-wide", [{ "cursor-pointer": "phone" }]],
+                    textContent: "手機"
+                  }, null, 8, ["for"])
+                ], 2),
+                createVNode("div", { class: "flex flex-wrap" }, [
+                  createVNode(_component_UIFormSelect, {
+                    class: "mr-2 w-24",
+                    id: "phone",
+                    options,
+                    modelValue: unref(registerForm).area,
+                    "onUpdate:modelValue": ($event) => unref(registerForm).area = $event
+                  }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+                  createVNode(_component_UIFormText, {
+                    id: "phone",
+                    modelValue: unref(registerForm).phone,
+                    "onUpdate:modelValue": ($event) => unref(registerForm).phone = $event,
+                    class: "mb-3 flex-1",
+                    "is-phone": true,
+                    onCaptcha: getCaptcha
+                  }, null, 8, ["modelValue", "onUpdate:modelValue"])
+                ])
+              ]),
+              createVNode(_component_UIFormCaptcha, {
+                modelValue: unref(registerForm).verifyCode,
+                "onUpdate:modelValue": ($event) => unref(registerForm).verifyCode = $event,
+                class: "mb-3",
+                label: "驗證碼",
+                placeholder: "請輸入手機驗證碼"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormPassword, {
+                id: "password",
+                modelValue: unref(registerForm).password,
+                "onUpdate:modelValue": ($event) => unref(registerForm).password = $event,
+                label: "密碼",
+                class: "mb-3",
+                placeholder: "長度至少為8,英數組合"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormPassword, {
+                id: "password",
+                modelValue: unref(registerForm).passwordConfirm,
+                "onUpdate:modelValue": ($event) => unref(registerForm).passwordConfirm = $event,
+                label: "確認密碼",
+                class: "mb-3",
+                placeholder: "再次輸入密碼"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormDate, {
+                id: "birthday",
+                modelValue: unref(registerForm).birthday,
+                "onUpdate:modelValue": ($event) => unref(registerForm).birthday = $event,
+                label: "生日",
+                class: "mb-3"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormRadio, {
+                modelValue: unref(registerForm).gender,
+                "onUpdate:modelValue": ($event) => unref(registerForm).gender = $event,
+                class: "mb-10",
+                label: "性別",
+                options: unref(genderOptions)
+              }, null, 8, ["modelValue", "onUpdate:modelValue", "options"]),
+              createVNode("div", { class: "text-center text-sm mb-5" }, [
+                createTextVNode(" 繼續使用代表您同意與接受 鍵結科技 的 "),
+                createVNode("span", {
+                  class: "text-blue-300 cursor-pointer",
+                  onClick: ($event) => openMemberRule("/member-rule")
+                }, " 《會員條款》 ", 8, ["onClick"])
+              ]),
+              createVNode(_component_UIFormSubmit, {
+                class: "mb-7",
+                text: "送出",
+                center: true,
+                onClick: ($event) => unref(user).register(unref(registerForm))
+              }, null, 8, ["onClick"]),
+              createVNode("div", {
+                class: "text-sm font-bold tracking-wide text-center cursor-pointer",
+                onClick: cancel
+              }, " 已有帳號，前往登入 ")
+            ];
+          }
+        }),
+        _: 1
+      }, _parent));
+      _push(`</div>`);
+    };
+  }
+});
+const _sfc_setup$b = _sfc_main$b.setup;
+_sfc_main$b.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/RegisterForm.vue");
+  return _sfc_setup$b ? _sfc_setup$b(props, ctx) : void 0;
+};
+const _sfc_main$a = {
+  __name: "SelectArea",
+  __ssrInlineRender: true,
+  props: ["modelValue", "label", "placeholder", "options"],
+  emits: ["update:modelValue"],
+  setup(__props, { emit }) {
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "form-group form-group_select" }, _attrs))} data-v-24226c81><label data-v-24226c81>${ssrInterpolate(__props.label)}</label><select${ssrRenderAttr("value", __props.modelValue)} data-v-24226c81><!--[-->`);
+      ssrRenderList(__props.options, (option) => {
+        _push(`<option data-v-24226c81>${ssrInterpolate(option)}</option>`);
+      });
+      _push(`<!--]--></select></div>`);
+    };
+  }
+};
+const _sfc_setup$a = _sfc_main$a.setup;
+_sfc_main$a.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/SelectArea.vue");
+  return _sfc_setup$a ? _sfc_setup$a(props, ctx) : void 0;
+};
+const __nuxt_component_2 = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["__scopeId", "data-v-24226c81"]]);
+const _sfc_main$9 = /* @__PURE__ */ defineComponent({
+  __name: "ForgotForm",
+  __ssrInlineRender: true,
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ["cancel", "close"],
+  setup(__props, { emit }) {
+    const cancel = () => {
+      emit("cancel");
+    };
+    const forgotForm = reactive({
+      phone: "",
+      password: "",
+      passwordConfirm: "",
+      verifyCode: ""
+    });
+    const { user } = useBaseStore();
+    const $alert = useState("alert");
+    const $loading = useState("loading");
+    const getCaptcha = async () => {
+      $loading.value = true;
+      const { error, message, data } = await useHttpFetchPost(
+        "/auth/forgot-captcha",
+        {
+          body: { phone: forgotForm.phone }
+        }
+      );
+      $loading.value = false;
+      if (error) {
+        const $alert2 = useState("alert");
+        $alert2.value = {
+          type: "error",
+          title: "驗證錯誤",
+          text: message,
+          center: true
+        };
+      }
+      if (data)
+        $alert.value = { type: "success", title: "發送成功", center: true };
+    };
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_UnoIcon = __nuxt_component_1;
+      const _component_UIForm = _sfc_main$k;
+      const _component_UIFormSelectArea = __nuxt_component_2;
+      const _component_UIFormText = __nuxt_component_2$3;
+      const _component_UIFormCaptcha = __nuxt_component_4$1;
+      const _component_UIFormPassword = __nuxt_component_2$2;
+      const _component_UIFormSubmit = _sfc_main$h;
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "p-12" }, _attrs))}><div class="flex items-center justify-between mb-7"><div class="text-xl font-bold text-gray-800 dark:text-gray-200"> 忘記密碼 </div>`);
+      _push(ssrRenderComponent(_component_UnoIcon, {
+        class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
+        onClick: cancel
+      }, null, _parent));
+      _push(`</div>`);
+      _push(ssrRenderComponent(_component_UIForm, {
+        onSubmit: ($event) => unref(user).forgot(unref(forgotForm))
+      }, {
+        default: withCtx((_2, _push2, _parent2, _scopeId) => {
+          if (_push2) {
+            _push2(ssrRenderComponent(_component_UIFormSelectArea, {
+              id: "area",
+              modelValue: _ctx.registerForm.area,
+              "onUpdate:modelValue": ($event) => _ctx.registerForm.area = $event,
+              label: "國際區碼",
+              class: "mb-3"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormText, {
+              id: "phone",
+              modelValue: unref(forgotForm).phone,
+              "onUpdate:modelValue": ($event) => unref(forgotForm).phone = $event,
+              label: "手機",
+              class: "mb-3",
+              "is-phone": true,
+              onCaptcha: getCaptcha
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormCaptcha, {
+              modelValue: unref(forgotForm).verifyCode,
+              "onUpdate:modelValue": ($event) => unref(forgotForm).verifyCode = $event,
+              class: "mb-3",
+              label: "驗證碼",
+              placeholder: "請輸入手機驗證碼"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormPassword, {
+              id: "password",
+              modelValue: unref(forgotForm).password,
+              "onUpdate:modelValue": ($event) => unref(forgotForm).password = $event,
+              label: "新密碼",
+              class: "mb-3",
+              placeholder: "長度至少為8,英數組合"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormPassword, {
+              id: "password",
+              modelValue: unref(forgotForm).passwordConfirm,
+              "onUpdate:modelValue": ($event) => unref(forgotForm).passwordConfirm = $event,
+              label: "確認密碼",
+              class: "mb-10",
+              placeholder: "再次輸入密碼"
+            }, null, _parent2, _scopeId));
+            _push2(ssrRenderComponent(_component_UIFormSubmit, {
+              class: "mb-7",
+              text: "送出",
+              center: true,
+              onClick: ($event) => unref(user).forgot(unref(forgotForm))
+            }, null, _parent2, _scopeId));
+          } else {
+            return [
+              createVNode(_component_UIFormSelectArea, {
+                id: "area",
+                modelValue: _ctx.registerForm.area,
+                "onUpdate:modelValue": ($event) => _ctx.registerForm.area = $event,
+                label: "國際區碼",
+                class: "mb-3"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormText, {
+                id: "phone",
+                modelValue: unref(forgotForm).phone,
+                "onUpdate:modelValue": ($event) => unref(forgotForm).phone = $event,
+                label: "手機",
+                class: "mb-3",
+                "is-phone": true,
+                onCaptcha: getCaptcha
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormCaptcha, {
+                modelValue: unref(forgotForm).verifyCode,
+                "onUpdate:modelValue": ($event) => unref(forgotForm).verifyCode = $event,
+                class: "mb-3",
+                label: "驗證碼",
+                placeholder: "請輸入手機驗證碼"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormPassword, {
+                id: "password",
+                modelValue: unref(forgotForm).password,
+                "onUpdate:modelValue": ($event) => unref(forgotForm).password = $event,
+                label: "新密碼",
+                class: "mb-3",
+                placeholder: "長度至少為8,英數組合"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormPassword, {
+                id: "password",
+                modelValue: unref(forgotForm).passwordConfirm,
+                "onUpdate:modelValue": ($event) => unref(forgotForm).passwordConfirm = $event,
+                label: "確認密碼",
+                class: "mb-10",
+                placeholder: "再次輸入密碼"
+              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode(_component_UIFormSubmit, {
+                class: "mb-7",
+                text: "送出",
+                center: true,
+                onClick: ($event) => unref(user).forgot(unref(forgotForm))
+              }, null, 8, ["onClick"])
+            ];
+          }
+        }),
+        _: 1
+      }, _parent));
+      _push(`</div>`);
+    };
+  }
+});
+const _sfc_setup$9 = _sfc_main$9.setup;
+_sfc_main$9.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/ForgotForm.vue");
+  return _sfc_setup$9 ? _sfc_setup$9(props, ctx) : void 0;
+};
+const _sfc_main$8 = /* @__PURE__ */ defineComponent({
+  __name: "Popup",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const type = ref("login");
+    const $showAuth = useState("showAuth", () => false);
+    const $bodyLock = useState("body.lock");
+    const close = () => {
+      $showAuth.value = false;
+    };
+    watch(
+      () => $showAuth.value,
+      (val) => {
+        $bodyLock.value = val;
+        if (!val) {
+          setTimeout(() => {
+            type.value = "login";
+          }, 400);
+        }
+      }
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_AuthLoginForm = __nuxt_component_0$1;
+      const _component_AuthRegisterForm = _sfc_main$b;
+      const _component_AuthForgotForm = _sfc_main$9;
+      ssrRenderTeleport(_push, (_push2) => {
+        _push2(ssrRenderComponent(unref(fe), {
+          show: unref($showAuth),
+          appear: ""
+        }, {
+          default: withCtx((_2, _push3, _parent2, _scopeId) => {
+            if (_push3) {
+              _push3(ssrRenderComponent(unref(oe), {
+                as: "template",
+                enter: "duration-150 linear",
+                "enter-from": "opacity-0",
+                "enter-to": "opacity-100",
+                leave: "duration-150 linear",
+                "leave-from": "opacity-100",
+                "leave-to": "opacity-0"
+              }, {
+                default: withCtx((_22, _push4, _parent3, _scopeId2) => {
+                  if (_push4) {
+                    _push4(`<div class="fixed top-0 left-0 w-full h-full z-20" data-v-97a7d60f${_scopeId2}><div class="absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50" data-v-97a7d60f${_scopeId2}></div><div class="absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-1/2 rounded-lg max-w-11/12 backdrop-filter backdrop-blur w-xl left-1/2 top-1/2 max-h-4/5 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow" data-v-97a7d60f${_scopeId2}><div data-v-97a7d60f${_scopeId2}>`);
+                    if (unref(type) === "login") {
+                      _push4(ssrRenderComponent(_component_AuthLoginForm, {
+                        onRegister: ($event) => type.value = "register",
+                        onForgot: ($event) => type.value = "forgot",
+                        onClose: close
+                      }, null, _parent3, _scopeId2));
+                    } else if (unref(type) === "register") {
+                      _push4(ssrRenderComponent(_component_AuthRegisterForm, {
+                        onCancel: ($event) => type.value = "login",
+                        onClose: close
+                      }, null, _parent3, _scopeId2));
+                    } else if (unref(type) === "forgot") {
+                      _push4(ssrRenderComponent(_component_AuthForgotForm, {
+                        onCancel: ($event) => type.value = "login",
+                        onClose: close
+                      }, null, _parent3, _scopeId2));
+                    } else {
+                      _push4(`<!---->`);
+                    }
+                    _push4(`</div></div></div>`);
+                  } else {
+                    return [
+                      createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-20" }, [
+                        createVNode("div", {
+                          class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50",
+                          onClick: close
+                        }),
+                        createVNode("div", { class: "absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-1/2 rounded-lg max-w-11/12 backdrop-filter backdrop-blur w-xl left-1/2 top-1/2 max-h-4/5 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow" }, [
+                          createVNode("div", null, [
+                            unref(type) === "login" ? (openBlock(), createBlock(_component_AuthLoginForm, {
+                              key: 0,
+                              onRegister: ($event) => type.value = "register",
+                              onForgot: ($event) => type.value = "forgot",
+                              onClose: close
+                            }, null, 8, ["onRegister", "onForgot"])) : unref(type) === "register" ? (openBlock(), createBlock(_component_AuthRegisterForm, {
+                              key: 1,
+                              onCancel: ($event) => type.value = "login",
+                              onClose: close
+                            }, null, 8, ["onCancel"])) : unref(type) === "forgot" ? (openBlock(), createBlock(_component_AuthForgotForm, {
+                              key: 2,
+                              onCancel: ($event) => type.value = "login",
+                              onClose: close
+                            }, null, 8, ["onCancel"])) : createCommentVNode("", true)
+                          ])
+                        ])
+                      ])
+                    ];
+                  }
+                }),
+                _: 1
+              }, _parent2, _scopeId));
+            } else {
+              return [
+                createVNode(unref(oe), {
+                  as: "template",
+                  enter: "duration-150 linear",
+                  "enter-from": "opacity-0",
+                  "enter-to": "opacity-100",
+                  leave: "duration-150 linear",
+                  "leave-from": "opacity-100",
+                  "leave-to": "opacity-0"
+                }, {
+                  default: withCtx(() => [
+                    createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-20" }, [
+                      createVNode("div", {
+                        class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50",
+                        onClick: close
+                      }),
+                      createVNode("div", { class: "absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-1/2 rounded-lg max-w-11/12 backdrop-filter backdrop-blur w-xl left-1/2 top-1/2 max-h-4/5 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow" }, [
+                        createVNode("div", null, [
+                          unref(type) === "login" ? (openBlock(), createBlock(_component_AuthLoginForm, {
+                            key: 0,
+                            onRegister: ($event) => type.value = "register",
+                            onForgot: ($event) => type.value = "forgot",
+                            onClose: close
+                          }, null, 8, ["onRegister", "onForgot"])) : unref(type) === "register" ? (openBlock(), createBlock(_component_AuthRegisterForm, {
+                            key: 1,
+                            onCancel: ($event) => type.value = "login",
+                            onClose: close
+                          }, null, 8, ["onCancel"])) : unref(type) === "forgot" ? (openBlock(), createBlock(_component_AuthForgotForm, {
+                            key: 2,
+                            onCancel: ($event) => type.value = "login",
+                            onClose: close
+                          }, null, 8, ["onCancel"])) : createCommentVNode("", true)
+                        ])
+                      ])
+                    ])
+                  ]),
+                  _: 1
+                })
+              ];
+            }
+          }),
+          _: 1
+        }, _parent));
+      }, "body", false, _parent);
+    };
+  }
+});
+const _sfc_setup$8 = _sfc_main$8.setup;
+_sfc_main$8.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/Popup.vue");
+  return _sfc_setup$8 ? _sfc_setup$8(props, ctx) : void 0;
+};
+const __nuxt_component_8 = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["__scopeId", "data-v-97a7d60f"]]);
+const _sfc_main$7 = /* @__PURE__ */ defineComponent({
+  __name: "Message",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const $message = useState("message", () => "");
+    const show = ref(false);
+    const reset = () => {
+      $message.value = "";
+    };
+    const close = () => {
+      show.value = false;
+      setTimeout(() => {
+        reset();
+      }, 150);
+    };
+    watch(
+      () => $message.value,
+      (val) => {
+        show.value = !!val;
+        setTimeout(() => {
+          close();
+        }, 4e3);
+      }
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_UnoIcon = __nuxt_component_1;
+      ssrRenderTeleport(_push, (_push2) => {
+        _push2(ssrRenderComponent(unref(fe), {
+          show: unref(show),
+          appear: ""
+        }, {
+          default: withCtx((_2, _push3, _parent2, _scopeId) => {
+            if (_push3) {
+              _push3(ssrRenderComponent(unref(oe), {
+                as: "template",
+                enter: "duration-150 linear",
+                "enter-from": "opacity-0",
+                "enter-to": "opacity-100",
+                leave: "duration-300 linear",
+                "leave-from": "",
+                "leave-to": "-translate-y-16"
+              }, {
+                default: withCtx((_22, _push4, _parent3, _scopeId2) => {
+                  if (_push4) {
+                    _push4(`<div class="py-2 px-5 fb fixed overflow-x-hidden overflow-y-auto transform -translate-x-1/2 rounded-lg lg:max-w-7/12 max-w-11/12 left-1/2 top-4 z-30 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow" data-v-f827ccb2${_scopeId2}>`);
+                    if (unref($message)) {
+                      _push4(`<div class="pl-[0.075em] tracking-wide" data-v-f827ccb2${_scopeId2}>${ssrInterpolate(unref($message))}</div>`);
+                    } else {
+                      _push4(`<!---->`);
+                    }
+                    _push4(ssrRenderComponent(_component_UnoIcon, {
+                      class: "i-ion-ios-close-circle-outline ml-3 p-1 text-xl cursor-pointer",
+                      onClick: close
+                    }, null, _parent3, _scopeId2));
+                    _push4(`</div>`);
+                  } else {
+                    return [
+                      createVNode("div", { class: "py-2 px-5 fb fixed overflow-x-hidden overflow-y-auto transform -translate-x-1/2 rounded-lg lg:max-w-7/12 max-w-11/12 left-1/2 top-4 z-30 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow" }, [
+                        unref($message) ? (openBlock(), createBlock("div", {
+                          key: 0,
+                          class: "pl-[0.075em] tracking-wide"
+                        }, toDisplayString(unref($message)), 1)) : createCommentVNode("", true),
+                        createVNode(_component_UnoIcon, {
+                          class: "i-ion-ios-close-circle-outline ml-3 p-1 text-xl cursor-pointer",
+                          onClick: close
+                        })
+                      ])
+                    ];
+                  }
+                }),
+                _: 1
+              }, _parent2, _scopeId));
+            } else {
+              return [
+                createVNode(unref(oe), {
+                  as: "template",
+                  enter: "duration-150 linear",
+                  "enter-from": "opacity-0",
+                  "enter-to": "opacity-100",
+                  leave: "duration-300 linear",
+                  "leave-from": "",
+                  "leave-to": "-translate-y-16"
+                }, {
+                  default: withCtx(() => [
+                    createVNode("div", { class: "py-2 px-5 fb fixed overflow-x-hidden overflow-y-auto transform -translate-x-1/2 rounded-lg lg:max-w-7/12 max-w-11/12 left-1/2 top-4 z-30 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow" }, [
+                      unref($message) ? (openBlock(), createBlock("div", {
+                        key: 0,
+                        class: "pl-[0.075em] tracking-wide"
+                      }, toDisplayString(unref($message)), 1)) : createCommentVNode("", true),
+                      createVNode(_component_UnoIcon, {
+                        class: "i-ion-ios-close-circle-outline ml-3 p-1 text-xl cursor-pointer",
+                        onClick: close
+                      })
+                    ])
+                  ]),
+                  _: 1
+                })
+              ];
+            }
+          }),
+          _: 1
+        }, _parent));
+      }, "body", false, _parent);
+    };
+  }
+});
+const _sfc_setup$7 = _sfc_main$7.setup;
+_sfc_main$7.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Global/Message.vue");
+  return _sfc_setup$7 ? _sfc_setup$7(props, ctx) : void 0;
+};
+const __nuxt_component_9 = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["__scopeId", "data-v-f827ccb2"]]);
+const _sfc_main$6 = /* @__PURE__ */ defineComponent({
+  __name: "Alert",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const $alert = useState("alert", () => {
+      return {
+        type: "",
+        title: "",
+        text: "",
+        center: false,
+        action: () => {
+        }
+      };
+    });
+    const show = ref(false);
+    const $bodyLock = useState("body.lock");
+    watch(
+      () => show.value,
+      (val) => {
+        $bodyLock.value = val;
+      }
+    );
+    watch(
+      () => $alert.value,
+      (val) => {
+        if (val.title || val.text)
+          show.value = true;
+      }
+    );
+    const reset = () => {
+      $alert.value = {
+        type: "",
+        title: "",
+        text: "",
+        center: false,
+        action: () => {
+        }
+      };
+    };
+    const close = async () => {
+      show.value = false;
+      if ($alert.value.action)
+        $alert.value.action();
+      setTimeout(() => {
+        reset();
+      }, 150);
+    };
+    const imgTypes = {
+      error: "/delete.png",
+      info: "/alert.png",
+      idea: "/idea.png",
+      success: "/check.png"
+    };
+    const imgType = computed(() => {
+      return imgTypes[$alert.value.type] || "/alert.png";
+    });
+    return (_ctx, _push, _parent, _attrs) => {
+      ssrRenderTeleport(_push, (_push2) => {
+        _push2(ssrRenderComponent(unref(fe), {
+          show: unref(show),
+          appear: ""
+        }, {
+          default: withCtx((_2, _push3, _parent2, _scopeId) => {
+            if (_push3) {
+              _push3(ssrRenderComponent(unref(oe), {
+                as: "template",
+                enter: "duration-150 linear",
+                "enter-from": "opacity-0",
+                "enter-to": "opacity-100",
+                leave: "duration-150 linear",
+                "leave-from": "opacity-100",
+                "leave-to": "opacity-0"
+              }, {
+                default: withCtx((_22, _push4, _parent3, _scopeId2) => {
+                  if (_push4) {
+                    _push4(`<div class="fixed top-0 left-0 w-full h-full z-30" data-v-ea4bae02${_scopeId2}><div class="absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50" data-v-ea4bae02${_scopeId2}></div><div class="${ssrRenderClass([[{ "text-center": unref($alert).center }], "p-12 min-w-xs md:min-w-sm absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-7/12 rounded-lg max-w-11/12 backdrop-filter backdrop-blur left-1/2 top-1/2 max-h-4/5 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow"])}" data-v-ea4bae02${_scopeId2}><img class="mx-auto mb-6 w-26"${ssrRenderAttr("src", unref(imgType))} data-v-ea4bae02${_scopeId2}>`);
+                    if (unref($alert).title) {
+                      _push4(`<div class="${ssrRenderClass([{ "pb-4": unref($alert).text }, "text-lg pl-[0.1em] tracking-widest font-bold text-center"])}" data-v-ea4bae02${_scopeId2}>${ssrInterpolate(unref($alert).title)}</div>`);
+                    } else {
+                      _push4(`<!---->`);
+                    }
+                    if (unref($alert).text) {
+                      _push4(`<div data-v-ea4bae02${_scopeId2}>${ssrInterpolate(unref($alert).text)}</div>`);
+                    } else {
+                      _push4(`<!---->`);
+                    }
+                    _push4(`</div></div>`);
+                  } else {
+                    return [
+                      createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-30" }, [
+                        createVNode("div", {
+                          class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50",
+                          onClick: close
+                        }),
+                        createVNode("div", {
+                          class: ["p-12 min-w-xs md:min-w-sm absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-7/12 rounded-lg max-w-11/12 backdrop-filter backdrop-blur left-1/2 top-1/2 max-h-4/5 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow", [{ "text-center": unref($alert).center }]]
+                        }, [
+                          createVNode("img", {
+                            class: "mx-auto mb-6 w-26",
+                            src: unref(imgType)
+                          }, null, 8, ["src"]),
+                          unref($alert).title ? (openBlock(), createBlock("div", {
+                            key: 0,
+                            class: ["text-lg pl-[0.1em] tracking-widest font-bold text-center", { "pb-4": unref($alert).text }]
+                          }, toDisplayString(unref($alert).title), 3)) : createCommentVNode("", true),
+                          unref($alert).text ? (openBlock(), createBlock("div", { key: 1 }, toDisplayString(unref($alert).text), 1)) : createCommentVNode("", true)
+                        ], 2)
+                      ])
+                    ];
+                  }
+                }),
+                _: 1
+              }, _parent2, _scopeId));
+            } else {
+              return [
+                createVNode(unref(oe), {
+                  as: "template",
+                  enter: "duration-150 linear",
+                  "enter-from": "opacity-0",
+                  "enter-to": "opacity-100",
+                  leave: "duration-150 linear",
+                  "leave-from": "opacity-100",
+                  "leave-to": "opacity-0"
+                }, {
+                  default: withCtx(() => [
+                    createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-30" }, [
+                      createVNode("div", {
+                        class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50",
+                        onClick: close
+                      }),
+                      createVNode("div", {
+                        class: ["p-12 min-w-xs md:min-w-sm absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-7/12 rounded-lg max-w-11/12 backdrop-filter backdrop-blur left-1/2 top-1/2 max-h-4/5 bg-light-100/95 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-100/[0.15] shadow", [{ "text-center": unref($alert).center }]]
+                      }, [
+                        createVNode("img", {
+                          class: "mx-auto mb-6 w-26",
+                          src: unref(imgType)
+                        }, null, 8, ["src"]),
+                        unref($alert).title ? (openBlock(), createBlock("div", {
+                          key: 0,
+                          class: ["text-lg pl-[0.1em] tracking-widest font-bold text-center", { "pb-4": unref($alert).text }]
+                        }, toDisplayString(unref($alert).title), 3)) : createCommentVNode("", true),
+                        unref($alert).text ? (openBlock(), createBlock("div", { key: 1 }, toDisplayString(unref($alert).text), 1)) : createCommentVNode("", true)
+                      ], 2)
+                    ])
+                  ]),
+                  _: 1
+                })
+              ];
+            }
+          }),
+          _: 1
+        }, _parent));
+      }, "body", false, _parent);
+    };
+  }
+});
+const _sfc_setup$6 = _sfc_main$6.setup;
+_sfc_main$6.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Global/Alert.vue");
+  return _sfc_setup$6 ? _sfc_setup$6(props, ctx) : void 0;
+};
+const __nuxt_component_10 = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__scopeId", "data-v-ea4bae02"]]);
+const _sfc_main$5 = {
+  name: "EosIconsLoading"
+};
+function _sfc_ssrRender(_ctx, _push, _parent, _attrs, $props, $setup, $data, $options) {
+  _push(`<svg${ssrRenderAttrs(mergeProps({
+    width: "1em",
+    height: "1em",
+    viewBox: "0 0 24 24"
+  }, _attrs))}><path fill="currentColor" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity=".5"></path><path fill="currentColor" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z"><animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12" type="rotate"></animateTransform></path></svg>`);
+}
+const _sfc_setup$5 = _sfc_main$5.setup;
+_sfc_main$5.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Icon/Loading.vue");
+  return _sfc_setup$5 ? _sfc_setup$5(props, ctx) : void 0;
+};
+const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["ssrRender", _sfc_ssrRender]]);
+const _sfc_main$4 = /* @__PURE__ */ defineComponent({
+  __name: "Loading",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const $loading = useState("loading", () => false);
+    const $bodyLock = useState("body.lock");
+    watch(
+      () => $loading.value,
+      (val) => {
+        $bodyLock.value = val;
+      }
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_IconLoading = __nuxt_component_0;
+      ssrRenderTeleport(_push, (_push2) => {
+        _push2(ssrRenderComponent(unref(fe), {
+          show: unref($loading),
+          appear: ""
+        }, {
+          default: withCtx((_2, _push3, _parent2, _scopeId) => {
+            if (_push3) {
+              _push3(ssrRenderComponent(unref(oe), {
+                as: "template",
+                enter: "duration-150 linear",
+                "enter-from": "opacity-0",
+                "enter-to": "opacity-100",
+                leave: "duration-150 linear",
+                "leave-from": "opacity-100",
+                "leave-to": "opacity-0"
+              }, {
+                default: withCtx((_22, _push4, _parent3, _scopeId2) => {
+                  if (_push4) {
+                    _push4(`<div class="fixed top-0 left-0 w-full h-full z-20" data-v-f01b506f${_scopeId2}><div class="absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50" data-v-f01b506f${_scopeId2}></div>`);
+                    _push4(ssrRenderComponent(_component_IconLoading, { class: "absolute text-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl" }, null, _parent3, _scopeId2));
+                    _push4(`</div>`);
+                  } else {
+                    return [
+                      createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-20" }, [
+                        createVNode("div", { class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50" }),
+                        createVNode(_component_IconLoading, { class: "absolute text-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl" })
+                      ])
+                    ];
+                  }
+                }),
+                _: 1
+              }, _parent2, _scopeId));
+            } else {
+              return [
+                createVNode(unref(oe), {
+                  as: "template",
+                  enter: "duration-150 linear",
+                  "enter-from": "opacity-0",
+                  "enter-to": "opacity-100",
+                  leave: "duration-150 linear",
+                  "leave-from": "opacity-100",
+                  "leave-to": "opacity-0"
+                }, {
+                  default: withCtx(() => [
+                    createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-20" }, [
+                      createVNode("div", { class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50" }),
+                      createVNode(_component_IconLoading, { class: "absolute text-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl" })
+                    ])
+                  ]),
+                  _: 1
+                })
+              ];
+            }
+          }),
+          _: 1
+        }, _parent));
+      }, "body", false, _parent);
+    };
+  }
+});
+const _sfc_setup$4 = _sfc_main$4.setup;
+_sfc_main$4.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Global/Loading.vue");
+  return _sfc_setup$4 ? _sfc_setup$4(props, ctx) : void 0;
+};
+const __nuxt_component_11 = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-f01b506f"]]);
+const _sfc_main$3 = /* @__PURE__ */ defineComponent({
+  __name: "Popup",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const $tip = useState("tip.data", () => {
+      return {
+        id: 0,
+        title: "",
+        content: "",
+        publishDate: ""
+      };
+    });
+    const $show = useState("tip.show", () => false);
+    const close = () => {
+      $show.value = false;
+    };
+    const isCollection = ref(false);
+    const collection = async (id) => {
+      const { data, error } = await useHttpFetchPost("/tip/collection", {
+        body: { id }
+      });
+      if (!error)
+        isCollection.value = true;
+    };
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_UnoIcon = __nuxt_component_1;
+      ssrRenderTeleport(_push, (_push2) => {
+        _push2(ssrRenderComponent(unref(fe), {
+          show: unref($show),
+          appear: ""
+        }, {
+          default: withCtx((_2, _push3, _parent2, _scopeId) => {
+            if (_push3) {
+              _push3(ssrRenderComponent(unref(oe), {
+                as: "template",
+                enter: "duration-150 linear",
+                "enter-from": "opacity-0",
+                "enter-to": "opacity-100",
+                leave: "duration-150 linear",
+                "leave-from": "opacity-100",
+                "leave-to": "opacity-0"
+              }, {
+                default: withCtx((_22, _push4, _parent3, _scopeId2) => {
+                  if (_push4) {
+                    _push4(`<div class="fixed top-0 left-0 w-full h-full z-20" data-v-b8baa62a${_scopeId2}><div class="absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50" data-v-b8baa62a${_scopeId2}></div><div class="px-10 pb-8 max-w-[44em] w-11/12 absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-1/2 rounded-lg backdrop-filter backdrop-blur left-1/2 top-1/2 max-h-4/5 bg-light-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-100/[0.15] shadow" data-v-b8baa62a${_scopeId2}>`);
+                    if (unref($tip).title) {
+                      _push4(`<div class="sticky top-0 pt-7 pb-2 flex flex-wrap justify-between text-lg pl-[0.1em] tracking-widest font-bold bg-light-100 dark:bg-gray-800" data-v-b8baa62a${_scopeId2}>${ssrInterpolate(unref($tip).title)} <div class="flex items-center space-x-3" data-v-b8baa62a${_scopeId2}><div class="cursor-pointer flex items-center" data-v-b8baa62a${_scopeId2}>`);
+                      _push4(ssrRenderComponent(_component_UnoIcon, {
+                        style: !unref(isCollection) ? null : { display: "none" },
+                        class: "i-ion-heart-outline w-6"
+                      }, null, _parent3, _scopeId2));
+                      _push4(ssrRenderComponent(_component_UnoIcon, {
+                        style: unref(isCollection) ? null : { display: "none" },
+                        class: "i-ion-heart-sharp text-red-600 w-6"
+                      }, null, _parent3, _scopeId2));
+                      _push4(`</div>`);
+                      _push4(ssrRenderComponent(_component_UnoIcon, {
+                        class: "i-ion-ios-close-circle-outline text-2xl w-6 cursor-pointer",
+                        onClick: close
+                      }, null, _parent3, _scopeId2));
+                      _push4(`</div></div>`);
+                    } else {
+                      _push4(`<!---->`);
+                    }
+                    _push4(`<div class="text-sm opacity-60 relative" data-v-b8baa62a${_scopeId2}>${ssrInterpolate(unref($tip).publishDate)}</div>`);
+                    if (unref($tip).content) {
+                      _push4(`<div class="py-4 relative" data-v-b8baa62a${_scopeId2}>${unref($tip).content}</div>`);
+                    } else {
+                      _push4(`<!---->`);
+                    }
+                    _push4(`</div></div>`);
+                  } else {
+                    return [
+                      createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-20" }, [
+                        createVNode("div", {
+                          class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50",
+                          onClick: close
+                        }),
+                        createVNode("div", { class: "px-10 pb-8 max-w-[44em] w-11/12 absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-1/2 rounded-lg backdrop-filter backdrop-blur left-1/2 top-1/2 max-h-4/5 bg-light-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-100/[0.15] shadow" }, [
+                          unref($tip).title ? (openBlock(), createBlock("div", {
+                            key: 0,
+                            class: "sticky top-0 pt-7 pb-2 flex flex-wrap justify-between text-lg pl-[0.1em] tracking-widest font-bold bg-light-100 dark:bg-gray-800"
+                          }, [
+                            createTextVNode(toDisplayString(unref($tip).title) + " ", 1),
+                            createVNode("div", { class: "flex items-center space-x-3" }, [
+                              createVNode("div", {
+                                class: "cursor-pointer flex items-center",
+                                onClick: ($event) => collection(unref($tip).id)
+                              }, [
+                                withDirectives(createVNode(_component_UnoIcon, { class: "i-ion-heart-outline w-6" }, null, 512), [
+                                  [vShow, !unref(isCollection)]
+                                ]),
+                                withDirectives(createVNode(_component_UnoIcon, { class: "i-ion-heart-sharp text-red-600 w-6" }, null, 512), [
+                                  [vShow, unref(isCollection)]
+                                ])
+                              ], 8, ["onClick"]),
+                              createVNode(_component_UnoIcon, {
+                                class: "i-ion-ios-close-circle-outline text-2xl w-6 cursor-pointer",
+                                onClick: close
+                              })
+                            ])
+                          ])) : createCommentVNode("", true),
+                          createVNode("div", { class: "text-sm opacity-60 relative" }, toDisplayString(unref($tip).publishDate), 1),
+                          unref($tip).content ? (openBlock(), createBlock("div", {
+                            key: 1,
+                            class: "py-4 relative",
+                            innerHTML: unref($tip).content
+                          }, null, 8, ["innerHTML"])) : createCommentVNode("", true)
+                        ])
+                      ])
+                    ];
+                  }
+                }),
+                _: 1
+              }, _parent2, _scopeId));
+            } else {
+              return [
+                createVNode(unref(oe), {
+                  as: "template",
+                  enter: "duration-150 linear",
+                  "enter-from": "opacity-0",
+                  "enter-to": "opacity-100",
+                  leave: "duration-150 linear",
+                  "leave-from": "opacity-100",
+                  "leave-to": "opacity-0"
+                }, {
+                  default: withCtx(() => [
+                    createVNode("div", { class: "fixed top-0 left-0 w-full h-full z-20" }, [
+                      createVNode("div", {
+                        class: "absolute top-0 left-0 w-full h-full cursor-pointer backdrop-filter backdrop-blur-sm bg-dark-900/50",
+                        onClick: close
+                      }),
+                      createVNode("div", { class: "px-10 pb-8 max-w-[44em] w-11/12 absolute overflow-x-hidden overflow-y-auto transform -translate-x-1/2 -translate-y-1/2 rounded-lg backdrop-filter backdrop-blur left-1/2 top-1/2 max-h-4/5 bg-light-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-100/[0.15] shadow" }, [
+                        unref($tip).title ? (openBlock(), createBlock("div", {
+                          key: 0,
+                          class: "sticky top-0 pt-7 pb-2 flex flex-wrap justify-between text-lg pl-[0.1em] tracking-widest font-bold bg-light-100 dark:bg-gray-800"
+                        }, [
+                          createTextVNode(toDisplayString(unref($tip).title) + " ", 1),
+                          createVNode("div", { class: "flex items-center space-x-3" }, [
+                            createVNode("div", {
+                              class: "cursor-pointer flex items-center",
+                              onClick: ($event) => collection(unref($tip).id)
+                            }, [
+                              withDirectives(createVNode(_component_UnoIcon, { class: "i-ion-heart-outline w-6" }, null, 512), [
+                                [vShow, !unref(isCollection)]
+                              ]),
+                              withDirectives(createVNode(_component_UnoIcon, { class: "i-ion-heart-sharp text-red-600 w-6" }, null, 512), [
+                                [vShow, unref(isCollection)]
+                              ])
+                            ], 8, ["onClick"]),
+                            createVNode(_component_UnoIcon, {
+                              class: "i-ion-ios-close-circle-outline text-2xl w-6 cursor-pointer",
+                              onClick: close
+                            })
+                          ])
+                        ])) : createCommentVNode("", true),
+                        createVNode("div", { class: "text-sm opacity-60 relative" }, toDisplayString(unref($tip).publishDate), 1),
+                        unref($tip).content ? (openBlock(), createBlock("div", {
+                          key: 1,
+                          class: "py-4 relative",
+                          innerHTML: unref($tip).content
+                        }, null, 8, ["innerHTML"])) : createCommentVNode("", true)
+                      ])
+                    ])
+                  ]),
+                  _: 1
+                })
+              ];
+            }
+          }),
+          _: 1
+        }, _parent));
+      }, "body", false, _parent);
+    };
+  }
+});
+const _sfc_setup$3 = _sfc_main$3.setup;
+_sfc_main$3.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Tip/Popup.vue");
+  return _sfc_setup$3 ? _sfc_setup$3(props, ctx) : void 0;
+};
+const __nuxt_component_12 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-b8baa62a"]]);
 async function userController() {
   const isLogin = useState("isLogin", () => false);
   const route = useRoute();
@@ -7087,7 +6233,7 @@ async function userController() {
     setTimeout(() => {
       $alert.value = {
         type: "info",
-        title: "\u8ACB\u91CD\u65B0\u767B\u5165",
+        title: "請重新登入",
         action: () => {
           router.push("/");
         }
@@ -7097,18 +6243,18 @@ async function userController() {
   return { token };
 }
 function InitApp() {
-  const app2 = {
-    name: "BondingTechs \u9375\u7D50\u79D1\u6280",
+  const app = {
+    name: "BondingTechs 鍵結科技",
     author: {
       name: "Bryan",
       link: "#"
     }
   };
-  useState("app", () => app2);
+  useState("app", () => app);
   const size = sizeController();
   const user = userController();
   return {
-    app: app2,
+    app,
     size,
     user
   };
@@ -7129,15 +6275,15 @@ const useDictStore = defineStore("dict", {
     }
   }
 });
-const _sfc_main = /* @__PURE__ */ defineComponent({
+const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "app",
   __ssrInlineRender: true,
   setup(__props) {
     InitApp();
     const locale = useState("locale.i18n");
-    const app2 = useAppConfig();
+    const app = useAppConfig();
     useHead({
-      title: app2.name,
+      title: app.name,
       titleTemplate: "%s",
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -7154,17 +6300,22 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     return (_ctx, _push, _parent, _attrs) => {
       const _component_Html = Html;
       const _component_Body = Body;
-      const _component_LayoutNavbar = _sfc_main$2;
+      const _component_LayoutNavbar = _sfc_main$m;
       const _component_NuxtLayout = __nuxt_component_3;
-      const _component_NuxtLoadingIndicator = __nuxt_component_4;
-      const _component_NuxtPage = __nuxt_component_2;
-      const _component_LayoutNavbarMobile = _sfc_main$1;
-      const _component_ClientOnly = __nuxt_component_0;
+      const _component_NuxtLoadingIndicator = __nuxt_component_4$2;
+      const _component_NuxtPage = __nuxt_component_2$4;
+      const _component_LayoutNavbarMobile = _sfc_main$l;
+      const _component_ClientOnly = __nuxt_component_0$2;
+      const _component_AuthPopup = __nuxt_component_8;
+      const _component_GlobalMessage = __nuxt_component_9;
+      const _component_GlobalAlert = __nuxt_component_10;
+      const _component_GlobalLoading = __nuxt_component_11;
+      const _component_TipPopup = __nuxt_component_12;
       _push(ssrRenderComponent(_component_Html, mergeProps({ lang: unref(locale) }, _attrs), {
-        default: withCtx((_, _push2, _parent2, _scopeId) => {
+        default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
             _push2(ssrRenderComponent(_component_Body, { class: "bg-white text-gray-800 antialiased transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200" }, {
-              default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+              default: withCtx((_22, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
                   _push3(ssrRenderComponent(_component_LayoutNavbar, null, null, _parent3, _scopeId2));
                   _push3(ssrRenderComponent(_component_NuxtLayout, { class: "lt-lg:pb-14" }, {
@@ -7186,7 +6337,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }, _parent3, _scopeId2));
                   _push3(ssrRenderComponent(_component_LayoutNavbarMobile, null, null, _parent3, _scopeId2));
-                  _push3(ssrRenderComponent(_component_ClientOnly, null, null, _parent3, _scopeId2));
+                  _push3(ssrRenderComponent(_component_ClientOnly, null, {}, _parent3, _scopeId2));
                 } else {
                   return [
                     createVNode(_component_LayoutNavbar),
@@ -7200,7 +6351,16 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                       _: 1
                     }),
                     createVNode(_component_LayoutNavbarMobile),
-                    createVNode(_component_ClientOnly)
+                    createVNode(_component_ClientOnly, null, {
+                      default: withCtx(() => [
+                        createVNode(_component_AuthPopup),
+                        createVNode(_component_GlobalMessage),
+                        createVNode(_component_GlobalAlert),
+                        createVNode(_component_GlobalLoading),
+                        createVNode(_component_TipPopup)
+                      ]),
+                      _: 1
+                    })
                   ];
                 }
               }),
@@ -7221,7 +6381,16 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     _: 1
                   }),
                   createVNode(_component_LayoutNavbarMobile),
-                  createVNode(_component_ClientOnly)
+                  createVNode(_component_ClientOnly, null, {
+                    default: withCtx(() => [
+                      createVNode(_component_AuthPopup),
+                      createVNode(_component_GlobalMessage),
+                      createVNode(_component_GlobalAlert),
+                      createVNode(_component_GlobalLoading),
+                      createVNode(_component_TipPopup)
+                    ]),
+                    _: 1
+                  })
                 ]),
                 _: 1
               })
@@ -7233,35 +6402,118 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     };
   }
 });
+const _sfc_setup$2 = _sfc_main$2.setup;
+_sfc_main$2.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("app.vue");
+  return _sfc_setup$2 ? _sfc_setup$2(props, ctx) : void 0;
+};
+const _sfc_main$1 = {
+  __name: "nuxt-error-page",
+  __ssrInlineRender: true,
+  props: {
+    error: Object
+  },
+  setup(__props) {
+    const props = __props;
+    const _error = props.error;
+    (_error.stack || "").split("\n").splice(1).map((line) => {
+      const text = line.replace("webpack:/", "").replace(".vue", ".js").trim();
+      return {
+        text,
+        internal: line.includes("node_modules") && !line.includes(".cache") || line.includes("internal") || line.includes("new Promise")
+      };
+    }).map((i) => `<span class="stack${i.internal ? " internal" : ""}">${i.text}</span>`).join("\n");
+    const statusCode = Number(_error.statusCode || 500);
+    const is404 = statusCode === 404;
+    const statusMessage = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
+    const description = _error.message || _error.toString();
+    const stack = void 0;
+    const _Error404 = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-404-06e4edc6.mjs').then((r2) => r2.default || r2));
+    const _Error = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-500-0352c428.mjs').then((r2) => r2.default || r2));
+    const ErrorTemplate = is404 ? _Error404 : _Error;
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ statusCode: unref(statusCode), statusMessage: unref(statusMessage), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
+    };
+  }
+};
+const _sfc_setup$1 = _sfc_main$1.setup;
+_sfc_main$1.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("../node_modules/nuxt/dist/app/components/nuxt-error-page.vue");
+  return _sfc_setup$1 ? _sfc_setup$1(props, ctx) : void 0;
+};
+const ErrorComponent = _sfc_main$1;
+const _sfc_main = {
+  __name: "nuxt-root",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const IslandRenderer = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/island-renderer-a0a9bbfc.mjs').then((r2) => r2.default || r2));
+    const nuxtApp = /* @__PURE__ */ useNuxtApp();
+    nuxtApp.deferHydration();
+    nuxtApp.ssrContext.url;
+    const SingleRenderer = false;
+    provide(PageRouteSymbol, useRoute());
+    nuxtApp.hooks.callHookWith((hooks) => hooks.map((hook) => hook()), "vue:setup");
+    const error = useError();
+    onErrorCaptured((err, target, info) => {
+      nuxtApp.hooks.callHook("vue:error", err, target, info).catch((hookError) => console.error("[nuxt] Error in `vue:error` hook", hookError));
+      {
+        const p2 = nuxtApp.runWithContext(() => showError(err));
+        onServerPrefetch(() => p2);
+        return false;
+      }
+    });
+    const { islandContext } = nuxtApp.ssrContext;
+    return (_ctx, _push, _parent, _attrs) => {
+      ssrRenderSuspense(_push, {
+        default: () => {
+          if (unref(error)) {
+            _push(ssrRenderComponent(unref(ErrorComponent), { error: unref(error) }, null, _parent));
+          } else if (unref(islandContext)) {
+            _push(ssrRenderComponent(unref(IslandRenderer), { context: unref(islandContext) }, null, _parent));
+          } else if (unref(SingleRenderer)) {
+            ssrRenderVNode(_push, createVNode(resolveDynamicComponent(unref(SingleRenderer)), null, null), _parent);
+          } else {
+            _push(ssrRenderComponent(unref(_sfc_main$2), null, null, _parent));
+          }
+        },
+        _: 1
+      });
+    };
+  }
+};
 const _sfc_setup = _sfc_main.setup;
 _sfc_main.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
-  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("app.vue");
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("../node_modules/nuxt/dist/app/components/nuxt-root.vue");
   return _sfc_setup ? _sfc_setup(props, ctx) : void 0;
 };
+const RootComponent = _sfc_main;
 if (!globalThis.$fetch) {
   globalThis.$fetch = $fetch$1.create({
     baseURL: baseURL()
   });
 }
 let entry;
-const plugins = normalizePlugins(_plugins);
 {
   entry = async function createNuxtAppServer(ssrContext) {
-    const vueApp = createApp(_sfc_main$9);
-    vueApp.component("App", _sfc_main);
+    const vueApp = createApp(RootComponent);
     const nuxt = createNuxtApp({ vueApp, ssrContext });
     try {
       await applyPlugins(nuxt, plugins);
       await nuxt.hooks.callHook("app:created", vueApp);
     } catch (err) {
-      await nuxt.callHook("app:error", err);
+      await nuxt.hooks.callHook("app:error", err);
       nuxt.payload.error = nuxt.payload.error || err;
+    }
+    if (ssrContext == null ? void 0 : ssrContext._renderResponse) {
+      throw new Error("skipping render");
     }
     return vueApp;
   };
 }
 const entry$1 = (ctx) => entry(ctx);
 
-export { _sfc_main$8 as A, defineNuxtRouteMiddleware as B, useAppConfig as C, O$1 as O, P, R, _export_sfc as _, u as a, __nuxt_component_1 as b, c, __nuxt_component_0$1 as d, entry$1 as default, useHead as e, f$2 as f, useHttpPost as g, useRouter as h, phoneRegex as i, useHttpFetchPost as j, useBaseStore as k, l, emailRegex as m, useRoute as n, o, p, idCardRegex as q, __nuxt_component_0 as r, storeToRefs as s, t, useState as u, passwordRegex as v, w, __nuxt_component_2 as x, htmlTag as y, _imports_0$1 as z };
+export { htmlTag as A, _imports_0$1 as B, _sfc_main$s as C, defineNuxtRouteMiddleware as D, useAppConfig as E, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, useHttpPost as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$k as i, __nuxt_component_2$1 as j, __nuxt_component_2$3 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, idCardRegex as o, phoneRegex as p, __nuxt_component_4 as q, __nuxt_component_5 as r, storeToRefs as s, __nuxt_component_0$2 as t, useHead as u, passwordRegex as v, __nuxt_component_2$2 as w, fe as x, oe as y, __nuxt_component_2$4 as z };
 //# sourceMappingURL=server.mjs.map

@@ -1,27 +1,30 @@
-import { defineEventHandler, useBody, createError } from 'h3';
-import { r as request } from './nitro/node-server.mjs';
+import { defineEventHandler, readBody, createError } from 'h3';
 import { p as phoneRegex } from './regex.mjs';
+import { r as request } from './nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
-import 'http';
-import 'https';
+import 'node:http';
+import 'node:https';
 import 'destr';
-import 'ohmyfetch';
+import 'ofetch';
 import 'unenv/runtime/fetch/index';
 import 'hookable';
 import 'scule';
+import 'klona';
+import 'defu';
 import 'ohash';
 import 'ufo';
 import 'unstorage';
-import 'defu';
+import 'unstorage/drivers/fs';
 import 'radix3';
 import 'node:fs';
 import 'node:url';
 import 'pathe';
 import 'axios';
+import 'http-graceful-shutdown';
 
 const forgot_post = defineEventHandler(async (event) => {
   try {
-    const body = await useBody(event);
+    const body = await readBody(event);
     const { phone, password, passwordConfirm, verifyCode } = body;
     const rules = [
       {
