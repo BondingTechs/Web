@@ -2,8 +2,8 @@ import { defineEventHandler, callNodeListener } from 'h3';
 import { r as request } from './nitro/node-server.mjs';
 import FormData from 'form-data';
 import fs from 'fs';
-import Jimp from 'jimp';
 import multer from 'multer';
+import sharp from 'sharp';
 import 'node-fetch-native/polyfill';
 import 'node:http';
 import 'node:https';
@@ -47,7 +47,7 @@ const uploadService = () => {
   };
   const { filename } = {
     filename: (_req, file, cb) => {
-      const name = `${uuid()}_${file.originalname}`;
+      const name = `${uuid()}.${file.mimetype.split("/").pop()}`;
       cb(null, name);
     }
   };
@@ -79,22 +79,20 @@ const uploadService = () => {
 };
 
 const upload_post = defineEventHandler(async (event) => {
-  var _a, _b, _c, _d;
+  var _a, _b, _c;
   try {
     const handler = uploadService().generateHandler("carousel", "image");
     await callNodeListener(handler, event.req, event.res);
     const formData = new FormData();
     const fileName = uuid();
     const fileType = (_a = event == null ? void 0 : event.req) == null ? void 0 : _a.file.originalname.split(".").pop();
-    const minifyPath = `minify_${(_b = event == null ? void 0 : event.req) == null ? void 0 : _b.file.path}`;
-    await minify((_c = event == null ? void 0 : event.req) == null ? void 0 : _c.file.path, minifyPath);
-    console.log(minifyPath);
+    const minifyPath = await minify((_b = event == null ? void 0 : event.req) == null ? void 0 : _b.file.filename);
     formData.append("file", fs.createReadStream(minifyPath));
     formData.append("key", `${fileName}.${fileType}`);
     const data = await request.post("/comm/upload", formData, {
       headers: formData.getHeaders()
     });
-    fs.unlink((_d = event == null ? void 0 : event.req) == null ? void 0 : _d.file.path, () => {
+    fs.unlink((_c = event == null ? void 0 : event.req) == null ? void 0 : _c.file.path, () => {
     });
     fs.unlink(minifyPath, () => {
     });
@@ -104,20 +102,17 @@ const upload_post = defineEventHandler(async (event) => {
     return { error: code !== 1e3, code, message };
   }
 });
-async function minify(inputImagePath, outputImagePath) {
-  console.log("minify");
+async function minify(inputImagePath) {
+  const outputFilePath = `minify_${inputImagePath}`;
   const targetWidth = 800;
-  const quality = 80;
+  const targetHeight = 600;
   try {
-    const image = await Jimp.read(inputImagePath);
-    if (image.getWidth() > targetWidth) {
-      image.resize(targetWidth, Jimp.AUTO);
-    }
-    image.quality(quality);
-    console.log("\u5716\u7247\u58D3\u7E2E\u6210\u529F\uFF01");
-    return image.writeAsync(outputImagePath);
-  } catch (err) {
-    console.error("\u5716\u7247\u58D3\u7E2E\u6642\u767C\u751F\u932F\u8AA4\uFF1A", err);
+    await sharp(inputImagePath).resize(targetWidth, targetHeight).toFile(outputFilePath);
+    console.log("\u538B\u7F29\u540E\u7684\u56FE\u7247\u5DF2\u4FDD\u5B58\u5230:", outputFilePath);
+    return outputFilePath;
+  } catch (error) {
+    console.error("\u56FE\u7247\u538B\u7F29\u5931\u8D25:", error);
+    return "";
   }
 }
 
