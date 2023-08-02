@@ -375,7 +375,7 @@ const _routes = [
     meta: __nuxt_page_meta$6 || {},
     alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
     redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
-    component: () => import('./_nuxt/index-e7442ab3.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-5e358906.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "member-rule",
@@ -481,7 +481,7 @@ const _routes = [
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-1af45d4c.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-0a379318.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
@@ -489,7 +489,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/categories-94f227eb.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/categories-2bb086ee.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) ?? "news-category-categorySlug",
@@ -497,7 +497,7 @@ const _routes = [
     meta: __nuxt_page_meta$2 || {},
     alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
     redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-bc6e9866.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-c6687b67.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) ?? "news-video-categorySlug",
@@ -505,7 +505,7 @@ const _routes = [
     meta: __nuxt_page_meta$1 || {},
     alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
     redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-711f22e2.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-c0262c3b.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) ?? "news-video",
@@ -513,7 +513,7 @@ const _routes = [
     meta: __nuxt_page_meta || {},
     alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
     redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index-f8118501.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-c4a57601.mjs').then((m2) => m2.default || m2)
   }
 ];
 function resolveUnref(r2) {
@@ -1072,7 +1072,7 @@ const defuFn = createDefu((object, key, currentValue) => {
   }
 });
 const cfg0 = defineAppConfig({
-  name: "BondingTechs 鍵結科技",
+  name: "BondingTechs",
   link: "/"
 });
 const inlineConfig = {};
@@ -3461,7 +3461,7 @@ const _sfc_main$n = /* @__PURE__ */ defineComponent({
     ]);
     return (_ctx, _push, _parent, _attrs) => {
       const _component_UnoIcon = __nuxt_component_1;
-      _push(`<div${ssrRenderAttrs(_attrs)}>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "relative flex items-center" }, _attrs))}>`);
       _push(ssrRenderComponent(unref(Me), {
         modelValue: _ctx.$colorMode.preference,
         "onUpdate:modelValue": ($event) => _ctx.$colorMode.preference = $event,
@@ -3632,9 +3632,19 @@ const _sfc_main$m = /* @__PURE__ */ defineComponent({
     const userMenu = ref([
       { id: 1, icon: "i-uil-user", label: "個人資料", path: "/my/account" },
       { id: 2, icon: "i-uil-file-alt", label: "瀏覽紀錄", path: "/my/history" },
-      { id: 3, icon: "i-ion-heart-outline", label: "我的收藏", path: "/my/collections" },
+      {
+        id: 3,
+        icon: "i-ion-heart-outline",
+        label: "我的收藏",
+        path: "/my/collections"
+      },
       { id: 4, icon: "i-uil-lightbulb-alt", label: "小知識", path: "/my/tips" },
-      { id: 5, icon: "i-uil-sign-out-alt", label: "登出", action: () => user.logout() }
+      {
+        id: 5,
+        icon: "i-uil-sign-out-alt",
+        label: "登出",
+        action: () => user.logout()
+      }
     ]);
     const clickNav = (id) => {
       const item = userMenu.value.find((item2) => item2.id === id);
@@ -3859,9 +3869,7 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
   __ssrInlineRender: true,
   setup(__props) {
     const app = useState("app");
-    const menus = ref([
-      { type: "link", text: "新聞", route: "/" }
-    ]);
+    const menus = ref([{ type: "link", text: "新聞", route: "/" }]);
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtLink = __nuxt_component_0$3;
       const _component_UIAnchor = _sfc_main$r;
@@ -3869,7 +3877,7 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
       const _component_TemSizeChange = _sfc_main$o;
       const _component_TemThemeChange = _sfc_main$n;
       const _component_LayoutNavbarUser = _sfc_main$m;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "h-12" }, _attrs))}><div class="h-12 fixed flex items-center w-screen top-0 left-0 backdrop-filter backdrop-blur top-0 flex-none transition-colors duration-300 z-20 border-b border-gray-900/10 dark:border-gray-50/[0.2] bg-white dark:bg-slate-900/[0.7]"><div class="cma"><div class="lg:px-8 lg:mx-0"><div class="relative flex items-center">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "h-12" }, _attrs))} data-v-69f1e41e><div class="h-12 fixed flex items-center w-screen top-0 left-0 backdrop-filter backdrop-blur top-0 flex-none transition-colors duration-300 z-20 border-b border-gray-900/10 dark:border-gray-50/[0.2] bg-white dark:bg-slate-900/[0.7]" data-v-69f1e41e><div class="cma" data-v-69f1e41e><div class="lg:px-8 lg:mx-0" data-v-69f1e41e><div class="relative flex items-center" data-v-69f1e41e>`);
       ssrRenderSlot(_ctx.$slots, "title", {}, () => {
         _push(ssrRenderComponent(_component_NuxtLink, {
           tag: "a",
@@ -3878,13 +3886,13 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
         }, {
           default: withCtx((_2, _push2, _parent2, _scopeId) => {
             if (_push2) {
-              _push2(`<span class="sr-only"${_scopeId}>home</span><span class="flex items-center"${_scopeId}><img class="w-18 mr-2"${ssrRenderAttr("src", _imports_0)}${_scopeId}><span class="leading-7 mt-[1px]"${_scopeId}>${ssrInterpolate(unref(app).name)}</span></span>`);
+              _push2(`<span class="sr-only" data-v-69f1e41e${_scopeId}>home</span><span class="flex items-center" data-v-69f1e41e${_scopeId}><img class="lg:w-18 w-12 mr-2"${ssrRenderAttr("src", _imports_0)} data-v-69f1e41e${_scopeId}><span class="leading-7 mt-[1px]" data-v-69f1e41e${_scopeId}>${ssrInterpolate(unref(app).name)}</span></span>`);
             } else {
               return [
                 createVNode("span", { class: "sr-only" }, "home"),
                 createVNode("span", { class: "flex items-center" }, [
                   createVNode("img", {
-                    class: "w-18 mr-2",
+                    class: "lg:w-18 w-12 mr-2",
                     src: _imports_0
                   }),
                   createVNode("span", { class: "leading-7 mt-[1px]" }, toDisplayString(unref(app).name), 1)
@@ -3895,9 +3903,9 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
           _: 1
         }, _parent));
       }, _push, _parent);
-      _push(`<div class="relative ml-auto flex lt-lg:hidden"><nav class="flex items-center text-sm font-semibold leading-6 text-gray-600 dark:text-gray-300" role="navigation"><ul class="flex items-center space-x-8"><!--[-->`);
+      _push(`<div class="desktop-menu relative ml-auto flex" data-v-69f1e41e><nav class="flex items-center text-sm font-semibold leading-6 text-gray-600 dark:text-gray-300" role="navigation" data-v-69f1e41e><ul class="flex items-center space-x-8" data-v-69f1e41e><!--[-->`);
       ssrRenderList(unref(menus), (item, i) => {
-        _push(`<li>`);
+        _push(`<li data-v-69f1e41e>`);
         if (item.type === "link") {
           _push(ssrRenderComponent(_component_UIAnchor, {
             to: item.route ? item.route : void 0,
@@ -3928,11 +3936,11 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
         }
         _push(`</li>`);
       });
-      _push(`<!--]--></ul></nav><div class="flex space-x-4 border-l ml-6 pl-6 border-gray-900/10 dark:border-gray-50/[0.2]">`);
+      _push(`<!--]--></ul></nav><div class="flex space-x-4 border-l ml-6 pl-6 border-gray-900/10 dark:border-gray-50/[0.2]" data-v-69f1e41e>`);
       _push(ssrRenderComponent(_component_TemSizeChange, null, null, _parent));
       _push(ssrRenderComponent(_component_TemThemeChange, null, null, _parent));
       _push(ssrRenderComponent(_component_LayoutNavbarUser, null, null, _parent));
-      _push(`</div></div><div class="lg:hidden ml-auto"><div class="text-sm md:text-base flex space-x-2 md:space-x-4 border-l pl-4 md:pl-6 border-gray-900/10 dark:border-gray-50/[0.2]">`);
+      _push(`</div></div><div class="mobile-menu ml-auto" data-v-69f1e41e><div class="text-sm md:text-base flex space-x-2 md:space-x-4 border-l pl-4 md:pl-6 border-gray-900/10 dark:border-gray-50/[0.2]" data-v-69f1e41e>`);
       _push(ssrRenderComponent(_component_TemSizeChange, null, null, _parent));
       _push(ssrRenderComponent(_component_TemThemeChange, null, null, _parent));
       _push(`</div></div></div></div></div></div></div>`);
@@ -3945,6 +3953,7 @@ _sfc_main$l.setup = (props, ctx) => {
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/Navbar.vue");
   return _sfc_setup$l ? _sfc_setup$l(props, ctx) : void 0;
 };
+const __nuxt_component_2$4 = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["__scopeId", "data-v-69f1e41e"]]);
 const _wrapIf = (component, props, slots) => {
   props = props === true ? {} : props;
   return { default: () => {
@@ -3953,7 +3962,7 @@ const _wrapIf = (component, props, slots) => {
   } };
 };
 const layouts = {
-  blog: () => import('./_nuxt/blog-3c4294d4.mjs').then((m2) => m2.default || m2),
+  blog: () => import('./_nuxt/blog-2f60eeec.mjs').then((m2) => m2.default || m2),
   default: () => import('./_nuxt/default-432cd5ca.mjs').then((m2) => m2.default || m2)
 };
 const LayoutLoader = /* @__PURE__ */ defineComponent({
@@ -4803,7 +4812,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
       const _component_UIFormText = __nuxt_component_2$1;
       const _component_UIFormPassword = __nuxt_component_2;
       const _component_UIFormSubmit = _sfc_main$f;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-100b030f><div class="flex items-center justify-between mb-7" data-v-100b030f><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-100b030f> 登入帳號 </div>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-846bf7e4><div class="flex items-center justify-between mb-7" data-v-846bf7e4><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-846bf7e4> 登入帳號 </div>`);
       _push(ssrRenderComponent(_component_UnoIcon, {
         class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
         onClick: ($event) => _ctx.$emit("close")
@@ -4812,9 +4821,9 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_UIForm, { onSubmit: login }, {
         default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div data-v-100b030f${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}" data-v-100b030f${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-100b030f${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="flex flex-wrap" data-v-100b030f${_scopeId}>`);
+            _push2(`<div data-v-846bf7e4${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}" data-v-846bf7e4${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-846bf7e4${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="lg:flex flex-wrap" data-v-846bf7e4${_scopeId}>`);
             _push2(ssrRenderComponent(_component_UIFormSelect, {
-              class: "mr-2 w-24",
+              class: "mr-0 lg:mr-2 lg:w-24 w-full lg:mb-0 mb-3",
               id: "phone",
               options,
               modelValue: unref(loginForm).area,
@@ -4835,20 +4844,20 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
               label: "密碼",
               placeholder: "長度至少為8,英數組合"
             }, null, _parent2, _scopeId));
-            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-100b030f${_scopeId}><div data-v-100b030f${_scopeId}><label class="flex items-center cursor-pointer check" data-v-100b030f${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-100b030f${_scopeId}>`);
+            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-846bf7e4${_scopeId}><div data-v-846bf7e4${_scopeId}><label class="flex items-center cursor-pointer check" data-v-846bf7e4${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-846bf7e4${_scopeId}>`);
             if (unref(loginForm).rememberMe) {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-checkbox-outline" }, null, _parent2, _scopeId));
             } else {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-android-checkbox-outline-blank" }, null, _parent2, _scopeId));
             }
-            _push2(`<span class="ml-2" data-v-100b030f${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-100b030f${_scopeId}>忘記密碼</span></div>`);
+            _push2(`<span class="ml-2" data-v-846bf7e4${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-846bf7e4${_scopeId}>忘記密碼</span></div>`);
             _push2(ssrRenderComponent(_component_UIFormSubmit, {
               class: "mb-7",
               text: "送出",
               center: true,
               onClick: login
             }, null, _parent2, _scopeId));
-            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-100b030f${_scopeId}> 註冊新帳號 </div>`);
+            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-846bf7e4${_scopeId}> 註冊新帳號 </div>`);
           } else {
             return [
               createVNode("div", null, [
@@ -4861,9 +4870,9 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
                     textContent: "手機"
                   })
                 ], 2),
-                createVNode("div", { class: "flex flex-wrap" }, [
+                createVNode("div", { class: "lg:flex flex-wrap" }, [
                   createVNode(_component_UIFormSelect, {
-                    class: "mr-2 w-24",
+                    class: "mr-0 lg:mr-2 lg:w-24 w-full lg:mb-0 mb-3",
                     id: "phone",
                     options,
                     modelValue: unref(loginForm).area,
@@ -4935,7 +4944,7 @@ _sfc_main$e.setup = (props, ctx) => {
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/LoginForm.vue");
   return _sfc_setup$e ? _sfc_setup$e(props, ctx) : void 0;
 };
-const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-100b030f"]]);
+const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-846bf7e4"]]);
 const defaultStyle = `
   block w-full border
   duration-200 
@@ -6525,7 +6534,7 @@ async function userController() {
 }
 function InitApp() {
   const app = {
-    name: "BondingTechs 鍵結科技",
+    name: "BondingTechs",
     author: {
       name: "Bonding",
       link: "#"
@@ -6581,7 +6590,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     return (_ctx, _push, _parent, _attrs) => {
       const _component_Html = Html;
       const _component_Body = Body;
-      const _component_LayoutNavbar = _sfc_main$l;
+      const _component_LayoutNavbar = __nuxt_component_2$4;
       const _component_NuxtLayout = __nuxt_component_3;
       const _component_NuxtLoadingIndicator = __nuxt_component_4$2;
       const _component_NuxtPage = __nuxt_component_2$3;
