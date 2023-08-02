@@ -1,5 +1,4 @@
 import { defineEventHandler, readBody, createError } from 'h3';
-import { p as phoneRegex } from './regex.mjs';
 import { r as request } from './nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
 import 'node:http';
@@ -29,6 +28,7 @@ const register_post = defineEventHandler(async (event) => {
       firstName,
       lastName,
       birthday,
+      area,
       phone,
       password,
       passwordConfirm,
@@ -49,9 +49,12 @@ const register_post = defineEventHandler(async (event) => {
         message: "\u8ACB\u8F38\u5165\u751F\u65E5"
       },
       {
+        key: "area",
+        message: "\u8ACB\u9078\u64C7\u5730\u5340"
+      },
+      {
         key: "phone",
-        message: "\u8ACB\u8F38\u5165\u624B\u6A5F\u865F\u78BC",
-        regex: phoneRegex
+        message: "\u8ACB\u8F38\u5165\u624B\u6A5F\u865F\u78BC"
       },
       {
         key: "password",
@@ -92,6 +95,7 @@ const register_post = defineEventHandler(async (event) => {
       firstName,
       lastName,
       birthday,
+      area,
       phone,
       password,
       passwordConfirm,

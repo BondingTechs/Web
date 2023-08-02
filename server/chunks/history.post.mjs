@@ -23,28 +23,12 @@ import 'http-graceful-shutdown';
 
 const history_post = defineEventHandler(async (event) => {
   try {
-    const {
-      keyWord,
-      size,
-      page,
-      order,
-      sort,
-      category,
-      type = "article"
-    } = await readBody(event);
+    const body = await readBody(event);
     const {
       code,
       message = "",
       data
-    } = await request.post("/my/history", {
-      keyWord,
-      size,
-      page,
-      order,
-      sort,
-      category,
-      type
-    });
+    } = await request.post("/location/history/add", body);
     return { error: code !== 1e3, code, message, data };
   } catch (err) {
     const { code, message = "" } = err;

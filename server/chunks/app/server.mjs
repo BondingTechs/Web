@@ -10,10 +10,11 @@ import { klona } from 'klona';
 import { renderSSRHead } from '@unhead/ssr';
 import { composableNames, getActiveHead, createServerHead as createServerHead$1 } from 'unhead';
 import { defineHeadPlugin } from '@unhead/shared';
-import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrIncludeBooleanAttr, ssrLooseContain, ssrRenderTeleport, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
-import { parse } from 'cookie-es';
 import { hash, isEqual } from 'ohash';
 import store from 'store';
+import axios from 'axios';
+import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrIncludeBooleanAttr, ssrLooseContain, ssrRenderTeleport, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
+import { parse } from 'cookie-es';
 import { defu } from 'defu';
 import { ref as ref$1 } from '@vue/runtime-core';
 import { a as useRuntimeConfig$1 } from '../nitro/node-server.mjs';
@@ -28,7 +29,6 @@ import 'radix3';
 import 'node:fs';
 import 'node:url';
 import 'pathe';
-import 'axios';
 import 'http-graceful-shutdown';
 
 const appConfig = useRuntimeConfig$1().app;
@@ -236,6 +236,20 @@ const useRoute = () => {
 function defineNuxtRouteMiddleware(middleware) {
   return middleware;
 }
+const addRouteMiddleware = (name, middleware, options = {}) => {
+  const nuxtApp = /* @__PURE__ */ useNuxtApp();
+  const global = options.global || typeof name !== "string";
+  const mw = typeof name !== "string" ? name : middleware;
+  if (!mw) {
+    console.warn("[nuxt] No route middleware passed to `addRouteMiddleware`.", name);
+    return;
+  }
+  if (global) {
+    nuxtApp._middleware.global.push(mw);
+  } else {
+    nuxtApp._middleware.named[name] = mw;
+  }
+};
 const isProcessingMiddleware = () => {
   try {
     if ((/* @__PURE__ */ useNuxtApp())._processingMiddleware) {
@@ -353,7 +367,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/404-46c75357.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/404-e20fbd2e.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) ?? "index",
@@ -361,7 +375,7 @@ const _routes = [
     meta: __nuxt_page_meta$6 || {},
     alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
     redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
-    component: () => import('./_nuxt/index-8ba810b8.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-e7442ab3.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "member-rule",
@@ -369,7 +383,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/member-rule-4e73f12e.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/member-rule-375b251f.mjs').then((m2) => m2.default || m2)
   },
   {
     path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/my",
@@ -380,7 +394,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/change-phone-0557a70d.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/change-phone-f60001f4.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-email-binding",
@@ -388,7 +402,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/email-binding-0687f601.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/email-binding-c351c3f8.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-email-verify",
@@ -396,7 +410,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/email-verify-ca1c11c9.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/email-verify-c69785ba.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-identity-verify",
@@ -404,7 +418,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/identity-verify-955df306.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/identity-verify-f2cd53b9.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account",
@@ -412,7 +426,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/index-93a2c0bd.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/index-74814ffd.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-reset-password",
@@ -420,7 +434,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/reset-password-3f8bc4e4.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/reset-password-1f78f3d8.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-collections",
@@ -428,7 +442,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/collections-1800e745.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/collections-b8f5a879.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-history",
@@ -436,7 +450,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/history-39fc6c61.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/history-231a80c5.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) ?? "my",
@@ -444,7 +458,7 @@ const _routes = [
         meta: __nuxt_page_meta$5 || {},
         alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
         redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
-        component: () => import('./_nuxt/index-9285f131.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/index-d4c365e3.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-tips",
@@ -452,14 +466,14 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/tips-88a63294.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/tips-cfa90f9d.mjs').then((m2) => m2.default || m2)
       }
     ],
     name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? void 0,
     meta: __nuxt_page_meta$4 || {},
     alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
     redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
-    component: () => import('./_nuxt/my-6438523a.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/my-8fbe5fce.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
@@ -467,7 +481,7 @@ const _routes = [
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-0dfaba78.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-1af45d4c.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
@@ -475,7 +489,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/categories-20740c6d.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/categories-94f227eb.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) ?? "news-category-categorySlug",
@@ -483,7 +497,7 @@ const _routes = [
     meta: __nuxt_page_meta$2 || {},
     alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
     redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-f6e5d02b.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-bc6e9866.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) ?? "news-video-categorySlug",
@@ -491,7 +505,7 @@ const _routes = [
     meta: __nuxt_page_meta$1 || {},
     alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
     redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-eca25dc3.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-711f22e2.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) ?? "news-video",
@@ -499,7 +513,7 @@ const _routes = [
     meta: __nuxt_page_meta || {},
     alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
     redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index-de4db2a3.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-f8118501.mjs').then((m2) => m2.default || m2)
   }
 ];
 function resolveUnref(r2) {
@@ -809,7 +823,7 @@ function writeServerCookie(event, name, value, opts = {}) {
     }
   }
 }
-const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [{ "src": "//unpkg.com/vconsole@latest/dist/vconsole.min.js", "type": "text/javascript" }, { "innerHTML": "new VConsole()" }], "noscript": [] };
+const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [{ "src": "//unpkg.com/vconsole@latest/dist/vconsole.min.js", "type": "text/javascript" }], "noscript": [] };
 const appPageTransition = { "name": "page" };
 const appLayoutTransition = { "name": "layout" };
 const appKeepalive = false;
@@ -1163,7 +1177,7 @@ const globalMiddleware = [
   validate
 ];
 const namedMiddleware = {
-  auth: () => import('./_nuxt/auth-7c9df495.mjs')
+  auth: () => import('./_nuxt/auth-8abe1026.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -1806,6 +1820,539 @@ const plugin_vue3_A0OWXRrUgq = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
     }
   };
 });
+const ga_I9ckZE2lFs = ({ app, store: store2 }) => {
+};
+const API_KEY = "f230d79e6b4e40379f05e24682765349";
+const IP_GEO_URL = "https://api.ipgeolocation.io/ipgeo";
+const IP_AGENT_URL = "https://api.ipgeolocation.io/user-agent";
+const useIPStore = defineStore("ip", () => {
+  const info = ref(null);
+  const agent = ref(null);
+  async function get() {
+    try {
+      if (info.value && agent.value) {
+        return {
+          info: info.value,
+          agent: agent.value
+        };
+      }
+      const { data: geoInfo } = await axios.get(`${IP_GEO_URL}?apiKey=${API_KEY}`);
+      const { data: { id: infoId } } = await useHttpFetchPost("/ip/info", {
+        body: {
+          ip: geoInfo.ip,
+          country: geoInfo.country_name,
+          city: geoInfo.city,
+          district: geoInfo.district,
+          latitude: geoInfo.latitude,
+          longitude: geoInfo.longitude,
+          timezone: geoInfo.time_zone.name
+        }
+      });
+      info.value = { ...geoInfo, infoId };
+      const { data: agentData } = await axios.get(`${IP_AGENT_URL}?apiKey=${API_KEY}`);
+      const { data: { id: agentId } } = await useHttpFetchPost("/ip/agent", {
+        body: {
+          infoId,
+          userAgentString: agentData.userAgentString,
+          name: agentData.name,
+          type: agentData.type,
+          version: agentData.version,
+          versionMajor: agentData.versionMajor,
+          device: JSON.stringify(agentData.device),
+          engine: JSON.stringify(agentData.engine),
+          operatingSystem: JSON.stringify(agentData.operatingSystem)
+        }
+      });
+      agent.value = { id: agentId, ...agentData, infoId };
+      return {
+        info: info.value,
+        agent: agent.value
+      };
+    } catch (e2) {
+      console.error(e2);
+    }
+  }
+  function clear() {
+    info.value = null;
+  }
+  return {
+    info,
+    get,
+    clear
+  };
+});
+const storage = {
+  // 后缀标识
+  suffix: "_deadtime",
+  /**
+   * 获取
+   * @param {string} key 關鍵字
+   */
+  get(key) {
+    return store.get(key);
+  },
+  /**
+   * 获取全部
+   */
+  info() {
+    const d2 = {};
+    store.each((value, key) => {
+      d2[key] = value;
+    });
+    return d2;
+  },
+  /**
+   * 设置
+   * @param {string} key 關鍵字
+   * @param {*} value 值
+   * @param {number} expires 过期时间
+   */
+  set(key, value, expires) {
+    store.set(key, value);
+    if (expires) {
+      store.set(
+        `${key}${this.suffix}`,
+        Date.parse(String(/* @__PURE__ */ new Date())) + expires * 1e3
+      );
+    }
+  },
+  /**
+   * 是否过期
+   * @param {string} key 關鍵字
+   */
+  isExpired(key) {
+    return (this.getExpiration(key) || 0) - Date.parse(String(/* @__PURE__ */ new Date())) <= 2e3;
+  },
+  /**
+   * 获取到期时间
+   * @param {string} key 關鍵字
+   */
+  getExpiration(key) {
+    return this.get(key + this.suffix);
+  },
+  /**
+   * 移除
+   * @param {string} key 關鍵字
+   */
+  remove(key) {
+    store.remove(key);
+    this.removeExpiration(key);
+  },
+  /**
+   * 移除到期时间
+   * @param {string} key 關鍵字
+   */
+  removeExpiration(key) {
+    store.remove(key + this.suffix);
+  },
+  /**
+   * 清理
+   */
+  clearAll() {
+    store.clearAll();
+  }
+};
+const useTipStore = defineStore("tip", () => {
+  const info = ref(null);
+  async function get() {
+    try {
+      const tip = await useHttpFetchPost("/tip/today");
+      const { data, error } = tip;
+      if (!error && data !== null) {
+        const $show = useState("tip.show", () => false);
+        const $tip = useState("tip.data");
+        $show.value = true;
+        $tip.value = {
+          id: data.id,
+          title: data.title,
+          content: data.content,
+          publishDate: data.publishDate
+        };
+        return data;
+      }
+    } catch (e2) {
+    }
+  }
+  function clear() {
+    storage.remove("today_tip");
+    info.value = {};
+  }
+  return {
+    info,
+    get,
+    clear
+  };
+});
+const phoneRegex = /^09\d{8}$/;
+const emailRegex = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+const htmlTag = /<[^>]*>/g;
+const useUserStore = defineStore("user", () => {
+  const token = ref("");
+  function setToken(data) {
+    token.value = data.token;
+    storage.set("token", data.token, data.expire);
+    storage.set("refreshToken", data.refreshToken, data.refreshExpire);
+  }
+  const isLogin = ref(false);
+  async function refreshToken(token2) {
+    try {
+      const { data, error } = await useHttpFetchPost("/auth/refresh", {
+        body: { refreshToken: token2 }
+      });
+      if (!error) {
+        setToken(data);
+        await get();
+      }
+    } catch (e2) {
+      logout();
+    }
+  }
+  const info = ref(null);
+  async function get() {
+    const { code, error, data } = await useHttpFetchPost("/user/person");
+    if (error) {
+      if (code === 1005) {
+        const storeRefreshToken = storage.get("refreshToken");
+        await refreshToken(storeRefreshToken);
+      } else {
+        clear();
+      }
+    } else if (!error) {
+      set2(data);
+    }
+    return data;
+  }
+  function set2(value) {
+    isLogin.value = true;
+    info.value = value;
+    storage.set("userInfo", value);
+  }
+  async function update(form) {
+    const $alert = useState("alert");
+    const updatePick = (({ firstName, lastName, birthday, gender, intro }) => ({
+      firstName,
+      lastName,
+      birthday,
+      gender,
+      intro
+    }))(info.value);
+    if (JSON.stringify(form) === JSON.stringify(updatePick)) {
+      return $alert.value = {
+        type: "info",
+        text: "未修改個人資料",
+        center: true
+      };
+    }
+    const $loading = useState("loading");
+    $loading.value = true;
+    const { error, message } = await useHttpFetchPost("/user/update", {
+      body: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        birthday: form.birthday,
+        gender: form.gender,
+        intro: form.intro
+      }
+    });
+    $loading.value = false;
+    if (error)
+      return $alert.value = { type: "error", text: message, center: true };
+    updateField({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      birthday: form.birthday,
+      gender: form.gender,
+      intro: form.intro
+    });
+    $alert.value = { type: "success", text: "個人資料已更新", center: true };
+  }
+  function updateField(obj) {
+    for (const key in obj)
+      info.value[key] = obj[key];
+    storage.set("userInfo", info.value);
+  }
+  async function login(loginForm) {
+    const { data, error, message } = await useHttpFetchPost(
+      "/auth/login",
+      {
+        body: {
+          area: loginForm.area,
+          phone: loginForm.phone,
+          password: loginForm.password
+        }
+      }
+    );
+    const $alert = useState("alert");
+    const $auth = useState("showAuth", () => false);
+    if (error && message) {
+      $alert.value = { type: "error", text: message, center: true };
+    } else {
+      $auth.value = false;
+      await setToken(data);
+      await get();
+      const tip = useTipStore();
+      await tip.get();
+      $alert.value = { type: "success", title: "登入成功" };
+      if (loginForm.rememberMe)
+        storage.set("loginData", loginForm);
+      else
+        storage.remove("loginData");
+    }
+  }
+  async function register(registerForm) {
+    const $alert = useState("alert");
+    if (!passwordRegex.test(registerForm.password)) {
+      return $alert.value = {
+        type: "error",
+        text: "密碼須為英數混合8位數以上",
+        center: true
+      };
+    }
+    const { error, message, data } = await useHttpFetchPost("/auth/register", {
+      body: {
+        firstName: registerForm.firstName,
+        lastName: registerForm.lastName,
+        birthday: registerForm.birthday,
+        area: registerForm.area,
+        phone: registerForm.phone,
+        password: registerForm.password,
+        gender: registerForm.gender,
+        passwordConfirm: registerForm.passwordConfirm,
+        verifyCode: registerForm.verifyCode
+      }
+    });
+    const $auth = useState("showAuth", () => false);
+    if (error && message) {
+      $alert.value = { type: "error", text: message, center: true };
+    } else {
+      $auth.value = false;
+      await setToken(data);
+      await get();
+      const tip = useTipStore();
+      await tip.get();
+      $alert.value = { type: "success", title: "登入成功" };
+      if (data.rememberMe)
+        storage.set("loginData", data);
+      else
+        storage.remove("loginData");
+    }
+    if (error) {
+      const $alert2 = useState("alert");
+      $alert2.value = {
+        type: "error",
+        title: "驗證錯誤",
+        text: message,
+        center: true
+      };
+    }
+    return { error, message, data };
+  }
+  async function forgot(forgotForm) {
+    const $alert = useState("alert");
+    if (!passwordRegex.test(forgotForm.password)) {
+      return $alert.value = {
+        type: "error",
+        text: "密碼須為英數混合8位數以上",
+        center: true
+      };
+    }
+    const { error, message, data } = await useHttpFetchPost("/auth/forgot", {
+      body: {
+        area: forgotForm.area,
+        phone: forgotForm.phone,
+        password: forgotForm.password,
+        passwordConfirm: forgotForm.passwordConfirm,
+        verifyCode: forgotForm.verifyCode
+      }
+    });
+    const $auth = useState("showAuth", () => false);
+    if (error && message) {
+      $alert.value = { type: "error", text: message, center: true };
+    } else {
+      $auth.value = false;
+      await setToken(data);
+      await get();
+      $alert.value = { type: "success", title: "修改成功，已登入" };
+      if (data.rememberMe)
+        storage.set("loginData", forgotForm);
+      else
+        storage.remove("loginData");
+    }
+    if (error) {
+      const $alert2 = useState("alert");
+      $alert2.value = {
+        type: "error",
+        title: "驗證錯誤",
+        text: message,
+        center: true
+      };
+    }
+    return { error, message, data };
+  }
+  async function logout() {
+    const $alert = useState("alert");
+    await useHttpFetchPost("/user/logout");
+    $alert.value = {
+      type: "success",
+      title: "登出成功"
+    };
+    clear();
+  }
+  async function clear() {
+    return await new Promise((resolve) => {
+      storage.remove("userInfo");
+      storage.remove("token");
+      const isLoginState = useState("isLogin");
+      isLoginState.value = false;
+      isLogin.value = false;
+      info.value = null;
+      token.value = "";
+      const route = useRoute();
+      const router = useRouter();
+      const middleware = route.meta.middleware ?? [];
+      if (middleware && middleware.includes("auth"))
+        router.push("/");
+      resolve("");
+    });
+  }
+  return {
+    token,
+    info,
+    isLogin,
+    get,
+    set: set2,
+    update,
+    updateField,
+    login,
+    register,
+    forgot,
+    logout,
+    clear,
+    setToken,
+    refreshToken
+  };
+});
+function useBaseStore() {
+  const user = useUserStore();
+  const tip = useTipStore();
+  const ip = useIPStore();
+  return {
+    // app,
+    // process,
+    user,
+    tip,
+    ip
+  };
+}
+const fetchConfig = {
+  baseURL: "/api"
+};
+function useGetFetchOptions(options = {}) {
+  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
+  options.headers = options.headers ?? {};
+  options.initialCache = options.initialCache ?? false;
+  options.lazy = options.lazy ?? false;
+  options.async = options.async ?? false;
+  options.body = { ...options.body, server: true };
+  if (options.multipart) {
+    options.headers = {
+      ...options.headers,
+      "Accept": "*/*",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+      "Access-Control-Allow-Headers": "origin,X-Requested-With,content-type,accept",
+      "Access-Control-Allow-Credentials": "true"
+    };
+    delete options.headers["Content-Type"];
+  }
+  const { user, ip } = useBaseStore();
+  const { token: tokenStore } = storeToRefs(user);
+  const token = tokenStore.value || storage.get("token");
+  if (token)
+    options.headers.Authorization = token;
+  else
+    delete options.headers.Authorization;
+  const { info: ipInfo } = storeToRefs(ip);
+  if (ipInfo.value) {
+    options.headers.ip = ipInfo.value.ip;
+  }
+  return options;
+}
+async function useHttp(key, url, options = {}) {
+  options = useGetFetchOptions(options);
+  options.key = key;
+  if (options.async) {
+    const res2 = await useAsyncData(
+      key,
+      () => $fetch(fetchConfig.baseURL + url, { ...options }),
+      "$8HXlY3lqR9"
+    );
+    return { ...res2 };
+  }
+  if (options.$) {
+    const data = ref(null);
+    const error = ref(null);
+    return await $fetch(url, options).then((res2) => {
+      data.value = res2.data;
+      return {
+        data,
+        error
+      };
+    }).catch((err) => {
+      var _a;
+      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
+      error.value = msg;
+      return {
+        data,
+        error
+      };
+    });
+  }
+  const res = await useFetch(url, {
+    ...options,
+    onRequest({ options: options2 }) {
+      return useGetFetchOptions(options2);
+    },
+    // 相當於響應攔截器
+    transform: (res2) => {
+      return res2.data;
+    }
+  }, "$Nbwy13v9tA");
+  return res;
+}
+function useHttpPost(key, url, options = {}) {
+  options.method = "POST";
+  return useHttp(key, url, options);
+}
+async function useHttpFetch(url, options = {}) {
+  options = useGetFetchOptions(options);
+  const {
+    error,
+    code,
+    message = "",
+    data = null
+  } = await $fetch(fetchConfig.baseURL + url, { ...options });
+  if (error && code === 1005) {
+    const router = useRouter();
+    router.push("/");
+  }
+  return {
+    code,
+    error,
+    message,
+    data
+  };
+}
+function useHttpFetchPost(url, options = {}) {
+  options.method = "POST";
+  return useHttpFetch(url, options);
+}
+const hisotry_AOAC2IlDrx = /* @__PURE__ */ defineNuxtPlugin(() => {
+  addRouteMiddleware(async (to, from) => {
+    return true;
+  });
+});
 const plugins = [
   plugin$1,
   revive_payload_server_eJ33V7gbc6,
@@ -1815,7 +2362,9 @@ const plugins = [
   plugin_dUrdF0P1fL,
   plugin_server_XNCxeHyTuP,
   unocss_MzCDxu9LMj,
-  plugin_vue3_A0OWXRrUgq
+  plugin_vue3_A0OWXRrUgq,
+  ga_I9ckZE2lFs,
+  hisotry_AOAC2IlDrx
 ];
 const removeUndefinedProps = (props) => Object.fromEntries(Object.entries(props).filter(([, value]) => value !== void 0));
 const setupForUseMeta = (metaFactory, renderChild) => (props, ctx) => {
@@ -1893,7 +2442,7 @@ const Body = /* @__PURE__ */ defineComponent({
   },
   setup: setupForUseMeta((bodyAttrs) => ({ bodyAttrs }), true)
 });
-const _sfc_main$s = /* @__PURE__ */ defineComponent({
+const _sfc_main$r = /* @__PURE__ */ defineComponent({
   __name: "Anchor",
   __ssrInlineRender: true,
   props: {
@@ -1947,11 +2496,11 @@ const _sfc_main$s = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$s = _sfc_main$s.setup;
-_sfc_main$s.setup = (props, ctx) => {
+const _sfc_setup$r = _sfc_main$r.setup;
+_sfc_main$r.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Anchor.vue");
-  return _sfc_setup$s ? _sfc_setup$s(props, ctx) : void 0;
+  return _sfc_setup$r ? _sfc_setup$r(props, ctx) : void 0;
 };
 const defaultStyle$2 = `
   cursor-pointer
@@ -1959,7 +2508,7 @@ const defaultStyle$2 = `
   focus:outline-none focus:ring-1 focus:ring-offset-1 focus:dark:ring-offset-gray-50 focus:dark:ring-gray-400 focus:ring-gray-600/[0.6] focus:ring-offset-gray-800/[0.6]
   flex items-center justify-center
 `;
-const _sfc_main$r = /* @__PURE__ */ defineComponent({
+const _sfc_main$q = /* @__PURE__ */ defineComponent({
   __name: "Button",
   __ssrInlineRender: true,
   props: {
@@ -2034,11 +2583,11 @@ const _sfc_main$r = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$r = _sfc_main$r.setup;
-_sfc_main$r.setup = (props, ctx) => {
+const _sfc_setup$q = _sfc_main$q.setup;
+_sfc_main$q.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Button.vue");
-  return _sfc_setup$r ? _sfc_setup$r(props, ctx) : void 0;
+  return _sfc_setup$q ? _sfc_setup$q(props, ctx) : void 0;
 };
 const _export_sfc = (sfc, props) => {
   const target = sfc.__vccOpts || sfc;
@@ -2047,17 +2596,17 @@ const _export_sfc = (sfc, props) => {
   }
   return target;
 };
-const _sfc_main$q = {};
+const _sfc_main$p = {};
 function _sfc_ssrRender$1(_ctx, _push, _parent, _attrs) {
   _push(`<div${ssrRenderAttrs(_attrs)}></div>`);
 }
-const _sfc_setup$q = _sfc_main$q.setup;
-_sfc_main$q.setup = (props, ctx) => {
+const _sfc_setup$p = _sfc_main$p.setup;
+_sfc_main$p.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("../node_modules/@unocss/nuxt/runtime/UnoIcon.vue");
-  return _sfc_setup$q ? _sfc_setup$q(props, ctx) : void 0;
+  return _sfc_setup$p ? _sfc_setup$p(props, ctx) : void 0;
 };
-const __nuxt_component_1 = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["ssrRender", _sfc_ssrRender$1]]);
+const __nuxt_component_1 = /* @__PURE__ */ _export_sfc(_sfc_main$p, [["ssrRender", _sfc_ssrRender$1]]);
 function u(r2, n2, ...a2) {
   if (r2 in n2) {
     let e2 = n2[r2];
@@ -2695,7 +3244,7 @@ function sizeController() {
     init
   };
 }
-const _sfc_main$p = /* @__PURE__ */ defineComponent({
+const _sfc_main$o = /* @__PURE__ */ defineComponent({
   __name: "SizeChange",
   __ssrInlineRender: true,
   props: {
@@ -2870,16 +3419,16 @@ const _sfc_main$p = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$p = _sfc_main$p.setup;
-_sfc_main$p.setup = (props, ctx) => {
+const _sfc_setup$o = _sfc_main$o.setup;
+_sfc_main$o.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/tem/SizeChange.vue");
-  return _sfc_setup$p ? _sfc_setup$p(props, ctx) : void 0;
+  return _sfc_setup$o ? _sfc_setup$o(props, ctx) : void 0;
 };
 const useColorMode = () => {
   return useState("color-mode").value;
 };
-const _sfc_main$o = /* @__PURE__ */ defineComponent({
+const _sfc_main$n = /* @__PURE__ */ defineComponent({
   __name: "ThemeChange",
   __ssrInlineRender: true,
   setup(__props) {
@@ -3058,473 +3607,14 @@ const _sfc_main$o = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$o = _sfc_main$o.setup;
-_sfc_main$o.setup = (props, ctx) => {
+const _sfc_setup$n = _sfc_main$n.setup;
+_sfc_main$n.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/tem/ThemeChange.vue");
-  return _sfc_setup$o ? _sfc_setup$o(props, ctx) : void 0;
+  return _sfc_setup$n ? _sfc_setup$n(props, ctx) : void 0;
 };
 const _imports_0$1 = "" + __publicAssetsURL("user.png");
-const storage = {
-  // 后缀标识
-  suffix: "_deadtime",
-  /**
-   * 获取
-   * @param {string} key 關鍵字
-   */
-  get(key) {
-    return store.get(key);
-  },
-  /**
-   * 获取全部
-   */
-  info() {
-    const d2 = {};
-    store.each((value, key) => {
-      d2[key] = value;
-    });
-    return d2;
-  },
-  /**
-   * 设置
-   * @param {string} key 關鍵字
-   * @param {*} value 值
-   * @param {number} expires 过期时间
-   */
-  set(key, value, expires) {
-    store.set(key, value);
-    if (expires) {
-      store.set(
-        `${key}${this.suffix}`,
-        Date.parse(String(/* @__PURE__ */ new Date())) + expires * 1e3
-      );
-    }
-  },
-  /**
-   * 是否过期
-   * @param {string} key 關鍵字
-   */
-  isExpired(key) {
-    return (this.getExpiration(key) || 0) - Date.parse(String(/* @__PURE__ */ new Date())) <= 2e3;
-  },
-  /**
-   * 获取到期时间
-   * @param {string} key 關鍵字
-   */
-  getExpiration(key) {
-    return this.get(key + this.suffix);
-  },
-  /**
-   * 移除
-   * @param {string} key 關鍵字
-   */
-  remove(key) {
-    store.remove(key);
-    this.removeExpiration(key);
-  },
-  /**
-   * 移除到期时间
-   * @param {string} key 關鍵字
-   */
-  removeExpiration(key) {
-    store.remove(key + this.suffix);
-  },
-  /**
-   * 清理
-   */
-  clearAll() {
-    store.clearAll();
-  }
-};
-const fetchConfig = {
-  baseURL: "/api"
-};
-function useGetFetchOptions(options = {}) {
-  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
-  options.headers = options.headers ?? {};
-  options.initialCache = options.initialCache ?? false;
-  options.lazy = options.lazy ?? false;
-  options.async = options.async ?? false;
-  options.body = { ...options.body, server: true };
-  if (options.multipart) {
-    options.headers = {
-      ...options.headers,
-      "Accept": "*/*",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
-      "Access-Control-Allow-Headers": "origin,X-Requested-With,content-type,accept",
-      "Access-Control-Allow-Credentials": "true"
-    };
-    delete options.headers["Content-Type"];
-  }
-  const { user } = useBaseStore();
-  const { token: tokenStore } = storeToRefs(user);
-  const token = tokenStore.value || storage.get("token");
-  if (token)
-    options.headers.Authorization = token;
-  else
-    delete options.headers.Authorization;
-  return options;
-}
-async function useHttp(key, url, options = {}) {
-  options = useGetFetchOptions(options);
-  options.key = key;
-  if (options.async) {
-    const res2 = await useAsyncData(
-      key,
-      () => $fetch(fetchConfig.baseURL + url, { ...options }),
-      "$8HXlY3lqR9"
-    );
-    return { ...res2 };
-  }
-  if (options.$) {
-    const data = ref(null);
-    const error = ref(null);
-    return await $fetch(url, options).then((res2) => {
-      data.value = res2.data;
-      return {
-        data,
-        error
-      };
-    }).catch((err) => {
-      var _a;
-      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
-      error.value = msg;
-      return {
-        data,
-        error
-      };
-    });
-  }
-  const res = await useFetch(url, {
-    ...options,
-    onRequest({ options: options2 }) {
-      return useGetFetchOptions(options2);
-    },
-    // 相當於響應攔截器
-    transform: (res2) => {
-      return res2.data;
-    }
-  }, "$Nbwy13v9tA");
-  return res;
-}
-function useHttpPost(key, url, options = {}) {
-  options.method = "POST";
-  return useHttp(key, url, options);
-}
-async function useHttpFetch(url, options = {}) {
-  options = useGetFetchOptions(options);
-  const {
-    error,
-    code,
-    message = "",
-    data = null
-  } = await $fetch(fetchConfig.baseURL + url, { ...options });
-  if (error && code === 1005) {
-    const router = useRouter();
-    router.push("/");
-  }
-  return {
-    code,
-    error,
-    message,
-    data
-  };
-}
-function useHttpFetchPost(url, options = {}) {
-  options.method = "POST";
-  return useHttpFetch(url, options);
-}
-const phoneRegex = /^09\d{8}$/;
-const emailRegex = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-const htmlTag = /<[^>]*>/g;
-const useTipStore = defineStore("tip", () => {
-  const info = ref(null);
-  async function get() {
-    try {
-      const tip = await useHttpFetchPost("/tip/today");
-      const { data, error } = tip;
-      console.log(data);
-      if (!error && data !== null) {
-        const $show = useState("tip.show", () => false);
-        const $tip = useState("tip.data");
-        $show.value = true;
-        $tip.value = {
-          id: data.id,
-          title: data.title,
-          content: data.content,
-          publishDate: data.publishDate
-        };
-        return data;
-      }
-    } catch (e2) {
-    }
-  }
-  function clear() {
-    storage.remove("today_tip");
-    info.value = {};
-  }
-  return {
-    info,
-    get,
-    clear
-  };
-});
-const useUserStore = defineStore("user", () => {
-  const token = ref("");
-  function setToken(data) {
-    token.value = data.token;
-    storage.set("token", data.token, data.expire);
-    storage.set("refreshToken", data.refreshToken, data.refreshExpire);
-  }
-  const isLogin = ref(false);
-  async function refreshToken(token2) {
-    try {
-      const { data, error } = await useHttpFetchPost("/auth/refresh", {
-        body: { refreshToken: token2 }
-      });
-      if (!error) {
-        setToken(data);
-        await get();
-      }
-    } catch (e2) {
-      logout();
-    }
-  }
-  const info = ref(null);
-  async function get() {
-    const { code, error, data } = await useHttpFetchPost("/user/person");
-    if (error) {
-      if (code === 1005) {
-        const storeRefreshToken = storage.get("refreshToken");
-        await refreshToken(storeRefreshToken);
-      } else {
-        clear();
-      }
-    } else if (!error) {
-      set2(data);
-    }
-    return data;
-  }
-  function set2(value) {
-    isLogin.value = true;
-    info.value = value;
-    storage.set("userInfo", value);
-  }
-  async function update(form) {
-    const $alert = useState("alert");
-    const updatePick = (({ firstName, lastName, birthday, gender, intro }) => ({
-      firstName,
-      lastName,
-      birthday,
-      gender,
-      intro
-    }))(info.value);
-    if (JSON.stringify(form) === JSON.stringify(updatePick)) {
-      return $alert.value = {
-        type: "info",
-        text: "未修改個人資料",
-        center: true
-      };
-    }
-    const $loading = useState("loading");
-    $loading.value = true;
-    const { error, message } = await useHttpFetchPost("/user/update", {
-      body: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        birthday: form.birthday,
-        gender: form.gender,
-        intro: form.intro
-      }
-    });
-    $loading.value = false;
-    if (error)
-      return $alert.value = { type: "error", text: message, center: true };
-    updateField({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      birthday: form.birthday,
-      gender: form.gender,
-      intro: form.intro
-    });
-    $alert.value = { type: "success", text: "個人資料已更新", center: true };
-  }
-  function updateField(obj) {
-    for (const key in obj)
-      info.value[key] = obj[key];
-    storage.set("userInfo", info.value);
-  }
-  async function login(loginForm) {
-    const { data, error, message } = await useHttpFetchPost(
-      "/auth/login",
-      {
-        body: {
-          phone: loginForm.phone,
-          password: loginForm.password
-        }
-      }
-    );
-    const $alert = useState("alert");
-    const $auth = useState("showAuth", () => false);
-    if (error && message) {
-      $alert.value = { type: "error", text: message, center: true };
-    } else {
-      $auth.value = false;
-      await setToken(data);
-      await get();
-      const tip = useTipStore();
-      await tip.get();
-      $alert.value = { type: "success", title: "登入成功" };
-      if (loginForm.rememberMe)
-        storage.set("loginData", loginForm);
-      else
-        storage.remove("loginData");
-    }
-  }
-  async function register(registerForm) {
-    const $alert = useState("alert");
-    if (!passwordRegex.test(registerForm.password)) {
-      return $alert.value = {
-        type: "error",
-        text: "密碼須為英數混合8位數以上",
-        center: true
-      };
-    }
-    const { error, message, data } = await useHttpFetchPost("/auth/register", {
-      body: {
-        firstName: registerForm.firstName,
-        lastName: registerForm.lastName,
-        birthday: registerForm.birthday,
-        phone: registerForm.phone,
-        password: registerForm.password,
-        gender: registerForm.gender,
-        passwordConfirm: registerForm.passwordConfirm,
-        verifyCode: registerForm.verifyCode
-      }
-    });
-    const $auth = useState("showAuth", () => false);
-    if (error && message) {
-      $alert.value = { type: "error", text: message, center: true };
-    } else {
-      $auth.value = false;
-      await setToken(data);
-      await get();
-      const tip = useTipStore();
-      await tip.get();
-      $alert.value = { type: "success", title: "登入成功" };
-      if (data.rememberMe)
-        storage.set("loginData", data);
-      else
-        storage.remove("loginData");
-    }
-    if (error) {
-      const $alert2 = useState("alert");
-      $alert2.value = {
-        type: "error",
-        title: "驗證錯誤",
-        text: message,
-        center: true
-      };
-    }
-    return { error, message, data };
-  }
-  async function forgot(forgotForm) {
-    const $alert = useState("alert");
-    if (!passwordRegex.test(forgotForm.password)) {
-      return $alert.value = {
-        type: "error",
-        text: "密碼須為英數混合8位數以上",
-        center: true
-      };
-    }
-    const { error, message, data } = await useHttpFetchPost("/auth/forgot", {
-      body: {
-        phone: forgotForm.phone,
-        password: forgotForm.password,
-        passwordConfirm: forgotForm.passwordConfirm,
-        verifyCode: forgotForm.verifyCode
-      }
-    });
-    const $auth = useState("showAuth", () => false);
-    if (error && message) {
-      $alert.value = { type: "error", text: message, center: true };
-    } else {
-      $auth.value = false;
-      await setToken(data);
-      await get();
-      $alert.value = { type: "success", title: "修改成功，已登入" };
-      if (data.rememberMe)
-        storage.set("loginData", forgotForm);
-      else
-        storage.remove("loginData");
-    }
-    if (error) {
-      const $alert2 = useState("alert");
-      $alert2.value = {
-        type: "error",
-        title: "驗證錯誤",
-        text: message,
-        center: true
-      };
-    }
-    return { error, message, data };
-  }
-  async function logout() {
-    const $alert = useState("alert");
-    await useHttpFetchPost("/user/logout");
-    $alert.value = {
-      type: "success",
-      title: "登出成功"
-    };
-    clear();
-  }
-  async function clear() {
-    return await new Promise((resolve) => {
-      storage.remove("userInfo");
-      storage.remove("token");
-      const isLoginState = useState("isLogin");
-      isLoginState.value = false;
-      isLogin.value = false;
-      info.value = null;
-      token.value = "";
-      const route = useRoute();
-      const router = useRouter();
-      const middleware = route.meta.middleware ?? [];
-      if (middleware && middleware.includes("auth"))
-        router.push("/");
-      resolve("");
-    });
-  }
-  return {
-    token,
-    info,
-    isLogin,
-    get,
-    set: set2,
-    update,
-    updateField,
-    login,
-    register,
-    forgot,
-    logout,
-    clear,
-    setToken,
-    refreshToken
-  };
-});
-function useBaseStore() {
-  const user = useUserStore();
-  const tip = useTipStore();
-  return {
-    // app,
-    // process,
-    user,
-    tip
-  };
-}
-const _sfc_main$n = /* @__PURE__ */ defineComponent({
+const _sfc_main$m = /* @__PURE__ */ defineComponent({
   __name: "User",
   __ssrInlineRender: true,
   props: {
@@ -3757,14 +3847,14 @@ const _sfc_main$n = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$n = _sfc_main$n.setup;
-_sfc_main$n.setup = (props, ctx) => {
+const _sfc_setup$m = _sfc_main$m.setup;
+_sfc_main$m.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/Navbar/User.vue");
-  return _sfc_setup$n ? _sfc_setup$n(props, ctx) : void 0;
+  return _sfc_setup$m ? _sfc_setup$m(props, ctx) : void 0;
 };
 const _imports_0 = "" + __publicAssetsURL("logo.png");
-const _sfc_main$m = /* @__PURE__ */ defineComponent({
+const _sfc_main$l = /* @__PURE__ */ defineComponent({
   __name: "Navbar",
   __ssrInlineRender: true,
   setup(__props) {
@@ -3774,11 +3864,11 @@ const _sfc_main$m = /* @__PURE__ */ defineComponent({
     ]);
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtLink = __nuxt_component_0$3;
-      const _component_UIAnchor = _sfc_main$s;
-      const _component_UIButton = _sfc_main$r;
-      const _component_TemSizeChange = _sfc_main$p;
-      const _component_TemThemeChange = _sfc_main$o;
-      const _component_LayoutNavbarUser = _sfc_main$n;
+      const _component_UIAnchor = _sfc_main$r;
+      const _component_UIButton = _sfc_main$q;
+      const _component_TemSizeChange = _sfc_main$o;
+      const _component_TemThemeChange = _sfc_main$n;
+      const _component_LayoutNavbarUser = _sfc_main$m;
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "h-12" }, _attrs))}><div class="h-12 fixed flex items-center w-screen top-0 left-0 backdrop-filter backdrop-blur top-0 flex-none transition-colors duration-300 z-20 border-b border-gray-900/10 dark:border-gray-50/[0.2] bg-white dark:bg-slate-900/[0.7]"><div class="cma"><div class="lg:px-8 lg:mx-0"><div class="relative flex items-center">`);
       ssrRenderSlot(_ctx.$slots, "title", {}, () => {
         _push(ssrRenderComponent(_component_NuxtLink, {
@@ -3849,11 +3939,11 @@ const _sfc_main$m = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$m = _sfc_main$m.setup;
-_sfc_main$m.setup = (props, ctx) => {
+const _sfc_setup$l = _sfc_main$l.setup;
+_sfc_main$l.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/Navbar.vue");
-  return _sfc_setup$m ? _sfc_setup$m(props, ctx) : void 0;
+  return _sfc_setup$l ? _sfc_setup$l(props, ctx) : void 0;
 };
 const _wrapIf = (component, props, slots) => {
   props = props === true ? {} : props;
@@ -3863,8 +3953,8 @@ const _wrapIf = (component, props, slots) => {
   } };
 };
 const layouts = {
-  blog: () => import('./_nuxt/blog-b5f57291.mjs').then((m2) => m2.default || m2),
-  default: () => import('./_nuxt/default-dacc9f7f.mjs').then((m2) => m2.default || m2)
+  blog: () => import('./_nuxt/blog-2c7a79f1.mjs').then((m2) => m2.default || m2),
+  default: () => import('./_nuxt/default-432cd5ca.mjs').then((m2) => m2.default || m2)
 };
 const LayoutLoader = /* @__PURE__ */ defineComponent({
   name: "LayoutLoader",
@@ -4109,7 +4199,7 @@ const RouteProvider = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const __nuxt_component_2$4 = /* @__PURE__ */ defineComponent({
+const __nuxt_component_2$3 = /* @__PURE__ */ defineComponent({
   name: "NuxtPage",
   inheritAttrs: false,
   props: {
@@ -4196,7 +4286,7 @@ function _mergeTransitionProps(routeProps) {
   }));
   return defu(..._props);
 }
-const _sfc_main$l = /* @__PURE__ */ defineComponent({
+const _sfc_main$k = /* @__PURE__ */ defineComponent({
   __name: "NavbarMobile",
   __ssrInlineRender: true,
   setup(__props) {
@@ -4239,11 +4329,11 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$l = _sfc_main$l.setup;
-_sfc_main$l.setup = (props, ctx) => {
+const _sfc_setup$k = _sfc_main$k.setup;
+_sfc_main$k.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Layout/NavbarMobile.vue");
-  return _sfc_setup$l ? _sfc_setup$l(props, ctx) : void 0;
+  return _sfc_setup$k ? _sfc_setup$k(props, ctx) : void 0;
 };
 const __nuxt_component_0$2 = /* @__PURE__ */ defineComponent({
   name: "ClientOnly",
@@ -4267,7 +4357,7 @@ const __nuxt_component_0$2 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_main$k = /* @__PURE__ */ defineComponent({
+const _sfc_main$j = /* @__PURE__ */ defineComponent({
   __name: "Form",
   __ssrInlineRender: true,
   emits: ["submit"],
@@ -4279,13 +4369,80 @@ const _sfc_main$k = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$k = _sfc_main$k.setup;
-_sfc_main$k.setup = (props, ctx) => {
+const _sfc_setup$j = _sfc_main$j.setup;
+_sfc_main$j.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form.vue");
-  return _sfc_setup$k ? _sfc_setup$k(props, ctx) : void 0;
+  return _sfc_setup$j ? _sfc_setup$j(props, ctx) : void 0;
 };
-const _sfc_main$j = {
+const _sfc_main$i = {
+  __name: "Select",
+  __ssrInlineRender: true,
+  props: [
+    "modelValue",
+    "label",
+    "placeholder",
+    "options",
+    "disabled",
+    "selected"
+  ],
+  emits: ["update:modelValue"],
+  setup(__props, { emit }) {
+    const props = __props;
+    const defaultStyle2 = computed(
+      () => props.disabled ? `
+  block w-full border cursor-not-allowed
+  duration-200
+  border-gray-600/[0.3] bg-gray-100
+  text-opacity-50
+  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
+  block w-full border
+  duration-200
+  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
+  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
+    );
+    const labelSizeStyles = reactive({
+      lg: "text-base",
+      md: "text-sm",
+      sm: "text-xs",
+      xs: "text-xs"
+    });
+    const inputSizeStyles = reactive({
+      lg: "h-12 px-4 text-lg rounded-lg",
+      md: "h-10 px-4 text-base rounded",
+      sm: "h-8 px-4 text-sm rounded",
+      xs: "h-7 px-4 text-xs rounded"
+    });
+    const labelSize = computed(
+      () => labelSizeStyles[props.size] || labelSizeStyles.md
+    );
+    const inputSize = computed(
+      () => inputSizeStyles[props.size] || inputSizeStyles.md
+    );
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<div${ssrRenderAttrs(_attrs)} data-v-20ac6568><div class="${ssrRenderClass([unref(labelSize), "flex items-center mb-2 empty:hidden"])}" data-v-20ac6568>`);
+      if (!!__props.label) {
+        _push(`<label${ssrRenderAttr("for", _ctx.id)} class="${ssrRenderClass([[{ "cursor-pointer": _ctx.id }], "block font-bold tracking-wide"])}" data-v-20ac6568>${ssrInterpolate(__props.label)}</label>`);
+      } else {
+        _push(`<!---->`);
+      }
+      ssrRenderSlot(_ctx.$slots, "label", {}, null, _push, _parent);
+      _push(`</div><div class="relative model flex" data-v-20ac6568><select${ssrRenderAttr("value", __props.modelValue)} class="${ssrRenderClass([{ "text-center": _ctx.center }, unref(defaultStyle2), unref(inputSize)])}" data-v-20ac6568><!--[-->`);
+      ssrRenderList(__props.options, (option) => {
+        _push(`<option${ssrRenderAttr("value", option)} data-v-20ac6568>${ssrInterpolate(option)}</option>`);
+      });
+      _push(`<!--]--></select></div></div>`);
+    };
+  }
+};
+const _sfc_setup$i = _sfc_main$i.setup;
+_sfc_main$i.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Select.vue");
+  return _sfc_setup$i ? _sfc_setup$i(props, ctx) : void 0;
+};
+const __nuxt_component_2$2 = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["__scopeId", "data-v-20ac6568"]]);
+const _sfc_main$h = {
   __name: "Text",
   __ssrInlineRender: true,
   props: {
@@ -4383,14 +4540,14 @@ const _sfc_main$j = {
     };
   }
 };
-const _sfc_setup$j = _sfc_main$j.setup;
-_sfc_main$j.setup = (props, ctx) => {
+const _sfc_setup$h = _sfc_main$h.setup;
+_sfc_main$h.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Text.vue");
-  return _sfc_setup$j ? _sfc_setup$j(props, ctx) : void 0;
+  return _sfc_setup$h ? _sfc_setup$h(props, ctx) : void 0;
 };
-const __nuxt_component_2$3 = _sfc_main$j;
-const _sfc_main$i = {
+const __nuxt_component_2$1 = _sfc_main$h;
+const _sfc_main$g = {
   __name: "Password",
   __ssrInlineRender: true,
   props: {
@@ -4474,19 +4631,19 @@ const _sfc_main$i = {
     };
   }
 };
-const _sfc_setup$i = _sfc_main$i.setup;
-_sfc_main$i.setup = (props, ctx) => {
+const _sfc_setup$g = _sfc_main$g.setup;
+_sfc_main$g.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Password.vue");
-  return _sfc_setup$i ? _sfc_setup$i(props, ctx) : void 0;
+  return _sfc_setup$g ? _sfc_setup$g(props, ctx) : void 0;
 };
-const __nuxt_component_2$2 = _sfc_main$i;
+const __nuxt_component_2 = _sfc_main$g;
 const defaultStyle$1 = `
   block w-full border outline-none font-bold
   bg-blue-500 text-light-200
   opacity-80 hover:opacity-100 duration-150
 `;
-const _sfc_main$h = /* @__PURE__ */ defineComponent({
+const _sfc_main$f = /* @__PURE__ */ defineComponent({
   __name: "Submit",
   __ssrInlineRender: true,
   props: {
@@ -4517,19 +4674,20 @@ const _sfc_main$h = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$h = _sfc_main$h.setup;
-_sfc_main$h.setup = (props, ctx) => {
+const _sfc_setup$f = _sfc_main$f.setup;
+_sfc_main$f.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Submit.vue");
-  return _sfc_setup$h ? _sfc_setup$h(props, ctx) : void 0;
+  return _sfc_setup$f ? _sfc_setup$f(props, ctx) : void 0;
 };
-const _sfc_main$g = /* @__PURE__ */ defineComponent({
+const _sfc_main$e = /* @__PURE__ */ defineComponent({
   __name: "LoginForm",
   __ssrInlineRender: true,
   emits: ["register", "forgot", "close"],
   setup(__props, { emit }) {
     const loginStorage = storage.get("loginData");
     const loginForm = reactive({
+      area: (loginStorage == null ? void 0 : loginStorage.area) || "+886",
       phone: (loginStorage == null ? void 0 : loginStorage.phone) || "",
       password: (loginStorage == null ? void 0 : loginStorage.password) || "",
       rememberMe: !!(loginStorage == null ? void 0 : loginStorage.rememberMe)
@@ -4537,18 +4695,115 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
     const login = async () => {
       const { user } = useBaseStore();
       await user.login({
+        area: loginForm.area,
         phone: loginForm.phone,
         password: loginForm.password,
         rememberMe: loginForm.rememberMe
       });
     };
+    const options = [
+      "+1",
+      "+1264",
+      "+1268",
+      "+1441",
+      "+1473",
+      "+1758",
+      "+1767",
+      "+1876",
+      "+20",
+      "+212",
+      "+233",
+      "+234",
+      "+237",
+      "+243",
+      "+248",
+      "+249",
+      "+250",
+      "+254",
+      "+256",
+      "+261",
+      "+297",
+      "+30",
+      "+32",
+      "+33",
+      "+34",
+      "+351",
+      "+352",
+      "+353",
+      "+354",
+      "+358",
+      "+380",
+      "+381",
+      "+389",
+      "+39",
+      "+40",
+      "+41",
+      "+43",
+      "+44",
+      "+45",
+      "+46",
+      "+47",
+      "+49",
+      "+502",
+      "+503",
+      "+504",
+      "+505",
+      "+507",
+      "+509",
+      "+52",
+      "+54",
+      "+55",
+      "+57",
+      "+58",
+      "+591",
+      "+595",
+      "+598",
+      "+60",
+      "+61",
+      "+62",
+      "+64",
+      "+65",
+      "+66",
+      "+674",
+      "+675",
+      "+676",
+      "+679",
+      "+7",
+      "+7",
+      "+81",
+      "+82",
+      "+852",
+      "+853",
+      "+86",
+      "+880",
+      "+886",
+      "+90",
+      "+91",
+      "+92",
+      "+93",
+      "+94",
+      "+960",
+      "+962",
+      "+964",
+      "+965",
+      "+966",
+      "+967",
+      "+967",
+      "+971",
+      "+973",
+      "+975",
+      "+975",
+      "+995",
+      "+998"
+    ];
     return (_ctx, _push, _parent, _attrs) => {
       const _component_UnoIcon = __nuxt_component_1;
-      const _component_UIForm = _sfc_main$k;
-      const _component_UIFormText = __nuxt_component_2$3;
-      const _component_UIFormPassword = __nuxt_component_2$2;
-      const _component_UIFormSubmit = _sfc_main$h;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-5132e79f><div class="flex items-center justify-between mb-7" data-v-5132e79f><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-5132e79f> 登入帳號 </div>`);
+      const _component_UIForm = _sfc_main$j;
+      const _component_UIFormSelect = __nuxt_component_2$2;
+      const _component_UIFormText = __nuxt_component_2$1;
+      const _component_UIFormPassword = __nuxt_component_2;
+      const _component_UIFormSubmit = _sfc_main$f;
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-100b030f><div class="flex items-center justify-between mb-7" data-v-100b030f><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-100b030f> 登入帳號 </div>`);
       _push(ssrRenderComponent(_component_UnoIcon, {
         class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
         onClick: ($event) => _ctx.$emit("close")
@@ -4557,14 +4812,22 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_UIForm, { onSubmit: login }, {
         default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
+            _push2(`<div data-v-100b030f${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}" data-v-100b030f${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-100b030f${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="flex flex-wrap" data-v-100b030f${_scopeId}>`);
+            _push2(ssrRenderComponent(_component_UIFormSelect, {
+              class: "mr-2 w-24",
+              id: "phone",
+              options,
+              modelValue: unref(loginForm).area,
+              "onUpdate:modelValue": ($event) => unref(loginForm).area = $event
+            }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_UIFormText, {
-              id: "account",
+              id: "phone",
               modelValue: unref(loginForm).phone,
               "onUpdate:modelValue": ($event) => unref(loginForm).phone = $event,
-              label: "手機號碼",
-              class: "mb-3",
+              class: "mb-3 flex-1",
               placeholder: "輸入手機號碼"
             }, null, _parent2, _scopeId));
+            _push2(`</div></div>`);
             _push2(ssrRenderComponent(_component_UIFormPassword, {
               id: "password",
               modelValue: unref(loginForm).password,
@@ -4572,30 +4835,49 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
               label: "密碼",
               placeholder: "長度至少為8,英數組合"
             }, null, _parent2, _scopeId));
-            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-5132e79f${_scopeId}><div data-v-5132e79f${_scopeId}><label class="flex items-center cursor-pointer check" data-v-5132e79f${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-5132e79f${_scopeId}>`);
+            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-100b030f${_scopeId}><div data-v-100b030f${_scopeId}><label class="flex items-center cursor-pointer check" data-v-100b030f${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-100b030f${_scopeId}>`);
             if (unref(loginForm).rememberMe) {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-checkbox-outline" }, null, _parent2, _scopeId));
             } else {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-android-checkbox-outline-blank" }, null, _parent2, _scopeId));
             }
-            _push2(`<span class="ml-2" data-v-5132e79f${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-5132e79f${_scopeId}>忘記密碼</span></div>`);
+            _push2(`<span class="ml-2" data-v-100b030f${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-100b030f${_scopeId}>忘記密碼</span></div>`);
             _push2(ssrRenderComponent(_component_UIFormSubmit, {
               class: "mb-7",
               text: "送出",
               center: true,
               onClick: login
             }, null, _parent2, _scopeId));
-            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-5132e79f${_scopeId}> 註冊新帳號 </div>`);
+            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-100b030f${_scopeId}> 註冊新帳號 </div>`);
           } else {
             return [
-              createVNode(_component_UIFormText, {
-                id: "account",
-                modelValue: unref(loginForm).phone,
-                "onUpdate:modelValue": ($event) => unref(loginForm).phone = $event,
-                label: "手機號碼",
-                class: "mb-3",
-                placeholder: "輸入手機號碼"
-              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode("div", null, [
+                createVNode("div", {
+                  class: ["flex items-center mb-2", _ctx.labelSize]
+                }, [
+                  createVNode("label", {
+                    for: "phone",
+                    class: ["block font-bold tracking-wide", [{ "cursor-pointer": "phone" }]],
+                    textContent: "手機"
+                  })
+                ], 2),
+                createVNode("div", { class: "flex flex-wrap" }, [
+                  createVNode(_component_UIFormSelect, {
+                    class: "mr-2 w-24",
+                    id: "phone",
+                    options,
+                    modelValue: unref(loginForm).area,
+                    "onUpdate:modelValue": ($event) => unref(loginForm).area = $event
+                  }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+                  createVNode(_component_UIFormText, {
+                    id: "phone",
+                    modelValue: unref(loginForm).phone,
+                    "onUpdate:modelValue": ($event) => unref(loginForm).phone = $event,
+                    class: "mb-3 flex-1",
+                    placeholder: "輸入手機號碼"
+                  }, null, 8, ["modelValue", "onUpdate:modelValue"])
+                ])
+              ]),
               createVNode(_component_UIFormPassword, {
                 id: "password",
                 modelValue: unref(loginForm).password,
@@ -4647,87 +4929,20 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$g = _sfc_main$g.setup;
-_sfc_main$g.setup = (props, ctx) => {
+const _sfc_setup$e = _sfc_main$e.setup;
+_sfc_main$e.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/LoginForm.vue");
-  return _sfc_setup$g ? _sfc_setup$g(props, ctx) : void 0;
+  return _sfc_setup$e ? _sfc_setup$e(props, ctx) : void 0;
 };
-const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["__scopeId", "data-v-5132e79f"]]);
-const _sfc_main$f = {
-  __name: "Select",
-  __ssrInlineRender: true,
-  props: [
-    "modelValue",
-    "label",
-    "placeholder",
-    "options",
-    "disabled",
-    "selected"
-  ],
-  emits: ["update:modelValue"],
-  setup(__props, { emit }) {
-    const props = __props;
-    const defaultStyle2 = computed(
-      () => props.disabled ? `
-  block w-full border cursor-not-allowed
-  duration-200
-  border-gray-600/[0.3] bg-gray-100
-  text-opacity-50
-  dark:border-gray-50/[0.2] dark:bg-gray-800` : `
-  block w-full border
-  duration-200
-  bg-transparent border-gray-600/[0.3] focus:bg-gray-200
-  dark:border-gray-50/[0.2] dark:focus:bg-gray-800`
-    );
-    const labelSizeStyles = reactive({
-      lg: "text-base",
-      md: "text-sm",
-      sm: "text-xs",
-      xs: "text-xs"
-    });
-    const inputSizeStyles = reactive({
-      lg: "h-12 px-4 text-lg rounded-lg",
-      md: "h-10 px-4 text-base rounded",
-      sm: "h-8 px-4 text-sm rounded",
-      xs: "h-7 px-4 text-xs rounded"
-    });
-    const labelSize = computed(
-      () => labelSizeStyles[props.size] || labelSizeStyles.md
-    );
-    const inputSize = computed(
-      () => inputSizeStyles[props.size] || inputSizeStyles.md
-    );
-    return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(_attrs)} data-v-20ac6568><div class="${ssrRenderClass([unref(labelSize), "flex items-center mb-2 empty:hidden"])}" data-v-20ac6568>`);
-      if (!!__props.label) {
-        _push(`<label${ssrRenderAttr("for", _ctx.id)} class="${ssrRenderClass([[{ "cursor-pointer": _ctx.id }], "block font-bold tracking-wide"])}" data-v-20ac6568>${ssrInterpolate(__props.label)}</label>`);
-      } else {
-        _push(`<!---->`);
-      }
-      ssrRenderSlot(_ctx.$slots, "label", {}, null, _push, _parent);
-      _push(`</div><div class="relative model flex" data-v-20ac6568><select${ssrRenderAttr("value", __props.modelValue)} class="${ssrRenderClass([{ "text-center": _ctx.center }, unref(defaultStyle2), unref(inputSize)])}" data-v-20ac6568><!--[-->`);
-      ssrRenderList(__props.options, (option) => {
-        _push(`<option${ssrRenderAttr("value", option)} data-v-20ac6568>${ssrInterpolate(option)}</option>`);
-      });
-      _push(`<!--]--></select></div></div>`);
-    };
-  }
-};
-const _sfc_setup$f = _sfc_main$f.setup;
-_sfc_main$f.setup = (props, ctx) => {
-  const ssrContext = useSSRContext();
-  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Select.vue");
-  return _sfc_setup$f ? _sfc_setup$f(props, ctx) : void 0;
-};
-const __nuxt_component_2$1 = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["__scopeId", "data-v-20ac6568"]]);
+const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-100b030f"]]);
 const defaultStyle = `
   block w-full border
   duration-200 
   bg-transparent border-gray-600/[0.3] focus:bg-gray-200
   dark:border-gray-50/[0.2] dark:focus:bg-gray-800
 `;
-const _sfc_main$e = {
+const _sfc_main$d = {
   __name: "Captcha",
   __ssrInlineRender: true,
   props: {
@@ -4765,14 +4980,14 @@ const _sfc_main$e = {
     };
   }
 };
-const _sfc_setup$e = _sfc_main$e.setup;
-_sfc_main$e.setup = (props, ctx) => {
+const _sfc_setup$d = _sfc_main$d.setup;
+_sfc_main$d.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Captcha.vue");
-  return _sfc_setup$e ? _sfc_setup$e(props, ctx) : void 0;
+  return _sfc_setup$d ? _sfc_setup$d(props, ctx) : void 0;
 };
-const __nuxt_component_4$1 = _sfc_main$e;
-const _sfc_main$d = {
+const __nuxt_component_4$1 = _sfc_main$d;
+const _sfc_main$c = {
   __name: "Date",
   __ssrInlineRender: true,
   props: {
@@ -4849,14 +5064,14 @@ const _sfc_main$d = {
     };
   }
 };
-const _sfc_setup$d = _sfc_main$d.setup;
-_sfc_main$d.setup = (props, ctx) => {
+const _sfc_setup$c = _sfc_main$c.setup;
+_sfc_main$c.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Date.vue");
-  return _sfc_setup$d ? _sfc_setup$d(props, ctx) : void 0;
+  return _sfc_setup$c ? _sfc_setup$c(props, ctx) : void 0;
 };
-const __nuxt_component_4 = /* @__PURE__ */ _export_sfc(_sfc_main$d, [["__scopeId", "data-v-85ac86be"]]);
-const _sfc_main$c = {
+const __nuxt_component_4 = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["__scopeId", "data-v-85ac86be"]]);
+const _sfc_main$b = {
   __name: "Radio",
   __ssrInlineRender: true,
   props: {
@@ -4915,14 +5130,14 @@ const _sfc_main$c = {
     };
   }
 };
-const _sfc_setup$c = _sfc_main$c.setup;
-_sfc_main$c.setup = (props, ctx) => {
+const _sfc_setup$b = _sfc_main$b.setup;
+_sfc_main$b.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/Radio.vue");
-  return _sfc_setup$c ? _sfc_setup$c(props, ctx) : void 0;
+  return _sfc_setup$b ? _sfc_setup$b(props, ctx) : void 0;
 };
-const __nuxt_component_5 = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["__scopeId", "data-v-e8c98730"]]);
-const _sfc_main$b = /* @__PURE__ */ defineComponent({
+const __nuxt_component_5 = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["__scopeId", "data-v-e8c98730"]]);
+const _sfc_main$a = /* @__PURE__ */ defineComponent({
   __name: "RegisterForm",
   __ssrInlineRender: true,
   props: {
@@ -5081,14 +5296,14 @@ const _sfc_main$b = /* @__PURE__ */ defineComponent({
     ];
     return (_ctx, _push, _parent, _attrs) => {
       const _component_UnoIcon = __nuxt_component_1;
-      const _component_UIForm = _sfc_main$k;
-      const _component_UIFormText = __nuxt_component_2$3;
-      const _component_UIFormSelect = __nuxt_component_2$1;
+      const _component_UIForm = _sfc_main$j;
+      const _component_UIFormText = __nuxt_component_2$1;
+      const _component_UIFormSelect = __nuxt_component_2$2;
       const _component_UIFormCaptcha = __nuxt_component_4$1;
-      const _component_UIFormPassword = __nuxt_component_2$2;
+      const _component_UIFormPassword = __nuxt_component_2;
       const _component_UIFormDate = __nuxt_component_4;
       const _component_UIFormRadio = __nuxt_component_5;
-      const _component_UIFormSubmit = _sfc_main$h;
+      const _component_UIFormSubmit = _sfc_main$f;
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "p-12" }, _attrs))}><div class="flex items-center justify-between mb-7"><div class="text-xl font-bold text-gray-800 dark:text-gray-200">註冊</div>`);
       _push(ssrRenderComponent(_component_UnoIcon, {
         class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
@@ -5115,7 +5330,7 @@ const _sfc_main$b = /* @__PURE__ */ defineComponent({
               label: "名字",
               class: "flex-1"
             }, null, _parent2, _scopeId));
-            _push2(`</div><div${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}"${_scopeId}><label${ssrRenderAttr("for", _ctx.phone)} class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}"${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="flex flex-wrap"${_scopeId}>`);
+            _push2(`</div><div${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}"${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}"${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="flex flex-wrap"${_scopeId}>`);
             _push2(ssrRenderComponent(_component_UIFormSelect, {
               class: "mr-2 w-24",
               id: "phone",
@@ -5200,10 +5415,10 @@ const _sfc_main$b = /* @__PURE__ */ defineComponent({
                   class: ["flex items-center mb-2", _ctx.labelSize]
                 }, [
                   createVNode("label", {
-                    for: _ctx.phone,
+                    for: "phone",
                     class: ["block font-bold tracking-wide", [{ "cursor-pointer": "phone" }]],
                     textContent: "手機"
-                  }, null, 8, ["for"])
+                  })
                 ], 2),
                 createVNode("div", { class: "flex flex-wrap" }, [
                   createVNode(_component_UIFormSelect, {
@@ -5286,34 +5501,12 @@ const _sfc_main$b = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_setup$b = _sfc_main$b.setup;
-_sfc_main$b.setup = (props, ctx) => {
-  const ssrContext = useSSRContext();
-  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/RegisterForm.vue");
-  return _sfc_setup$b ? _sfc_setup$b(props, ctx) : void 0;
-};
-const _sfc_main$a = {
-  __name: "SelectArea",
-  __ssrInlineRender: true,
-  props: ["modelValue", "label", "placeholder", "options"],
-  emits: ["update:modelValue"],
-  setup(__props, { emit }) {
-    return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "form-group form-group_select" }, _attrs))} data-v-24226c81><label data-v-24226c81>${ssrInterpolate(__props.label)}</label><select${ssrRenderAttr("value", __props.modelValue)} data-v-24226c81><!--[-->`);
-      ssrRenderList(__props.options, (option) => {
-        _push(`<option data-v-24226c81>${ssrInterpolate(option)}</option>`);
-      });
-      _push(`<!--]--></select></div>`);
-    };
-  }
-};
 const _sfc_setup$a = _sfc_main$a.setup;
 _sfc_main$a.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
-  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/UI/Form/SelectArea.vue");
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/RegisterForm.vue");
   return _sfc_setup$a ? _sfc_setup$a(props, ctx) : void 0;
 };
-const __nuxt_component_2 = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["__scopeId", "data-v-24226c81"]]);
 const _sfc_main$9 = /* @__PURE__ */ defineComponent({
   __name: "ForgotForm",
   __ssrInlineRender: true,
@@ -5329,6 +5522,7 @@ const _sfc_main$9 = /* @__PURE__ */ defineComponent({
       emit("cancel");
     };
     const forgotForm = reactive({
+      area: "",
       phone: "",
       password: "",
       passwordConfirm: "",
@@ -5342,7 +5536,7 @@ const _sfc_main$9 = /* @__PURE__ */ defineComponent({
       const { error, message, data } = await useHttpFetchPost(
         "/auth/forgot-captcha",
         {
-          body: { phone: forgotForm.phone }
+          body: { area: forgotForm.area, phone: forgotForm.phone }
         }
       );
       $loading.value = false;
@@ -5358,14 +5552,109 @@ const _sfc_main$9 = /* @__PURE__ */ defineComponent({
       if (data)
         $alert.value = { type: "success", title: "發送成功", center: true };
     };
+    const options = [
+      "+1",
+      "+1264",
+      "+1268",
+      "+1441",
+      "+1473",
+      "+1758",
+      "+1767",
+      "+1876",
+      "+20",
+      "+212",
+      "+233",
+      "+234",
+      "+237",
+      "+243",
+      "+248",
+      "+249",
+      "+250",
+      "+254",
+      "+256",
+      "+261",
+      "+297",
+      "+30",
+      "+32",
+      "+33",
+      "+34",
+      "+351",
+      "+352",
+      "+353",
+      "+354",
+      "+358",
+      "+380",
+      "+381",
+      "+389",
+      "+39",
+      "+40",
+      "+41",
+      "+43",
+      "+44",
+      "+45",
+      "+46",
+      "+47",
+      "+49",
+      "+502",
+      "+503",
+      "+504",
+      "+505",
+      "+507",
+      "+509",
+      "+52",
+      "+54",
+      "+55",
+      "+57",
+      "+58",
+      "+591",
+      "+595",
+      "+598",
+      "+60",
+      "+61",
+      "+62",
+      "+64",
+      "+65",
+      "+66",
+      "+674",
+      "+675",
+      "+676",
+      "+679",
+      "+7",
+      "+7",
+      "+81",
+      "+82",
+      "+852",
+      "+853",
+      "+86",
+      "+880",
+      "+886",
+      "+90",
+      "+91",
+      "+92",
+      "+93",
+      "+94",
+      "+960",
+      "+962",
+      "+964",
+      "+965",
+      "+966",
+      "+967",
+      "+967",
+      "+971",
+      "+973",
+      "+975",
+      "+975",
+      "+995",
+      "+998"
+    ];
     return (_ctx, _push, _parent, _attrs) => {
       const _component_UnoIcon = __nuxt_component_1;
-      const _component_UIForm = _sfc_main$k;
-      const _component_UIFormSelectArea = __nuxt_component_2;
-      const _component_UIFormText = __nuxt_component_2$3;
+      const _component_UIForm = _sfc_main$j;
+      const _component_UIFormSelect = __nuxt_component_2$2;
+      const _component_UIFormText = __nuxt_component_2$1;
       const _component_UIFormCaptcha = __nuxt_component_4$1;
-      const _component_UIFormPassword = __nuxt_component_2$2;
-      const _component_UIFormSubmit = _sfc_main$h;
+      const _component_UIFormPassword = __nuxt_component_2;
+      const _component_UIFormSubmit = _sfc_main$f;
       _push(`<div${ssrRenderAttrs(mergeProps({ class: "p-12" }, _attrs))}><div class="flex items-center justify-between mb-7"><div class="text-xl font-bold text-gray-800 dark:text-gray-200"> 忘記密碼 </div>`);
       _push(ssrRenderComponent(_component_UnoIcon, {
         class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
@@ -5377,22 +5666,23 @@ const _sfc_main$9 = /* @__PURE__ */ defineComponent({
       }, {
         default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(ssrRenderComponent(_component_UIFormSelectArea, {
-              id: "area",
-              modelValue: _ctx.registerForm.area,
-              "onUpdate:modelValue": ($event) => _ctx.registerForm.area = $event,
-              label: "國際區碼",
-              class: "mb-3"
+            _push2(`<div${_scopeId}><div class="flex items-center mb-2"${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}"${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="flex flex-wrap"${_scopeId}>`);
+            _push2(ssrRenderComponent(_component_UIFormSelect, {
+              class: "mr-2 w-24",
+              id: "phone",
+              options,
+              modelValue: unref(forgotForm).area,
+              "onUpdate:modelValue": ($event) => unref(forgotForm).area = $event
             }, null, _parent2, _scopeId));
             _push2(ssrRenderComponent(_component_UIFormText, {
               id: "phone",
               modelValue: unref(forgotForm).phone,
               "onUpdate:modelValue": ($event) => unref(forgotForm).phone = $event,
-              label: "手機",
-              class: "mb-3",
+              class: "mb-3 flex-1",
               "is-phone": true,
               onCaptcha: getCaptcha
             }, null, _parent2, _scopeId));
+            _push2(`</div></div>`);
             _push2(ssrRenderComponent(_component_UIFormCaptcha, {
               modelValue: unref(forgotForm).verifyCode,
               "onUpdate:modelValue": ($event) => unref(forgotForm).verifyCode = $event,
@@ -5424,22 +5714,32 @@ const _sfc_main$9 = /* @__PURE__ */ defineComponent({
             }, null, _parent2, _scopeId));
           } else {
             return [
-              createVNode(_component_UIFormSelectArea, {
-                id: "area",
-                modelValue: _ctx.registerForm.area,
-                "onUpdate:modelValue": ($event) => _ctx.registerForm.area = $event,
-                label: "國際區碼",
-                class: "mb-3"
-              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
-              createVNode(_component_UIFormText, {
-                id: "phone",
-                modelValue: unref(forgotForm).phone,
-                "onUpdate:modelValue": ($event) => unref(forgotForm).phone = $event,
-                label: "手機",
-                class: "mb-3",
-                "is-phone": true,
-                onCaptcha: getCaptcha
-              }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+              createVNode("div", null, [
+                createVNode("div", { class: "flex items-center mb-2" }, [
+                  createVNode("label", {
+                    for: "phone",
+                    class: ["block font-bold tracking-wide", [{ "cursor-pointer": "phone" }]],
+                    textContent: "手機"
+                  })
+                ]),
+                createVNode("div", { class: "flex flex-wrap" }, [
+                  createVNode(_component_UIFormSelect, {
+                    class: "mr-2 w-24",
+                    id: "phone",
+                    options,
+                    modelValue: unref(forgotForm).area,
+                    "onUpdate:modelValue": ($event) => unref(forgotForm).area = $event
+                  }, null, 8, ["modelValue", "onUpdate:modelValue"]),
+                  createVNode(_component_UIFormText, {
+                    id: "phone",
+                    modelValue: unref(forgotForm).phone,
+                    "onUpdate:modelValue": ($event) => unref(forgotForm).phone = $event,
+                    class: "mb-3 flex-1",
+                    "is-phone": true,
+                    onCaptcha: getCaptcha
+                  }, null, 8, ["modelValue", "onUpdate:modelValue"])
+                ])
+              ]),
               createVNode(_component_UIFormCaptcha, {
                 modelValue: unref(forgotForm).verifyCode,
                 "onUpdate:modelValue": ($event) => unref(forgotForm).verifyCode = $event,
@@ -5507,7 +5807,7 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent({
     );
     return (_ctx, _push, _parent, _attrs) => {
       const _component_AuthLoginForm = __nuxt_component_0$1;
-      const _component_AuthRegisterForm = _sfc_main$b;
+      const _component_AuthRegisterForm = _sfc_main$a;
       const _component_AuthForgotForm = _sfc_main$9;
       ssrRenderTeleport(_push, (_push2) => {
         _push2(ssrRenderComponent(unref(fe), {
@@ -6281,11 +6581,11 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     return (_ctx, _push, _parent, _attrs) => {
       const _component_Html = Html;
       const _component_Body = Body;
-      const _component_LayoutNavbar = _sfc_main$m;
+      const _component_LayoutNavbar = _sfc_main$l;
       const _component_NuxtLayout = __nuxt_component_3;
       const _component_NuxtLoadingIndicator = __nuxt_component_4$2;
-      const _component_NuxtPage = __nuxt_component_2$4;
-      const _component_LayoutNavbarMobile = _sfc_main$l;
+      const _component_NuxtPage = __nuxt_component_2$3;
+      const _component_LayoutNavbarMobile = _sfc_main$k;
       const _component_ClientOnly = __nuxt_component_0$2;
       const _component_AuthPopup = __nuxt_component_8;
       const _component_GlobalMessage = __nuxt_component_9;
@@ -6410,8 +6710,8 @@ const _sfc_main$1 = {
     const statusMessage = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-404-06e4edc6.mjs').then((r2) => r2.default || r2));
-    const _Error = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-500-0352c428.mjs').then((r2) => r2.default || r2));
+    const _Error404 = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-404-5567b6cd.mjs').then((r2) => r2.default || r2));
+    const _Error = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-500-337667df.mjs').then((r2) => r2.default || r2));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ statusCode: unref(statusCode), statusMessage: unref(statusMessage), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
@@ -6429,7 +6729,7 @@ const _sfc_main = {
   __name: "nuxt-root",
   __ssrInlineRender: true,
   setup(__props) {
-    const IslandRenderer = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/island-renderer-a0a9bbfc.mjs').then((r2) => r2.default || r2));
+    const IslandRenderer = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/island-renderer-58a912d1.mjs').then((r2) => r2.default || r2));
     const nuxtApp = /* @__PURE__ */ useNuxtApp();
     nuxtApp.deferHydration();
     nuxtApp.ssrContext.url;
@@ -6496,5 +6796,5 @@ let entry;
 }
 const entry$1 = (ctx) => entry(ctx);
 
-export { _imports_0$1 as A, _sfc_main$s as B, defineNuxtRouteMiddleware as C, useAppConfig as D, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, useHttpPost as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$k as i, __nuxt_component_2$1 as j, __nuxt_component_2$3 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, __nuxt_component_4 as o, phoneRegex as p, __nuxt_component_5 as q, __nuxt_component_0$2 as r, storeToRefs as s, passwordRegex as t, useHead as u, __nuxt_component_2$2 as v, fe as w, oe as x, __nuxt_component_2$4 as y, htmlTag as z };
+export { _imports_0$1 as A, _sfc_main$r as B, defineNuxtRouteMiddleware as C, useAppConfig as D, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, useHttpPost as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$j as i, __nuxt_component_2$2 as j, __nuxt_component_2$1 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, __nuxt_component_4 as o, phoneRegex as p, __nuxt_component_5 as q, __nuxt_component_0$2 as r, storeToRefs as s, passwordRegex as t, useHead as u, __nuxt_component_2 as v, fe as w, oe as x, __nuxt_component_2$3 as y, htmlTag as z };
 //# sourceMappingURL=server.mjs.map

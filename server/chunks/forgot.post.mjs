@@ -1,5 +1,4 @@
 import { defineEventHandler, readBody, createError } from 'h3';
-import { p as phoneRegex } from './regex.mjs';
 import { r as request } from './nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
 import 'node:http';
@@ -25,12 +24,16 @@ import 'http-graceful-shutdown';
 const forgot_post = defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
-    const { phone, password, passwordConfirm, verifyCode } = body;
+    const { area, phone, password, passwordConfirm, verifyCode } = body;
     const rules = [
       {
+        key: "area",
+        message: "\u8ACB\u9078\u64C7\u5730\u5340"
+      },
+      {
         key: "phone",
-        message: "\u8ACB\u8F38\u5165\u624B\u6A5F\u865F\u78BC",
-        regex: phoneRegex
+        message: "\u8ACB\u8F38\u5165\u624B\u6A5F\u865F\u78BC"
+        // regex: phoneRegex,
       },
       {
         key: "password",
@@ -65,6 +68,7 @@ const forgot_post = defineEventHandler(async (event) => {
       message = "",
       data = {}
     } = await request.post("/auth/forgot", {
+      area,
       phone,
       password,
       passwordConfirm,

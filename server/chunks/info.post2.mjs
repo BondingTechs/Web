@@ -1,4 +1,4 @@
-import { eventHandler, readBody } from 'h3';
+import { defineEventHandler, readBody } from 'h3';
 import { r as request } from './nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
 import 'node:http';
@@ -21,14 +21,14 @@ import 'pathe';
 import 'axios';
 import 'http-graceful-shutdown';
 
-const info_post = eventHandler(async (event) => {
+const info_post = defineEventHandler(async (event) => {
   try {
-    const { id } = await readBody(event);
+    const body = await readBody(event);
     const {
       code,
       message = "",
-      data = null
-    } = await request.post("/tip/getInfo", { id });
+      data
+    } = await request.post("/location/info/add", body);
     return { error: code !== 1e3, code, message, data };
   } catch (err) {
     const { code, message = "" } = err;

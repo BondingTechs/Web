@@ -1,5 +1,4 @@
 import { defineEventHandler, readBody, createError } from 'h3';
-import { p as phoneRegex } from './regex.mjs';
 import { r as request } from './nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
 import 'node:http';
@@ -23,21 +22,26 @@ import 'axios';
 import 'http-graceful-shutdown';
 
 const _type_Captcha_post = defineEventHandler(async (event) => {
+  var _a, _b;
   try {
-    const type = event.context.params["type-captcha"].replace("-captcha", "");
+    const type = (_b = (_a = event.context) == null ? void 0 : _a.params) == null ? void 0 : _b["type-captcha"].replace("-captcha", "");
     const body = await readBody(event);
     const { phone, area } = body;
     console.log(body);
     const rules = [
       {
+        key: "area",
+        message: "\u8ACB\u9078\u64C7\u5730\u5340"
+      },
+      {
         key: "phone",
-        message: "\u8ACB\u8F38\u5165\u624B\u6A5F\u865F\u78BC",
-        regex: phoneRegex
+        message: "\u8ACB\u8F38\u5165\u624B\u6A5F\u865F\u78BC"
+        // regex: phoneRegex,
       }
     ];
     const validateRule = (rule) => {
       const value = body[rule.key] || "";
-      if (value && rule.regex && rule.regex.test(value))
+      if (value)
         return;
       throw createError({
         message: rule.message

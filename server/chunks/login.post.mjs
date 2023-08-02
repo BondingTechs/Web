@@ -23,12 +23,12 @@ import 'http-graceful-shutdown';
 
 const login_post = defineEventHandler(async (event) => {
   try {
-    const { phone, password } = await readBody(event);
+    const { area, phone, password } = await readBody(event);
     const {
       code,
       message = "",
       data = {}
-    } = await request.post("/auth/login", { phone, password });
+    } = await request.post("/auth/login", { area, phone, password });
     return { error: code !== 1e3, code, message, data };
   } catch (err) {
     const { code, message = "" } = err;
