@@ -473,7 +473,7 @@ const _routes = [
     meta: __nuxt_page_meta$4 || {},
     alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
     redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
-    component: () => import('./_nuxt/my-8fbe5fce.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/my-3f962845.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
@@ -823,7 +823,7 @@ function writeServerCookie(event, name, value, opts = {}) {
     }
   }
 }
-const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [{ "src": "//unpkg.com/vconsole@latest/dist/vconsole.min.js", "type": "text/javascript" }], "noscript": [] };
+const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [{ "src": "//unpkg.com/vconsole@latest/dist/vconsole.min.js", "type": "text/javascript" }, { "innerHTML": "new VConsole()" }], "noscript": [] };
 const appPageTransition = { "name": "page" };
 const appLayoutTransition = { "name": "layout" };
 const appKeepalive = false;
@@ -3953,7 +3953,7 @@ const _wrapIf = (component, props, slots) => {
   } };
 };
 const layouts = {
-  blog: () => import('./_nuxt/blog-2c7a79f1.mjs').then((m2) => m2.default || m2),
+  blog: () => import('./_nuxt/blog-3c4294d4.mjs').then((m2) => m2.default || m2),
   default: () => import('./_nuxt/default-432cd5ca.mjs').then((m2) => m2.default || m2)
 };
 const LayoutLoader = /* @__PURE__ */ defineComponent({
@@ -6527,7 +6527,7 @@ function InitApp() {
   const app = {
     name: "BondingTechs 鍵結科技",
     author: {
-      name: "Bryan",
+      name: "Bonding",
       link: "#"
     }
   };
