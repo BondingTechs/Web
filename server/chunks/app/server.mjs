@@ -17,7 +17,7 @@ import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrR
 import { parse } from 'cookie-es';
 import { defu } from 'defu';
 import { ref as ref$1 } from '@vue/runtime-core';
-import { a as useRuntimeConfig$1 } from '../nitro/node-server.mjs';
+import { u as useRuntimeConfig$1 } from '../nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
 import 'node:http';
 import 'node:https';
@@ -339,14 +339,8 @@ const createError = (err) => {
   _err.__nuxt_error = true;
   return _err;
 };
-const __nuxt_page_meta$6 = {
-  layout: "blog"
-};
-const __nuxt_page_meta$5 = {
-  middleware: ["auth"]
-};
 const __nuxt_page_meta$4 = {
-  middleware: ["auth"]
+  layout: "blog"
 };
 const __nuxt_page_meta$3 = {
   layout: "blog"
@@ -370,12 +364,12 @@ const _routes = [
     component: () => import('./_nuxt/404-e20fbd2e.mjs').then((m2) => m2.default || m2)
   },
   {
-    name: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) ?? "index",
-    path: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.path) ?? "/",
-    meta: __nuxt_page_meta$6 || {},
-    alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
-    redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
-    component: () => import('./_nuxt/index-5e358906.mjs').then((m2) => m2.default || m2)
+    name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? "index",
+    path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/",
+    meta: __nuxt_page_meta$4 || {},
+    alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
+    redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
+    component: () => import('./_nuxt/index-f647470f.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "member-rule",
@@ -386,7 +380,7 @@ const _routes = [
     component: () => import('./_nuxt/member-rule-375b251f.mjs').then((m2) => m2.default || m2)
   },
   {
-    path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/my",
+    path: "/my",
     children: [
       {
         name: "my-account-change-phone",
@@ -394,7 +388,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/change-phone-f60001f4.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/change-phone-9f10bf99.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-email-binding",
@@ -410,7 +404,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/email-verify-c69785ba.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/email-verify-5717d7d9.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-identity-verify",
@@ -426,7 +420,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/index-74814ffd.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/index-0c2025f9.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-account-reset-password",
@@ -434,7 +428,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/reset-password-1f78f3d8.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/reset-password-93ef7395.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-collections",
@@ -442,7 +436,7 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/collections-b8f5a879.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/collections-81bb0bf6.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-history",
@@ -450,15 +444,15 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/history-231a80c5.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/history-0c29b3e0.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) ?? "my",
-        path: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.path) ?? "",
-        meta: __nuxt_page_meta$5 || {},
-        alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
-        redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
-        component: () => import('./_nuxt/index-d4c365e3.mjs').then((m2) => m2.default || m2)
+        name: "my",
+        path: "",
+        meta: {},
+        alias: [],
+        redirect: void 0,
+        component: () => import('./_nuxt/index-7922bbd5.mjs').then((m2) => m2.default || m2)
       },
       {
         name: "my-tips",
@@ -466,14 +460,14 @@ const _routes = [
         meta: {},
         alias: [],
         redirect: void 0,
-        component: () => import('./_nuxt/tips-cfa90f9d.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/tips-13f7b3a1.mjs').then((m2) => m2.default || m2)
       }
     ],
-    name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? void 0,
-    meta: __nuxt_page_meta$4 || {},
-    alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
-    redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
-    component: () => import('./_nuxt/my-3f962845.mjs').then((m2) => m2.default || m2)
+    name: void 0,
+    meta: {},
+    alias: [],
+    redirect: void 0,
+    component: () => import('./_nuxt/my-af7d4fb0.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
@@ -481,7 +475,7 @@ const _routes = [
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-0a379318.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-829b8446.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
@@ -489,7 +483,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/categories-2bb086ee.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/categories-058022a5.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) ?? "news-category-categorySlug",
@@ -497,7 +491,7 @@ const _routes = [
     meta: __nuxt_page_meta$2 || {},
     alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
     redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-c6687b67.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-1fc79896.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) ?? "news-video-categorySlug",
@@ -505,7 +499,7 @@ const _routes = [
     meta: __nuxt_page_meta$1 || {},
     alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
     redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-c0262c3b.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-f3352818.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) ?? "news-video",
@@ -513,7 +507,7 @@ const _routes = [
     meta: __nuxt_page_meta || {},
     alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
     redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index-c4a57601.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-ecfa3c63.mjs').then((m2) => m2.default || m2)
   }
 ];
 function resolveUnref(r2) {
@@ -823,9 +817,9 @@ function writeServerCookie(event, name, value, opts = {}) {
     }
   }
 }
-const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [{ "src": "//unpkg.com/vconsole@latest/dist/vconsole.min.js", "type": "text/javascript" }, { "innerHTML": "new VConsole()" }], "noscript": [] };
 const appPageTransition = { "name": "page" };
 const appLayoutTransition = { "name": "layout" };
+const appHead = { "meta": [{ "name": "viewport", "content": "width=device-width, initial-scale=1" }, { "charset": "utf-8" }], "link": [], "style": [], "script": [], "noscript": [] };
 const appKeepalive = false;
 function definePayloadReducer(name, reduce) {
   {
@@ -1177,7 +1171,8 @@ const globalMiddleware = [
   validate
 ];
 const namedMiddleware = {
-  auth: () => import('./_nuxt/auth-8abe1026.mjs')
+  auth: () => import('./_nuxt/auth-4ed993c7.mjs'),
+  global: () => import('./_nuxt/global-ea8d7fcf.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -1820,8 +1815,6 @@ const plugin_vue3_A0OWXRrUgq = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
     }
   };
 });
-const ga_I9ckZE2lFs = ({ app, store: store2 }) => {
-};
 const API_KEY = "f230d79e6b4e40379f05e24682765349";
 const IP_GEO_URL = "https://api.ipgeolocation.io/ipgeo";
 const IP_AGENT_URL = "https://api.ipgeolocation.io/user-agent";
@@ -2335,7 +2328,7 @@ async function useHttpFetch(url, options = {}) {
   } = await $fetch(fetchConfig.baseURL + url, { ...options });
   if (error && code === 1005) {
     const router = useRouter();
-    router.push("/");
+    router.replace("/");
   }
   return {
     code,
@@ -2363,7 +2356,6 @@ const plugins = [
   plugin_server_XNCxeHyTuP,
   unocss_MzCDxu9LMj,
   plugin_vue3_A0OWXRrUgq,
-  ga_I9ckZE2lFs,
   hisotry_AOAC2IlDrx
 ];
 const removeUndefinedProps = (props) => Object.fromEntries(Object.entries(props).filter(([, value]) => value !== void 0));
@@ -3962,7 +3954,7 @@ const _wrapIf = (component, props, slots) => {
   } };
 };
 const layouts = {
-  blog: () => import('./_nuxt/blog-2f60eeec.mjs').then((m2) => m2.default || m2),
+  blog: () => import('./_nuxt/blog-9518142a.mjs').then((m2) => m2.default || m2),
   default: () => import('./_nuxt/default-432cd5ca.mjs').then((m2) => m2.default || m2)
 };
 const LayoutLoader = /* @__PURE__ */ defineComponent({
@@ -4812,7 +4804,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
       const _component_UIFormText = __nuxt_component_2$1;
       const _component_UIFormPassword = __nuxt_component_2;
       const _component_UIFormSubmit = _sfc_main$f;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-846bf7e4><div class="flex items-center justify-between mb-7" data-v-846bf7e4><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-846bf7e4> 登入帳號 </div>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-eb1aa510><div class="flex items-center justify-between mb-7" data-v-eb1aa510><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-eb1aa510> 登入帳號 </div>`);
       _push(ssrRenderComponent(_component_UnoIcon, {
         class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
         onClick: ($event) => _ctx.$emit("close")
@@ -4821,7 +4813,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_UIForm, { onSubmit: login }, {
         default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div data-v-846bf7e4${_scopeId}><div class="${ssrRenderClass([_ctx.labelSize, "flex items-center mb-2"])}" data-v-846bf7e4${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-846bf7e4${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="lg:flex flex-wrap" data-v-846bf7e4${_scopeId}>`);
+            _push2(`<div data-v-eb1aa510${_scopeId}><div class="flex items-center mb-2" data-v-eb1aa510${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-eb1aa510${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="lg:flex flex-wrap" data-v-eb1aa510${_scopeId}>`);
             _push2(ssrRenderComponent(_component_UIFormSelect, {
               class: "mr-0 lg:mr-2 lg:w-24 w-full lg:mb-0 mb-3",
               id: "phone",
@@ -4844,32 +4836,30 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
               label: "密碼",
               placeholder: "長度至少為8,英數組合"
             }, null, _parent2, _scopeId));
-            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-846bf7e4${_scopeId}><div data-v-846bf7e4${_scopeId}><label class="flex items-center cursor-pointer check" data-v-846bf7e4${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-846bf7e4${_scopeId}>`);
+            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-eb1aa510${_scopeId}><div data-v-eb1aa510${_scopeId}><label class="flex items-center cursor-pointer check" data-v-eb1aa510${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-eb1aa510${_scopeId}>`);
             if (unref(loginForm).rememberMe) {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-checkbox-outline" }, null, _parent2, _scopeId));
             } else {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-android-checkbox-outline-blank" }, null, _parent2, _scopeId));
             }
-            _push2(`<span class="ml-2" data-v-846bf7e4${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-846bf7e4${_scopeId}>忘記密碼</span></div>`);
+            _push2(`<span class="ml-2" data-v-eb1aa510${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-eb1aa510${_scopeId}>忘記密碼</span></div>`);
             _push2(ssrRenderComponent(_component_UIFormSubmit, {
               class: "mb-7",
               text: "送出",
               center: true,
               onClick: login
             }, null, _parent2, _scopeId));
-            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-846bf7e4${_scopeId}> 註冊新帳號 </div>`);
+            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-eb1aa510${_scopeId}> 註冊新帳號 </div>`);
           } else {
             return [
               createVNode("div", null, [
-                createVNode("div", {
-                  class: ["flex items-center mb-2", _ctx.labelSize]
-                }, [
+                createVNode("div", { class: "flex items-center mb-2" }, [
                   createVNode("label", {
                     for: "phone",
                     class: ["block font-bold tracking-wide", [{ "cursor-pointer": "phone" }]],
                     textContent: "手機"
                   })
-                ], 2),
+                ]),
                 createVNode("div", { class: "lg:flex flex-wrap" }, [
                   createVNode(_component_UIFormSelect, {
                     class: "mr-0 lg:mr-2 lg:w-24 w-full lg:mb-0 mb-3",
@@ -4944,7 +4934,7 @@ _sfc_main$e.setup = (props, ctx) => {
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/LoginForm.vue");
   return _sfc_setup$e ? _sfc_setup$e(props, ctx) : void 0;
 };
-const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-846bf7e4"]]);
+const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-eb1aa510"]]);
 const defaultStyle = `
   block w-full border
   duration-200 
@@ -6805,5 +6795,5 @@ let entry;
 }
 const entry$1 = (ctx) => entry(ctx);
 
-export { _imports_0$1 as A, _sfc_main$r as B, defineNuxtRouteMiddleware as C, useAppConfig as D, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, useHttpPost as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$j as i, __nuxt_component_2$2 as j, __nuxt_component_2$1 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, __nuxt_component_4 as o, phoneRegex as p, __nuxt_component_5 as q, __nuxt_component_0$2 as r, storeToRefs as s, passwordRegex as t, useHead as u, __nuxt_component_2 as v, fe as w, oe as x, __nuxt_component_2$3 as y, htmlTag as z };
+export { __nuxt_component_0$2 as A, useAppConfig as B, htmlTag as C, _imports_0$1 as D, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, defineNuxtRouteMiddleware as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$j as i, __nuxt_component_2$2 as j, __nuxt_component_2$1 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, passwordRegex as o, phoneRegex as p, __nuxt_component_2 as q, fe as r, storeToRefs as s, oe as t, useHead as u, useHttpPost as v, __nuxt_component_4 as w, __nuxt_component_5 as x, __nuxt_component_2$3 as y, _sfc_main$r as z };
 //# sourceMappingURL=server.mjs.map

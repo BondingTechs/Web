@@ -104,14 +104,14 @@ const upload_post = defineEventHandler(async (event) => {
 });
 async function minify(inputImagePath) {
   const outputFilePath = `minify_${inputImagePath}`;
-  const targetWidth = 800;
-  const targetHeight = 600;
+  const targetWidth = 1024;
+  const targetHeight = 1024;
   try {
     await sharp(inputImagePath).resize(targetWidth, targetHeight).toFile(outputFilePath);
-    console.log("\u538B\u7F29\u540E\u7684\u56FE\u7247\u5DF2\u4FDD\u5B58\u5230:", outputFilePath);
+    console.log("\u58D3\u7E2E\u5F8C\u7684\u5716\u7247\u5DF2\u4FDD\u5B58\u5230:", outputFilePath);
     return outputFilePath;
   } catch (error) {
-    console.error("\u56FE\u7247\u538B\u7F29\u5931\u8D25:", error);
+    console.error("\u5716\u7247\u58D3\u7E2E\u5931\u6557:", error);
     return "";
   }
 }
