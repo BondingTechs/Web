@@ -6618,7 +6618,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
         {
           hid: "description",
           name: "description",
-          content: "Nuxt 3 Awesome Starter"
+          content: "BondingTechs 鍵結科技官方網站"
         }
       ],
       link: [{ rel: "icon", type: "image/png", href: "/favicon.png" }]

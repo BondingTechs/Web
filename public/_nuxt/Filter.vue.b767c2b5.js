@@ -1,1 +1,0 @@
-import{d as e,r as t,e as r}from"./entry.f840fcde.js";const s=e({__name:"Filter",setup(a){return t([{text:"觀看次數",value:""},{text:"收藏次數",value:""},{text:"上傳日期(最新)",value:""},{text:"上傳日期(最舊)",value:""}]),(n,o)=>r("",!0)}});export{s as _};
