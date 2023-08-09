@@ -339,8 +339,41 @@ const createError = (err) => {
   _err.__nuxt_error = true;
   return _err;
 };
-const __nuxt_page_meta$4 = {
+const __nuxt_page_meta$f = {
   layout: "blog"
+};
+const __nuxt_page_meta$e = {
+  auth: true
+};
+const __nuxt_page_meta$d = {
+  auth: true
+};
+const __nuxt_page_meta$c = {
+  auth: true
+};
+const __nuxt_page_meta$b = {
+  auth: true
+};
+const __nuxt_page_meta$a = {
+  auth: true
+};
+const __nuxt_page_meta$9 = {
+  auth: true
+};
+const __nuxt_page_meta$8 = {
+  auth: true
+};
+const __nuxt_page_meta$7 = {
+  auth: true
+};
+const __nuxt_page_meta$6 = {
+  auth: true
+};
+const __nuxt_page_meta$5 = {
+  auth: true
+};
+const __nuxt_page_meta$4 = {
+  auth: true
 };
 const __nuxt_page_meta$3 = {
   layout: "blog"
@@ -364,11 +397,11 @@ const _routes = [
     component: () => import('./_nuxt/404-e20fbd2e.mjs').then((m2) => m2.default || m2)
   },
   {
-    name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? "index",
-    path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/",
-    meta: __nuxt_page_meta$4 || {},
-    alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
-    redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
+    name: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.name) ?? "index",
+    path: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.path) ?? "/",
+    meta: __nuxt_page_meta$f || {},
+    alias: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.alias) || [],
+    redirect: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.redirect) || void 0,
     component: () => import('./_nuxt/index-f647470f.mjs').then((m2) => m2.default || m2)
   },
   {
@@ -380,94 +413,94 @@ const _routes = [
     component: () => import('./_nuxt/member-rule-375b251f.mjs').then((m2) => m2.default || m2)
   },
   {
-    path: "/my",
+    path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/my",
     children: [
       {
-        name: "my-account-change-phone",
-        path: "account/change-phone",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$e == null ? void 0 : __nuxt_page_meta$e.name) ?? "my-account-change-phone",
+        path: (__nuxt_page_meta$e == null ? void 0 : __nuxt_page_meta$e.path) ?? "account/change-phone",
+        meta: __nuxt_page_meta$e || {},
+        alias: (__nuxt_page_meta$e == null ? void 0 : __nuxt_page_meta$e.alias) || [],
+        redirect: (__nuxt_page_meta$e == null ? void 0 : __nuxt_page_meta$e.redirect) || void 0,
         component: () => import('./_nuxt/change-phone-9f10bf99.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-account-email-binding",
-        path: "account/email-binding",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.name) ?? "my-account-email-binding",
+        path: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.path) ?? "account/email-binding",
+        meta: __nuxt_page_meta$d || {},
+        alias: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.alias) || [],
+        redirect: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.redirect) || void 0,
         component: () => import('./_nuxt/email-binding-c351c3f8.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-account-email-verify",
-        path: "account/email-verify",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.name) ?? "my-account-email-verify",
+        path: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.path) ?? "account/email-verify",
+        meta: __nuxt_page_meta$c || {},
+        alias: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.alias) || [],
+        redirect: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.redirect) || void 0,
         component: () => import('./_nuxt/email-verify-5717d7d9.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-account-identity-verify",
-        path: "account/identity-verify",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.name) ?? "my-account-identity-verify",
+        path: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.path) ?? "account/identity-verify",
+        meta: __nuxt_page_meta$b || {},
+        alias: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.alias) || [],
+        redirect: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.redirect) || void 0,
         component: () => import('./_nuxt/identity-verify-f2cd53b9.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-account",
-        path: "account",
-        meta: {},
-        alias: [],
-        redirect: void 0,
-        component: () => import('./_nuxt/index-0c2025f9.mjs').then((m2) => m2.default || m2)
+        name: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.name) ?? "my-account",
+        path: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.path) ?? "account",
+        meta: __nuxt_page_meta$a || {},
+        alias: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.alias) || [],
+        redirect: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.redirect) || void 0,
+        component: () => import('./_nuxt/index-0b587159.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-account-reset-password",
-        path: "account/reset-password",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.name) ?? "my-account-reset-password",
+        path: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.path) ?? "account/reset-password",
+        meta: __nuxt_page_meta$9 || {},
+        alias: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.alias) || [],
+        redirect: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.redirect) || void 0,
         component: () => import('./_nuxt/reset-password-93ef7395.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-collections",
-        path: "collections",
-        meta: {},
-        alias: [],
-        redirect: void 0,
-        component: () => import('./_nuxt/collections-81bb0bf6.mjs').then((m2) => m2.default || m2)
+        name: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.name) ?? "my-collections",
+        path: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.path) ?? "collections",
+        meta: __nuxt_page_meta$8 || {},
+        alias: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.alias) || [],
+        redirect: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.redirect) || void 0,
+        component: () => import('./_nuxt/collections-9b3519a2.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-history",
-        path: "history",
-        meta: {},
-        alias: [],
-        redirect: void 0,
-        component: () => import('./_nuxt/history-0c29b3e0.mjs').then((m2) => m2.default || m2)
+        name: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.name) ?? "my-history",
+        path: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.path) ?? "history",
+        meta: __nuxt_page_meta$7 || {},
+        alias: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.alias) || [],
+        redirect: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.redirect) || void 0,
+        component: () => import('./_nuxt/history-f82927f2.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my",
-        path: "",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) ?? "my",
+        path: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.path) ?? "",
+        meta: __nuxt_page_meta$6 || {},
+        alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
+        redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
         component: () => import('./_nuxt/index-7922bbd5.mjs').then((m2) => m2.default || m2)
       },
       {
-        name: "my-tips",
-        path: "tips",
-        meta: {},
-        alias: [],
-        redirect: void 0,
+        name: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) ?? "my-tips",
+        path: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.path) ?? "tips",
+        meta: __nuxt_page_meta$5 || {},
+        alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
+        redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
         component: () => import('./_nuxt/tips-13f7b3a1.mjs').then((m2) => m2.default || m2)
       }
     ],
-    name: void 0,
-    meta: {},
-    alias: [],
-    redirect: void 0,
-    component: () => import('./_nuxt/my-af7d4fb0.mjs').then((m2) => m2.default || m2)
+    name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? void 0,
+    meta: __nuxt_page_meta$4 || {},
+    alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
+    redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
+    component: () => import('./_nuxt/my-d1be65c0.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
@@ -1815,65 +1848,6 @@ const plugin_vue3_A0OWXRrUgq = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
     }
   };
 });
-const API_KEY = "f230d79e6b4e40379f05e24682765349";
-const IP_GEO_URL = "https://api.ipgeolocation.io/ipgeo";
-const IP_AGENT_URL = "https://api.ipgeolocation.io/user-agent";
-const useIPStore = defineStore("ip", () => {
-  const info = ref(null);
-  const agent = ref(null);
-  async function get() {
-    try {
-      if (info.value && agent.value) {
-        return {
-          info: info.value,
-          agent: agent.value
-        };
-      }
-      const { data: geoInfo } = await axios.get(`${IP_GEO_URL}?apiKey=${API_KEY}`);
-      const { data: { id: infoId } } = await useHttpFetchPost("/ip/info", {
-        body: {
-          ip: geoInfo.ip,
-          country: geoInfo.country_name,
-          city: geoInfo.city,
-          district: geoInfo.district,
-          latitude: geoInfo.latitude,
-          longitude: geoInfo.longitude,
-          timezone: geoInfo.time_zone.name
-        }
-      });
-      info.value = { ...geoInfo, infoId };
-      const { data: agentData } = await axios.get(`${IP_AGENT_URL}?apiKey=${API_KEY}`);
-      const { data: { id: agentId } } = await useHttpFetchPost("/ip/agent", {
-        body: {
-          infoId,
-          userAgentString: agentData.userAgentString,
-          name: agentData.name,
-          type: agentData.type,
-          version: agentData.version,
-          versionMajor: agentData.versionMajor,
-          device: JSON.stringify(agentData.device),
-          engine: JSON.stringify(agentData.engine),
-          operatingSystem: JSON.stringify(agentData.operatingSystem)
-        }
-      });
-      agent.value = { id: agentId, ...agentData, infoId };
-      return {
-        info: info.value,
-        agent: agent.value
-      };
-    } catch (e2) {
-      console.error(e2);
-    }
-  }
-  function clear() {
-    info.value = null;
-  }
-  return {
-    info,
-    get,
-    clear
-  };
-});
 const storage = {
   // 后缀标识
   suffix: "_deadtime",
@@ -1945,6 +1919,168 @@ const storage = {
     store.clearAll();
   }
 };
+const fetchConfig = {
+  baseURL: "/api"
+};
+function useGetFetchOptions(options = {}) {
+  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
+  options.headers = options.headers ?? {};
+  options.initialCache = options.initialCache ?? false;
+  options.lazy = options.lazy ?? false;
+  options.async = options.async ?? false;
+  options.body = { ...options.body, server: true };
+  if (options.multipart) {
+    options.headers = {
+      ...options.headers,
+      "Accept": "*/*",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+      "Access-Control-Allow-Headers": "origin,X-Requested-With,content-type,accept",
+      "Access-Control-Allow-Credentials": "true"
+    };
+    delete options.headers["Content-Type"];
+  }
+  const { user, ip } = useBaseStore();
+  const { token: tokenStore } = storeToRefs(user);
+  const token = tokenStore.value || storage.get("token");
+  if (token)
+    options.headers.Authorization = token;
+  else
+    delete options.headers.Authorization;
+  const { info: ipInfo } = storeToRefs(ip);
+  if (ipInfo.value) {
+    options.headers.ip = ipInfo.value.ip;
+  }
+  return options;
+}
+async function useHttp(key, url, options = {}) {
+  options = useGetFetchOptions(options);
+  options.key = key;
+  if (options.async) {
+    const res2 = await useAsyncData(
+      key,
+      () => $fetch(fetchConfig.baseURL + url, { ...options }),
+      "$8HXlY3lqR9"
+    );
+    return { ...res2 };
+  }
+  if (options.$) {
+    const data = ref(null);
+    const error = ref(null);
+    return await $fetch(url, options).then((res2) => {
+      data.value = res2.data;
+      return {
+        data,
+        error
+      };
+    }).catch((err) => {
+      var _a;
+      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
+      error.value = msg;
+      return {
+        data,
+        error
+      };
+    });
+  }
+  const res = await useFetch(url, {
+    ...options,
+    onRequest({ options: options2 }) {
+      return useGetFetchOptions(options2);
+    },
+    // 相當於響應攔截器
+    transform: (res2) => {
+      return res2.data;
+    }
+  }, "$Nbwy13v9tA");
+  return res;
+}
+function useHttpPost(key, url, options = {}) {
+  options.method = "POST";
+  return useHttp(key, url, options);
+}
+async function useHttpFetch(url, options = {}) {
+  options = useGetFetchOptions(options);
+  const {
+    error,
+    code,
+    message = "",
+    data = null
+  } = await $fetch(fetchConfig.baseURL + url, { ...options });
+  if (error && code === 1005) {
+    const router = useRouter();
+    router.replace("/");
+  }
+  return {
+    code,
+    error,
+    message,
+    data
+  };
+}
+function useHttpFetchPost(url, options = {}) {
+  options.method = "POST";
+  return useHttpFetch(url, options);
+}
+const API_KEY = "f230d79e6b4e40379f05e24682765349";
+const IP_GEO_URL = "https://api.ipgeolocation.io/ipgeo";
+const IP_AGENT_URL = "https://api.ipgeolocation.io/user-agent";
+const useIPStore = defineStore("ip", () => {
+  const info = ref(null);
+  const agent = ref(null);
+  async function get() {
+    try {
+      if (info.value && agent.value) {
+        return {
+          info: info.value,
+          agent: agent.value
+        };
+      }
+      const { data: geoInfo } = await axios.get(`${IP_GEO_URL}?apiKey=${API_KEY}`);
+      const { data: { id: infoId } } = await useHttpFetchPost("/ip/info", {
+        body: {
+          ip: geoInfo.ip,
+          country: geoInfo.country_name,
+          city: geoInfo.city,
+          district: geoInfo.district,
+          latitude: geoInfo.latitude,
+          longitude: geoInfo.longitude,
+          timezone: geoInfo.time_zone.name
+        }
+      });
+      info.value = { ...geoInfo, infoId };
+      const { data: agentData } = await axios.get(`${IP_AGENT_URL}?apiKey=${API_KEY}`);
+      const { data: { id: agentId } } = await useHttpFetchPost("/ip/agent", {
+        body: {
+          infoId,
+          userAgentString: agentData.userAgentString,
+          name: agentData.name,
+          type: agentData.type,
+          version: agentData.version,
+          versionMajor: agentData.versionMajor,
+          device: JSON.stringify(agentData.device),
+          engine: JSON.stringify(agentData.engine),
+          operatingSystem: JSON.stringify(agentData.operatingSystem)
+        }
+      });
+      agent.value = { id: agentId, ...agentData, infoId };
+      return {
+        info: info.value,
+        agent: agent.value
+      };
+    } catch (e2) {
+      console.error(e2);
+    }
+  }
+  function clear() {
+    info.value = null;
+  }
+  return {
+    info,
+    get,
+    clear
+  };
+});
 const useTipStore = defineStore("tip", () => {
   const info = ref(null);
   async function get() {
@@ -2003,6 +2139,10 @@ const useUserStore = defineStore("user", () => {
   }
   const info = ref(null);
   async function get() {
+    if (info.value && token.value) {
+      console.log(info.value, token.value);
+      return info.value;
+    }
     const { code, error, data } = await useHttpFetchPost("/user/person");
     if (error) {
       if (code === 1005) {
@@ -2190,6 +2330,11 @@ const useUserStore = defineStore("user", () => {
       type: "success",
       title: "登出成功"
     };
+    const route = useRoute();
+    if (route.meta.auth) {
+      const router = useRouter();
+      router.push("/");
+    }
     clear();
   }
   async function clear() {
@@ -2238,109 +2383,11 @@ function useBaseStore() {
     ip
   };
 }
-const fetchConfig = {
-  baseURL: "/api"
-};
-function useGetFetchOptions(options = {}) {
-  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
-  options.headers = options.headers ?? {};
-  options.initialCache = options.initialCache ?? false;
-  options.lazy = options.lazy ?? false;
-  options.async = options.async ?? false;
-  options.body = { ...options.body, server: true };
-  if (options.multipart) {
-    options.headers = {
-      ...options.headers,
-      "Accept": "*/*",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
-      "Access-Control-Allow-Headers": "origin,X-Requested-With,content-type,accept",
-      "Access-Control-Allow-Credentials": "true"
-    };
-    delete options.headers["Content-Type"];
-  }
-  const { user, ip } = useBaseStore();
-  const { token: tokenStore } = storeToRefs(user);
-  const token = tokenStore.value || storage.get("token");
-  if (token)
-    options.headers.Authorization = token;
-  else
-    delete options.headers.Authorization;
-  const { info: ipInfo } = storeToRefs(ip);
-  if (ipInfo.value) {
-    options.headers.ip = ipInfo.value.ip;
-  }
-  return options;
-}
-async function useHttp(key, url, options = {}) {
-  options = useGetFetchOptions(options);
-  options.key = key;
-  if (options.async) {
-    const res2 = await useAsyncData(
-      key,
-      () => $fetch(fetchConfig.baseURL + url, { ...options }),
-      "$8HXlY3lqR9"
-    );
-    return { ...res2 };
-  }
-  if (options.$) {
-    const data = ref(null);
-    const error = ref(null);
-    return await $fetch(url, options).then((res2) => {
-      data.value = res2.data;
-      return {
-        data,
-        error
-      };
-    }).catch((err) => {
-      var _a;
-      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
-      error.value = msg;
-      return {
-        data,
-        error
-      };
-    });
-  }
-  const res = await useFetch(url, {
-    ...options,
-    onRequest({ options: options2 }) {
-      return useGetFetchOptions(options2);
-    },
-    // 相當於響應攔截器
-    transform: (res2) => {
-      return res2.data;
-    }
-  }, "$Nbwy13v9tA");
-  return res;
-}
-function useHttpPost(key, url, options = {}) {
-  options.method = "POST";
-  return useHttp(key, url, options);
-}
-async function useHttpFetch(url, options = {}) {
-  options = useGetFetchOptions(options);
-  const {
-    error,
-    code,
-    message = "",
-    data = null
-  } = await $fetch(fetchConfig.baseURL + url, { ...options });
-  if (error && code === 1005) {
-    const router = useRouter();
-    router.replace("/");
-  }
-  return {
-    code,
-    error,
-    message,
-    data
-  };
-}
-function useHttpFetchPost(url, options = {}) {
-  options.method = "POST";
-  return useHttpFetch(url, options);
-}
+const auth_e0FkfVuy48 = /* @__PURE__ */ defineNuxtPlugin(() => {
+  addRouteMiddleware(async (to, from) => {
+    return true;
+  });
+});
 const hisotry_AOAC2IlDrx = /* @__PURE__ */ defineNuxtPlugin(() => {
   addRouteMiddleware(async (to, from) => {
     return true;
@@ -2356,6 +2403,7 @@ const plugins = [
   plugin_server_XNCxeHyTuP,
   unocss_MzCDxu9LMj,
   plugin_vue3_A0OWXRrUgq,
+  auth_e0FkfVuy48,
   hisotry_AOAC2IlDrx
 ];
 const removeUndefinedProps = (props) => Object.fromEntries(Object.entries(props).filter(([, value]) => value !== void 0));
@@ -6509,7 +6557,7 @@ async function userController() {
     };
   }
   const $alert = useState("alert");
-  if (route.meta.middleware && route.meta.middleware.includes("auth") && !isLogin.value) {
+  if (route.meta.auth && !isLogin.value) {
     setTimeout(() => {
       $alert.value = {
         type: "info",
