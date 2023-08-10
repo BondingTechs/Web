@@ -2114,7 +2114,7 @@ const useTipStore = defineStore("tip", () => {
 });
 const phoneRegex = /^09\d{8}$/;
 const emailRegex = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()-=_+[\]{}|;:',.<>?\/`~]{8,}$/;
 const htmlTag = /<[^>]*>/g;
 const useUserStore = defineStore("user", () => {
   const token = ref("");
