@@ -508,7 +508,7 @@ const _routes = [
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-829b8446.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-42d445c8.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
@@ -6616,7 +6616,6 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         {
-          hid: "description",
           name: "description",
           content: "BondingTechs 鍵結科技官方網站"
         }
