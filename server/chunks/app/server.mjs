@@ -4736,7 +4736,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
   setup(__props, { emit }) {
     const loginStorage = storage.get("loginData");
     const loginForm = reactive({
-      area: (loginStorage == null ? void 0 : loginStorage.area) || "+886",
+      area: (loginStorage == null ? void 0 : loginStorage.area) || "",
       phone: (loginStorage == null ? void 0 : loginStorage.phone) || "",
       password: (loginStorage == null ? void 0 : loginStorage.password) || "",
       rememberMe: !!(loginStorage == null ? void 0 : loginStorage.rememberMe)
@@ -4852,7 +4852,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
       const _component_UIFormText = __nuxt_component_2$1;
       const _component_UIFormPassword = __nuxt_component_2;
       const _component_UIFormSubmit = _sfc_main$f;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-eb1aa510><div class="flex items-center justify-between mb-7" data-v-eb1aa510><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-eb1aa510> 登入帳號 </div>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "flex flex-col justify-center p-12" }, _attrs))} data-v-19688f30><div class="flex items-center justify-between mb-7" data-v-19688f30><div class="text-xl font-bold text-gray-800 dark:text-gray-200" data-v-19688f30> 登入帳號 </div>`);
       _push(ssrRenderComponent(_component_UnoIcon, {
         class: "i-ion-ios-close-circle-outline text-2xl cursor-pointer",
         onClick: ($event) => _ctx.$emit("close")
@@ -4861,7 +4861,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
       _push(ssrRenderComponent(_component_UIForm, { onSubmit: login }, {
         default: withCtx((_2, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div data-v-eb1aa510${_scopeId}><div class="flex items-center mb-2" data-v-eb1aa510${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-eb1aa510${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="lg:flex flex-wrap" data-v-eb1aa510${_scopeId}>`);
+            _push2(`<div data-v-19688f30${_scopeId}><div class="flex items-center mb-2" data-v-19688f30${_scopeId}><label for="phone" class="${ssrRenderClass([[{ "cursor-pointer": "phone" }], "block font-bold tracking-wide"])}" data-v-19688f30${_scopeId}>${ssrInterpolate("手機")}</label></div><div class="lg:flex flex-wrap" data-v-19688f30${_scopeId}>`);
             _push2(ssrRenderComponent(_component_UIFormSelect, {
               class: "mr-0 lg:mr-2 lg:w-24 w-full lg:mb-0 mb-3",
               id: "phone",
@@ -4884,20 +4884,20 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
               label: "密碼",
               placeholder: "長度至少為8,英數組合"
             }, null, _parent2, _scopeId));
-            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-eb1aa510${_scopeId}><div data-v-eb1aa510${_scopeId}><label class="flex items-center cursor-pointer check" data-v-eb1aa510${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-eb1aa510${_scopeId}>`);
+            _push2(`<div class="flex items-center justify-between py-4 mb-2 text-sm" data-v-19688f30${_scopeId}><div data-v-19688f30${_scopeId}><label class="flex items-center cursor-pointer check" data-v-19688f30${_scopeId}><input${ssrIncludeBooleanAttr(Array.isArray(unref(loginForm).rememberMe) ? ssrLooseContain(unref(loginForm).rememberMe, null) : unref(loginForm).rememberMe) ? " checked" : ""} type="checkbox" name="checkbox-forced-colors-checked" data-v-19688f30${_scopeId}>`);
             if (unref(loginForm).rememberMe) {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-checkbox-outline" }, null, _parent2, _scopeId));
             } else {
               _push2(ssrRenderComponent(_component_UnoIcon, { class: "i-ion-android-checkbox-outline-blank" }, null, _parent2, _scopeId));
             }
-            _push2(`<span class="ml-2" data-v-eb1aa510${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-eb1aa510${_scopeId}>忘記密碼</span></div>`);
+            _push2(`<span class="ml-2" data-v-19688f30${_scopeId}>記住我</span></label></div><span class="cursor-pointer" data-v-19688f30${_scopeId}>忘記密碼</span></div>`);
             _push2(ssrRenderComponent(_component_UIFormSubmit, {
               class: "mb-7",
               text: "送出",
               center: true,
               onClick: login
             }, null, _parent2, _scopeId));
-            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-eb1aa510${_scopeId}> 註冊新帳號 </div>`);
+            _push2(`<div class="text-sm font-bold tracking-wide text-center cursor-pointer" data-v-19688f30${_scopeId}> 註冊新帳號 </div>`);
           } else {
             return [
               createVNode("div", null, [
@@ -4982,7 +4982,7 @@ _sfc_main$e.setup = (props, ctx) => {
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/Auth/LoginForm.vue");
   return _sfc_setup$e ? _sfc_setup$e(props, ctx) : void 0;
 };
-const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-eb1aa510"]]);
+const __nuxt_component_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-19688f30"]]);
 const defaultStyle = `
   block w-full border
   duration-200 
