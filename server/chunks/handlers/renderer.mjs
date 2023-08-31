@@ -2,7 +2,7 @@ import { createRenderer } from 'vue-bundle-renderer/runtime';
 import { eventHandler, setResponseStatus, getQuery, createError } from 'h3';
 import { stringify, uneval } from 'devalue';
 import { renderToString } from 'vue/server-renderer';
-import { a as useNitroApp, u as useRuntimeConfig, g as getRouteRules } from '../nitro/node-server.mjs';
+import { u as useNitroApp, a as useRuntimeConfig, g as getRouteRules } from '../nitro/node-server.mjs';
 import { joinURL } from 'ufo';
 import 'node-fetch-native/polyfill';
 import 'node:http';

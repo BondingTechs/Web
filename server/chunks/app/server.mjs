@@ -10,14 +10,14 @@ import { klona } from 'klona';
 import { renderSSRHead } from '@unhead/ssr';
 import { composableNames, getActiveHead, createServerHead as createServerHead$1 } from 'unhead';
 import { defineHeadPlugin } from '@unhead/shared';
+import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrIncludeBooleanAttr, ssrLooseContain, ssrRenderTeleport, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
+import { parse } from 'cookie-es';
 import { hash, isEqual } from 'ohash';
 import store from 'store';
 import axios from 'axios';
-import { ssrRenderComponent, ssrRenderSlot, ssrInterpolate, ssrRenderAttrs, ssrRenderList, ssrRenderAttr, ssrRenderClass, ssrIncludeBooleanAttr, ssrLooseContain, ssrRenderTeleport, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
-import { parse } from 'cookie-es';
 import { defu } from 'defu';
 import { ref as ref$1 } from '@vue/runtime-core';
-import { u as useRuntimeConfig$1 } from '../nitro/node-server.mjs';
+import { a as useRuntimeConfig$1 } from '../nitro/node-server.mjs';
 import 'node-fetch-native/polyfill';
 import 'node:http';
 import 'node:https';
@@ -236,20 +236,6 @@ const useRoute = () => {
 function defineNuxtRouteMiddleware(middleware) {
   return middleware;
 }
-const addRouteMiddleware = (name, middleware, options = {}) => {
-  const nuxtApp = /* @__PURE__ */ useNuxtApp();
-  const global = options.global || typeof name !== "string";
-  const mw = typeof name !== "string" ? name : middleware;
-  if (!mw) {
-    console.warn("[nuxt] No route middleware passed to `addRouteMiddleware`.", name);
-    return;
-  }
-  if (global) {
-    nuxtApp._middleware.global.push(mw);
-  } else {
-    nuxtApp._middleware.named[name] = mw;
-  }
-};
 const isProcessingMiddleware = () => {
   try {
     if ((/* @__PURE__ */ useNuxtApp())._processingMiddleware) {
@@ -394,7 +380,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/404-e20fbd2e.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/404-8a62e55c.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.name) ?? "index",
@@ -402,7 +388,7 @@ const _routes = [
     meta: __nuxt_page_meta$f || {},
     alias: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.alias) || [],
     redirect: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.redirect) || void 0,
-    component: () => import('./_nuxt/index-f647470f.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-f27dad7d.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "member-rule",
@@ -410,7 +396,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/member-rule-375b251f.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/member-rule-bae8abc5.mjs').then((m2) => m2.default || m2)
   },
   {
     path: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.path) ?? "/my",
@@ -421,7 +407,7 @@ const _routes = [
         meta: __nuxt_page_meta$e || {},
         alias: (__nuxt_page_meta$e == null ? void 0 : __nuxt_page_meta$e.alias) || [],
         redirect: (__nuxt_page_meta$e == null ? void 0 : __nuxt_page_meta$e.redirect) || void 0,
-        component: () => import('./_nuxt/change-phone-9f10bf99.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/change-phone-9fb04341.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.name) ?? "my-account-email-binding",
@@ -429,7 +415,7 @@ const _routes = [
         meta: __nuxt_page_meta$d || {},
         alias: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.alias) || [],
         redirect: (__nuxt_page_meta$d == null ? void 0 : __nuxt_page_meta$d.redirect) || void 0,
-        component: () => import('./_nuxt/email-binding-c351c3f8.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/email-binding-c22b04c3.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.name) ?? "my-account-email-verify",
@@ -437,7 +423,7 @@ const _routes = [
         meta: __nuxt_page_meta$c || {},
         alias: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.alias) || [],
         redirect: (__nuxt_page_meta$c == null ? void 0 : __nuxt_page_meta$c.redirect) || void 0,
-        component: () => import('./_nuxt/email-verify-5717d7d9.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/email-verify-d12979b2.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.name) ?? "my-account-identity-verify",
@@ -445,7 +431,7 @@ const _routes = [
         meta: __nuxt_page_meta$b || {},
         alias: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.alias) || [],
         redirect: (__nuxt_page_meta$b == null ? void 0 : __nuxt_page_meta$b.redirect) || void 0,
-        component: () => import('./_nuxt/identity-verify-f2cd53b9.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/identity-verify-ddb0125f.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.name) ?? "my-account",
@@ -453,7 +439,7 @@ const _routes = [
         meta: __nuxt_page_meta$a || {},
         alias: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.alias) || [],
         redirect: (__nuxt_page_meta$a == null ? void 0 : __nuxt_page_meta$a.redirect) || void 0,
-        component: () => import('./_nuxt/index-0b587159.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/index-418215e0.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.name) ?? "my-account-reset-password",
@@ -461,7 +447,7 @@ const _routes = [
         meta: __nuxt_page_meta$9 || {},
         alias: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.alias) || [],
         redirect: (__nuxt_page_meta$9 == null ? void 0 : __nuxt_page_meta$9.redirect) || void 0,
-        component: () => import('./_nuxt/reset-password-93ef7395.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/reset-password-26d83f3d.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.name) ?? "my-collections",
@@ -469,7 +455,7 @@ const _routes = [
         meta: __nuxt_page_meta$8 || {},
         alias: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.alias) || [],
         redirect: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.redirect) || void 0,
-        component: () => import('./_nuxt/collections-9b3519a2.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/collections-02548498.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.name) ?? "my-history",
@@ -477,7 +463,7 @@ const _routes = [
         meta: __nuxt_page_meta$7 || {},
         alias: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.alias) || [],
         redirect: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.redirect) || void 0,
-        component: () => import('./_nuxt/history-f82927f2.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/history-d4a128d4.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) ?? "my",
@@ -485,7 +471,7 @@ const _routes = [
         meta: __nuxt_page_meta$6 || {},
         alias: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.alias) || [],
         redirect: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.redirect) || void 0,
-        component: () => import('./_nuxt/index-7922bbd5.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/index-86691931.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.name) ?? "my-tips",
@@ -493,14 +479,14 @@ const _routes = [
         meta: __nuxt_page_meta$5 || {},
         alias: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.alias) || [],
         redirect: (__nuxt_page_meta$5 == null ? void 0 : __nuxt_page_meta$5.redirect) || void 0,
-        component: () => import('./_nuxt/tips-13f7b3a1.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/tips-c237ad82.mjs').then((m2) => m2.default || m2)
       }
     ],
     name: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.name) ?? void 0,
     meta: __nuxt_page_meta$4 || {},
     alias: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.alias) || [],
     redirect: (__nuxt_page_meta$4 == null ? void 0 : __nuxt_page_meta$4.redirect) || void 0,
-    component: () => import('./_nuxt/my-d1be65c0.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/my-356895b1.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
@@ -508,7 +494,7 @@ const _routes = [
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-762f001c.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-ae33c7c8.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
@@ -516,7 +502,7 @@ const _routes = [
     meta: {},
     alias: [],
     redirect: void 0,
-    component: () => import('./_nuxt/categories-058022a5.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/categories-2b8ebe36.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.name) ?? "news-category-categorySlug",
@@ -524,7 +510,7 @@ const _routes = [
     meta: __nuxt_page_meta$2 || {},
     alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
     redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-1fc79896.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-ee40f43f.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) ?? "news-video-categorySlug",
@@ -532,7 +518,7 @@ const _routes = [
     meta: __nuxt_page_meta$1 || {},
     alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
     redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-f3352818.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-abfd9479.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) ?? "news-video",
@@ -540,7 +526,7 @@ const _routes = [
     meta: __nuxt_page_meta || {},
     alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
     redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index-ecfa3c63.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-70179c87.mjs').then((m2) => m2.default || m2)
   }
 ];
 function resolveUnref(r2) {
@@ -1203,10 +1189,7 @@ const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
 const globalMiddleware = [
   validate
 ];
-const namedMiddleware = {
-  auth: () => import('./_nuxt/auth-4ed993c7.mjs'),
-  global: () => import('./_nuxt/global-ea8d7fcf.mjs')
-};
+const namedMiddleware = {};
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
   enforce: "pre",
@@ -1848,551 +1831,6 @@ const plugin_vue3_A0OWXRrUgq = /* @__PURE__ */ defineNuxtPlugin((nuxtApp) => {
     }
   };
 });
-const storage = {
-  // 后缀标识
-  suffix: "_deadtime",
-  /**
-   * 获取
-   * @param {string} key 關鍵字
-   */
-  get(key) {
-    return store.get(key);
-  },
-  /**
-   * 获取全部
-   */
-  info() {
-    const d2 = {};
-    store.each((value, key) => {
-      d2[key] = value;
-    });
-    return d2;
-  },
-  /**
-   * 设置
-   * @param {string} key 關鍵字
-   * @param {*} value 值
-   * @param {number} expires 过期时间
-   */
-  set(key, value, expires) {
-    store.set(key, value);
-    if (expires) {
-      store.set(
-        `${key}${this.suffix}`,
-        Date.parse(String(/* @__PURE__ */ new Date())) + expires * 1e3
-      );
-    }
-  },
-  /**
-   * 是否过期
-   * @param {string} key 關鍵字
-   */
-  isExpired(key) {
-    return (this.getExpiration(key) || 0) - Date.parse(String(/* @__PURE__ */ new Date())) <= 2e3;
-  },
-  /**
-   * 获取到期时间
-   * @param {string} key 關鍵字
-   */
-  getExpiration(key) {
-    return this.get(key + this.suffix);
-  },
-  /**
-   * 移除
-   * @param {string} key 關鍵字
-   */
-  remove(key) {
-    store.remove(key);
-    this.removeExpiration(key);
-  },
-  /**
-   * 移除到期时间
-   * @param {string} key 關鍵字
-   */
-  removeExpiration(key) {
-    store.remove(key + this.suffix);
-  },
-  /**
-   * 清理
-   */
-  clearAll() {
-    store.clearAll();
-  }
-};
-const fetchConfig = {
-  baseURL: "/api"
-};
-function useGetFetchOptions(options = {}) {
-  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
-  options.headers = options.headers ?? {};
-  options.initialCache = options.initialCache ?? false;
-  options.lazy = options.lazy ?? false;
-  options.async = options.async ?? false;
-  options.body = { ...options.body, server: true };
-  if (options.multipart) {
-    options.headers = {
-      ...options.headers,
-      "Accept": "*/*",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
-      "Access-Control-Allow-Headers": "origin,X-Requested-With,content-type,accept",
-      "Access-Control-Allow-Credentials": "true"
-    };
-    delete options.headers["Content-Type"];
-  }
-  const { user, ip } = useBaseStore();
-  const { token: tokenStore } = storeToRefs(user);
-  const token = tokenStore.value || storage.get("token");
-  if (token)
-    options.headers.Authorization = token;
-  else
-    delete options.headers.Authorization;
-  const { info: ipInfo } = storeToRefs(ip);
-  if (ipInfo.value) {
-    options.headers.ip = ipInfo.value.ip;
-  }
-  return options;
-}
-async function useHttp(key, url, options = {}) {
-  options = useGetFetchOptions(options);
-  options.key = key;
-  if (options.async) {
-    const res2 = await useAsyncData(
-      key,
-      () => $fetch(fetchConfig.baseURL + url, { ...options }),
-      "$8HXlY3lqR9"
-    );
-    return { ...res2 };
-  }
-  if (options.$) {
-    const data = ref(null);
-    const error = ref(null);
-    return await $fetch(url, options).then((res2) => {
-      data.value = res2.data;
-      return {
-        data,
-        error
-      };
-    }).catch((err) => {
-      var _a;
-      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
-      error.value = msg;
-      return {
-        data,
-        error
-      };
-    });
-  }
-  const res = await useFetch(url, {
-    ...options,
-    onRequest({ options: options2 }) {
-      return useGetFetchOptions(options2);
-    },
-    // 相當於響應攔截器
-    transform: (res2) => {
-      return res2.data;
-    }
-  }, "$Nbwy13v9tA");
-  return res;
-}
-function useHttpPost(key, url, options = {}) {
-  options.method = "POST";
-  return useHttp(key, url, options);
-}
-async function useHttpFetch(url, options = {}) {
-  options = useGetFetchOptions(options);
-  const {
-    error,
-    code,
-    message = "",
-    data = null
-  } = await $fetch(fetchConfig.baseURL + url, { ...options });
-  if (error && code === 1005) {
-    const router = useRouter();
-    router.replace("/");
-  }
-  return {
-    code,
-    error,
-    message,
-    data
-  };
-}
-function useHttpFetchPost(url, options = {}) {
-  options.method = "POST";
-  return useHttpFetch(url, options);
-}
-const API_KEY = "f230d79e6b4e40379f05e24682765349";
-const IP_GEO_URL = "https://api.ipgeolocation.io/ipgeo";
-const IP_AGENT_URL = "https://api.ipgeolocation.io/user-agent";
-const useIPStore = defineStore("ip", () => {
-  const info = ref(null);
-  const agent = ref(null);
-  async function get() {
-    try {
-      if (info.value && agent.value) {
-        return {
-          info: info.value,
-          agent: agent.value
-        };
-      }
-      const { data: geoInfo } = await axios.get(`${IP_GEO_URL}?apiKey=${API_KEY}`);
-      const { data: { id: infoId } } = await useHttpFetchPost("/ip/info", {
-        body: {
-          ip: geoInfo.ip,
-          country: geoInfo.country_name,
-          city: geoInfo.city,
-          district: geoInfo.district,
-          latitude: geoInfo.latitude,
-          longitude: geoInfo.longitude,
-          timezone: geoInfo.time_zone.name
-        }
-      });
-      info.value = { ...geoInfo, infoId };
-      const { data: agentData } = await axios.get(`${IP_AGENT_URL}?apiKey=${API_KEY}`);
-      const { data: { id: agentId } } = await useHttpFetchPost("/ip/agent", {
-        body: {
-          infoId,
-          userAgentString: agentData.userAgentString,
-          name: agentData.name,
-          type: agentData.type,
-          version: agentData.version,
-          versionMajor: agentData.versionMajor,
-          device: JSON.stringify(agentData.device),
-          engine: JSON.stringify(agentData.engine),
-          operatingSystem: JSON.stringify(agentData.operatingSystem)
-        }
-      });
-      agent.value = { id: agentId, ...agentData, infoId };
-      return {
-        info: info.value,
-        agent: agent.value
-      };
-    } catch (e2) {
-      console.error(e2);
-    }
-  }
-  function clear() {
-    info.value = null;
-  }
-  return {
-    info,
-    get,
-    clear
-  };
-});
-const useTipStore = defineStore("tip", () => {
-  const info = ref(null);
-  async function get() {
-    try {
-      const tip = await useHttpFetchPost("/tip/today");
-      const { data, error } = tip;
-      if (!error && data !== null) {
-        const $show = useState("tip.show", () => false);
-        const $tip = useState("tip.data");
-        $show.value = true;
-        $tip.value = {
-          id: data.id,
-          title: data.title,
-          content: data.content,
-          publishDate: data.publishDate
-        };
-        return data;
-      }
-    } catch (e2) {
-    }
-  }
-  function clear() {
-    storage.remove("today_tip");
-    info.value = {};
-  }
-  return {
-    info,
-    get,
-    clear
-  };
-});
-const phoneRegex = /^09\d{8}$/;
-const emailRegex = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()-=_+[\]{}|;:',.<>?\/`~]{8,}$/;
-const htmlTag = /<[^>]*>/g;
-const useUserStore = defineStore("user", () => {
-  const token = ref("");
-  function setToken(data) {
-    token.value = data.token;
-    storage.set("token", data.token, data.expire);
-    storage.set("refreshToken", data.refreshToken, data.refreshExpire);
-  }
-  const isLogin = ref(false);
-  async function refreshToken(token2) {
-    try {
-      const { data, error } = await useHttpFetchPost("/auth/refresh", {
-        body: { refreshToken: token2 }
-      });
-      if (!error) {
-        setToken(data);
-        await get();
-      }
-    } catch (e2) {
-      logout();
-    }
-  }
-  const info = ref(null);
-  async function get() {
-    if (info.value && token.value) {
-      console.log(info.value, token.value);
-      return info.value;
-    }
-    const { code, error, data } = await useHttpFetchPost("/user/person");
-    if (error) {
-      if (code === 1005) {
-        const storeRefreshToken = storage.get("refreshToken");
-        await refreshToken(storeRefreshToken);
-      } else {
-        clear();
-      }
-    } else if (!error) {
-      set2(data);
-    }
-    return data;
-  }
-  function set2(value) {
-    isLogin.value = true;
-    info.value = value;
-    storage.set("userInfo", value);
-  }
-  async function update(form) {
-    const $alert = useState("alert");
-    const updatePick = (({ firstName, lastName, birthday, gender, intro }) => ({
-      firstName,
-      lastName,
-      birthday,
-      gender,
-      intro
-    }))(info.value);
-    if (JSON.stringify(form) === JSON.stringify(updatePick)) {
-      return $alert.value = {
-        type: "info",
-        text: "未修改個人資料",
-        center: true
-      };
-    }
-    const $loading = useState("loading");
-    $loading.value = true;
-    const { error, message } = await useHttpFetchPost("/user/update", {
-      body: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        birthday: form.birthday,
-        gender: form.gender,
-        intro: form.intro
-      }
-    });
-    $loading.value = false;
-    if (error)
-      return $alert.value = { type: "error", text: message, center: true };
-    updateField({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      birthday: form.birthday,
-      gender: form.gender,
-      intro: form.intro
-    });
-    $alert.value = { type: "success", text: "個人資料已更新", center: true };
-  }
-  function updateField(obj) {
-    for (const key in obj)
-      info.value[key] = obj[key];
-    storage.set("userInfo", info.value);
-  }
-  async function login(loginForm) {
-    const { data, error, message } = await useHttpFetchPost(
-      "/auth/login",
-      {
-        body: {
-          area: loginForm.area,
-          phone: loginForm.phone,
-          password: loginForm.password
-        }
-      }
-    );
-    const $alert = useState("alert");
-    const $auth = useState("showAuth", () => false);
-    if (error && message) {
-      $alert.value = { type: "error", text: message, center: true };
-    } else {
-      $auth.value = false;
-      await setToken(data);
-      await get();
-      const tip = useTipStore();
-      await tip.get();
-      $alert.value = { type: "success", title: "登入成功" };
-      if (loginForm.rememberMe)
-        storage.set("loginData", loginForm);
-      else
-        storage.remove("loginData");
-    }
-  }
-  async function register(registerForm) {
-    const $alert = useState("alert");
-    if (!passwordRegex.test(registerForm.password)) {
-      return $alert.value = {
-        type: "error",
-        text: "密碼須為英數混合8位數以上",
-        center: true
-      };
-    }
-    const { error, message, data } = await useHttpFetchPost("/auth/register", {
-      body: {
-        firstName: registerForm.firstName,
-        lastName: registerForm.lastName,
-        birthday: registerForm.birthday,
-        area: registerForm.area,
-        phone: registerForm.phone,
-        password: registerForm.password,
-        gender: registerForm.gender,
-        passwordConfirm: registerForm.passwordConfirm,
-        verifyCode: registerForm.verifyCode
-      }
-    });
-    const $auth = useState("showAuth", () => false);
-    if (error && message) {
-      $alert.value = { type: "error", text: message, center: true };
-    } else {
-      $auth.value = false;
-      await setToken(data);
-      await get();
-      const tip = useTipStore();
-      await tip.get();
-      $alert.value = { type: "success", title: "登入成功" };
-      if (data.rememberMe)
-        storage.set("loginData", data);
-      else
-        storage.remove("loginData");
-    }
-    if (error) {
-      const $alert2 = useState("alert");
-      $alert2.value = {
-        type: "error",
-        title: "驗證錯誤",
-        text: message,
-        center: true
-      };
-    }
-    return { error, message, data };
-  }
-  async function forgot(forgotForm) {
-    const $alert = useState("alert");
-    if (!passwordRegex.test(forgotForm.password)) {
-      return $alert.value = {
-        type: "error",
-        text: "密碼須為英數混合8位數以上",
-        center: true
-      };
-    }
-    const { error, message, data } = await useHttpFetchPost("/auth/forgot", {
-      body: {
-        area: forgotForm.area,
-        phone: forgotForm.phone,
-        password: forgotForm.password,
-        passwordConfirm: forgotForm.passwordConfirm,
-        verifyCode: forgotForm.verifyCode
-      }
-    });
-    const $auth = useState("showAuth", () => false);
-    if (error && message) {
-      $alert.value = { type: "error", text: message, center: true };
-    } else {
-      $auth.value = false;
-      await setToken(data);
-      await get();
-      $alert.value = { type: "success", title: "修改成功，已登入" };
-      if (data.rememberMe)
-        storage.set("loginData", forgotForm);
-      else
-        storage.remove("loginData");
-    }
-    if (error) {
-      const $alert2 = useState("alert");
-      $alert2.value = {
-        type: "error",
-        title: "驗證錯誤",
-        text: message,
-        center: true
-      };
-    }
-    return { error, message, data };
-  }
-  async function logout() {
-    const $alert = useState("alert");
-    await useHttpFetchPost("/user/logout");
-    $alert.value = {
-      type: "success",
-      title: "登出成功"
-    };
-    const route = useRoute();
-    if (route.meta.auth) {
-      const router = useRouter();
-      router.push("/");
-    }
-    clear();
-  }
-  async function clear() {
-    return await new Promise((resolve) => {
-      storage.remove("userInfo");
-      storage.remove("token");
-      const isLoginState = useState("isLogin");
-      isLoginState.value = false;
-      isLogin.value = false;
-      info.value = null;
-      token.value = "";
-      const route = useRoute();
-      const router = useRouter();
-      const middleware = route.meta.middleware ?? [];
-      if (middleware && middleware.includes("auth"))
-        router.push("/");
-      resolve("");
-    });
-  }
-  return {
-    token,
-    info,
-    isLogin,
-    get,
-    set: set2,
-    update,
-    updateField,
-    login,
-    register,
-    forgot,
-    logout,
-    clear,
-    setToken,
-    refreshToken
-  };
-});
-function useBaseStore() {
-  const user = useUserStore();
-  const tip = useTipStore();
-  const ip = useIPStore();
-  return {
-    // app,
-    // process,
-    user,
-    tip,
-    ip
-  };
-}
-const auth_e0FkfVuy48 = /* @__PURE__ */ defineNuxtPlugin(() => {
-  addRouteMiddleware(async (to, from) => {
-    return true;
-  });
-});
-const hisotry_AOAC2IlDrx = /* @__PURE__ */ defineNuxtPlugin(() => {
-  addRouteMiddleware(async (to, from) => {
-    return true;
-  });
-});
 const plugins = [
   plugin$1,
   revive_payload_server_eJ33V7gbc6,
@@ -2402,9 +1840,7 @@ const plugins = [
   plugin_dUrdF0P1fL,
   plugin_server_XNCxeHyTuP,
   unocss_MzCDxu9LMj,
-  plugin_vue3_A0OWXRrUgq,
-  auth_e0FkfVuy48,
-  hisotry_AOAC2IlDrx
+  plugin_vue3_A0OWXRrUgq
 ];
 const removeUndefinedProps = (props) => Object.fromEntries(Object.entries(props).filter(([, value]) => value !== void 0));
 const setupForUseMeta = (metaFactory, renderChild) => (props, ctx) => {
@@ -3654,6 +3090,540 @@ _sfc_main$n.setup = (props, ctx) => {
   return _sfc_setup$n ? _sfc_setup$n(props, ctx) : void 0;
 };
 const _imports_0$1 = "" + __publicAssetsURL("user.png");
+const storage = {
+  // 后缀标识
+  suffix: "_deadtime",
+  /**
+   * 获取
+   * @param {string} key 關鍵字
+   */
+  get(key) {
+    return store.get(key);
+  },
+  /**
+   * 获取全部
+   */
+  info() {
+    const d2 = {};
+    store.each((value, key) => {
+      d2[key] = value;
+    });
+    return d2;
+  },
+  /**
+   * 设置
+   * @param {string} key 關鍵字
+   * @param {*} value 值
+   * @param {number} expires 过期时间
+   */
+  set(key, value, expires) {
+    store.set(key, value);
+    if (expires) {
+      store.set(
+        `${key}${this.suffix}`,
+        Date.parse(String(/* @__PURE__ */ new Date())) + expires * 1e3
+      );
+    }
+  },
+  /**
+   * 是否过期
+   * @param {string} key 關鍵字
+   */
+  isExpired(key) {
+    return (this.getExpiration(key) || 0) - Date.parse(String(/* @__PURE__ */ new Date())) <= 2e3;
+  },
+  /**
+   * 获取到期时间
+   * @param {string} key 關鍵字
+   */
+  getExpiration(key) {
+    return this.get(key + this.suffix);
+  },
+  /**
+   * 移除
+   * @param {string} key 關鍵字
+   */
+  remove(key) {
+    store.remove(key);
+    this.removeExpiration(key);
+  },
+  /**
+   * 移除到期时间
+   * @param {string} key 關鍵字
+   */
+  removeExpiration(key) {
+    store.remove(key + this.suffix);
+  },
+  /**
+   * 清理
+   */
+  clearAll() {
+    store.clearAll();
+  }
+};
+const fetchConfig = {
+  baseURL: "/api"
+};
+function useGetFetchOptions(options = {}) {
+  options.baseURL = options.baseURL ?? fetchConfig.baseURL;
+  options.headers = options.headers ?? {};
+  options.initialCache = options.initialCache ?? false;
+  options.lazy = options.lazy ?? false;
+  options.async = options.async ?? false;
+  options.body = { ...options.body, server: true };
+  if (options.multipart) {
+    options.headers = {
+      ...options.headers,
+      "Accept": "*/*",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+      "Access-Control-Allow-Headers": "origin,X-Requested-With,content-type,accept",
+      "Access-Control-Allow-Credentials": "true"
+    };
+    delete options.headers["Content-Type"];
+  }
+  const { user, ip } = useBaseStore();
+  const { token: tokenStore } = storeToRefs(user);
+  const token = tokenStore.value || storage.get("token");
+  if (token)
+    options.headers.Authorization = token;
+  else
+    delete options.headers.Authorization;
+  const { info: ipInfo } = storeToRefs(ip);
+  if (ipInfo.value) {
+    options.headers.ip = ipInfo.value.ip;
+  }
+  return options;
+}
+async function useHttp(key, url, options = {}) {
+  options = useGetFetchOptions(options);
+  options.key = key;
+  if (options.async) {
+    const res2 = await useAsyncData(
+      key,
+      () => $fetch(fetchConfig.baseURL + url, { ...options }),
+      "$8HXlY3lqR9"
+    );
+    return { ...res2 };
+  }
+  if (options.$) {
+    const data = ref(null);
+    const error = ref(null);
+    return await $fetch(url, options).then((res2) => {
+      data.value = res2.data;
+      return {
+        data,
+        error
+      };
+    }).catch((err) => {
+      var _a;
+      const msg = (_a = err == null ? void 0 : err.data) == null ? void 0 : _a.data;
+      error.value = msg;
+      return {
+        data,
+        error
+      };
+    });
+  }
+  const res = await useFetch(url, {
+    ...options,
+    onRequest({ options: options2 }) {
+      return useGetFetchOptions(options2);
+    },
+    // 相當於響應攔截器
+    transform: (res2) => {
+      return res2.data;
+    }
+  }, "$Nbwy13v9tA");
+  return res;
+}
+function useHttpPost(key, url, options = {}) {
+  options.method = "POST";
+  return useHttp(key, url, options);
+}
+async function useHttpFetch(url, options = {}) {
+  options = useGetFetchOptions(options);
+  const {
+    error,
+    code,
+    message = "",
+    data = null
+  } = await $fetch(fetchConfig.baseURL + url, { ...options });
+  if (error && code === 1005) {
+    const router = useRouter();
+    router.replace("/");
+  }
+  return {
+    code,
+    error,
+    message,
+    data
+  };
+}
+function useHttpFetchPost(url, options = {}) {
+  options.method = "POST";
+  return useHttpFetch(url, options);
+}
+const API_KEY = "f230d79e6b4e40379f05e24682765349";
+const IP_GEO_URL = "https://api.ipgeolocation.io/ipgeo";
+const IP_AGENT_URL = "https://api.ipgeolocation.io/user-agent";
+const useIPStore = defineStore("ip", () => {
+  const info = ref(null);
+  const agent = ref(null);
+  async function get() {
+    try {
+      if (info.value && agent.value) {
+        return {
+          info: info.value,
+          agent: agent.value
+        };
+      }
+      const { data: geoInfo } = await axios.get(`${IP_GEO_URL}?apiKey=${API_KEY}`);
+      const { data: { id: infoId } } = await useHttpFetchPost("/ip/info", {
+        body: {
+          ip: geoInfo.ip,
+          country: geoInfo.country_name,
+          city: geoInfo.city,
+          district: geoInfo.district,
+          latitude: geoInfo.latitude,
+          longitude: geoInfo.longitude,
+          timezone: geoInfo.time_zone.name
+        }
+      });
+      info.value = { ...geoInfo, infoId };
+      const { data: agentData } = await axios.get(`${IP_AGENT_URL}?apiKey=${API_KEY}`);
+      const { data: { id: agentId } } = await useHttpFetchPost("/ip/agent", {
+        body: {
+          infoId,
+          userAgentString: agentData.userAgentString,
+          name: agentData.name,
+          type: agentData.type,
+          version: agentData.version,
+          versionMajor: agentData.versionMajor,
+          device: JSON.stringify(agentData.device),
+          engine: JSON.stringify(agentData.engine),
+          operatingSystem: JSON.stringify(agentData.operatingSystem)
+        }
+      });
+      agent.value = { id: agentId, ...agentData, infoId };
+      return {
+        info: info.value,
+        agent: agent.value
+      };
+    } catch (e2) {
+      console.error(e2);
+    }
+  }
+  function clear() {
+    info.value = null;
+  }
+  return {
+    info,
+    get,
+    clear
+  };
+});
+const useTipStore = defineStore("tip", () => {
+  const info = ref(null);
+  async function get() {
+    try {
+      const tip = await useHttpFetchPost("/tip/today");
+      const { data, error } = tip;
+      if (!error && data !== null) {
+        const $show = useState("tip.show", () => false);
+        const $tip = useState("tip.data");
+        $show.value = true;
+        $tip.value = {
+          id: data.id,
+          title: data.title,
+          content: data.content,
+          publishDate: data.publishDate
+        };
+        return data;
+      }
+    } catch (e2) {
+    }
+  }
+  function clear() {
+    storage.remove("today_tip");
+    info.value = {};
+  }
+  return {
+    info,
+    get,
+    clear
+  };
+});
+const phoneRegex = /^09\d{8}$/;
+const emailRegex = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()-=_+[\]{}|;:',.<>?\/`~]{8,}$/;
+const htmlTag = /<[^>]*>/g;
+const useUserStore = defineStore("user", () => {
+  const token = ref("");
+  function setToken(data) {
+    token.value = data.token;
+    storage.set("token", data.token, data.expire);
+    storage.set("refreshToken", data.refreshToken, data.refreshExpire);
+  }
+  const isLogin = ref(false);
+  async function refreshToken(token2) {
+    try {
+      const { data, error } = await useHttpFetchPost("/auth/refresh", {
+        body: { refreshToken: token2 }
+      });
+      if (!error) {
+        setToken(data);
+        await get();
+      }
+    } catch (e2) {
+      logout();
+    }
+  }
+  const info = ref(null);
+  async function get() {
+    if (info.value && token.value) {
+      return info.value;
+    }
+    const { code, error, data } = await useHttpFetchPost("/user/person");
+    if (error) {
+      if (code === 1005) {
+        const storeRefreshToken = storage.get("refreshToken");
+        await refreshToken(storeRefreshToken);
+      } else {
+        clear();
+      }
+    } else if (!error) {
+      set2(data);
+    }
+    return data;
+  }
+  function set2(value) {
+    isLogin.value = true;
+    info.value = value;
+    storage.set("userInfo", value);
+  }
+  async function update(form) {
+    const $alert = useState("alert");
+    const updatePick = (({ firstName, lastName, birthday, gender, intro }) => ({
+      firstName,
+      lastName,
+      birthday,
+      gender,
+      intro
+    }))(info.value);
+    if (JSON.stringify(form) === JSON.stringify(updatePick)) {
+      return $alert.value = {
+        type: "info",
+        text: "未修改個人資料",
+        center: true
+      };
+    }
+    const $loading = useState("loading");
+    $loading.value = true;
+    const { error, message } = await useHttpFetchPost("/user/update", {
+      body: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        birthday: form.birthday,
+        gender: form.gender,
+        intro: form.intro
+      }
+    });
+    $loading.value = false;
+    if (error)
+      return $alert.value = { type: "error", text: message, center: true };
+    updateField({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      birthday: form.birthday,
+      gender: form.gender,
+      intro: form.intro
+    });
+    $alert.value = { type: "success", text: "個人資料已更新", center: true };
+  }
+  function updateField(obj) {
+    for (const key in obj)
+      info.value[key] = obj[key];
+    storage.set("userInfo", info.value);
+  }
+  async function login(loginForm) {
+    const { data, error, message } = await useHttpFetchPost(
+      "/auth/login",
+      {
+        body: {
+          area: loginForm.area,
+          phone: loginForm.phone,
+          password: loginForm.password
+        }
+      }
+    );
+    const $alert = useState("alert");
+    const $auth = useState("showAuth", () => false);
+    if (error && message) {
+      $alert.value = { type: "error", text: message, center: true };
+    } else {
+      $auth.value = false;
+      await setToken(data);
+      await get();
+      const tip = useTipStore();
+      await tip.get();
+      $alert.value = { type: "success", title: "登入成功" };
+      if (loginForm.rememberMe)
+        storage.set("loginData", loginForm);
+      else
+        storage.remove("loginData");
+    }
+  }
+  async function register(registerForm) {
+    const $alert = useState("alert");
+    if (!passwordRegex.test(registerForm.password)) {
+      return $alert.value = {
+        type: "error",
+        text: "密碼須為英數混合8位數以上",
+        center: true
+      };
+    }
+    const { error, message, data } = await useHttpFetchPost("/auth/register", {
+      body: {
+        firstName: registerForm.firstName,
+        lastName: registerForm.lastName,
+        birthday: registerForm.birthday,
+        area: registerForm.area,
+        phone: registerForm.phone,
+        password: registerForm.password,
+        gender: registerForm.gender,
+        passwordConfirm: registerForm.passwordConfirm,
+        verifyCode: registerForm.verifyCode
+      }
+    });
+    const $auth = useState("showAuth", () => false);
+    if (error && message) {
+      $alert.value = { type: "error", text: message, center: true };
+    } else {
+      $auth.value = false;
+      await setToken(data);
+      await get();
+      const tip = useTipStore();
+      await tip.get();
+      $alert.value = { type: "success", title: "登入成功" };
+      if (data.rememberMe)
+        storage.set("loginData", data);
+      else
+        storage.remove("loginData");
+    }
+    if (error) {
+      const $alert2 = useState("alert");
+      $alert2.value = {
+        type: "error",
+        title: "驗證錯誤",
+        text: message,
+        center: true
+      };
+    }
+    return { error, message, data };
+  }
+  async function forgot(forgotForm) {
+    const $alert = useState("alert");
+    if (!passwordRegex.test(forgotForm.password)) {
+      return $alert.value = {
+        type: "error",
+        text: "密碼須為英數混合8位數以上",
+        center: true
+      };
+    }
+    const { error, message, data } = await useHttpFetchPost("/auth/forgot", {
+      body: {
+        area: forgotForm.area,
+        phone: forgotForm.phone,
+        password: forgotForm.password,
+        passwordConfirm: forgotForm.passwordConfirm,
+        verifyCode: forgotForm.verifyCode
+      }
+    });
+    const $auth = useState("showAuth", () => false);
+    if (error && message) {
+      $alert.value = { type: "error", text: message, center: true };
+    } else {
+      $auth.value = false;
+      await setToken(data);
+      await get();
+      $alert.value = { type: "success", title: "修改成功，已登入" };
+      if (data.rememberMe)
+        storage.set("loginData", forgotForm);
+      else
+        storage.remove("loginData");
+    }
+    if (error) {
+      const $alert2 = useState("alert");
+      $alert2.value = {
+        type: "error",
+        title: "驗證錯誤",
+        text: message,
+        center: true
+      };
+    }
+    return { error, message, data };
+  }
+  async function logout() {
+    const $alert = useState("alert");
+    await useHttpFetchPost("/user/logout");
+    $alert.value = {
+      type: "success",
+      title: "登出成功"
+    };
+    const route = useRoute();
+    if (route.meta.auth) {
+      const router = useRouter();
+      router.push("/");
+    }
+    clear();
+  }
+  async function clear() {
+    return await new Promise((resolve) => {
+      storage.remove("userInfo");
+      storage.remove("token");
+      const isLoginState = useState("isLogin");
+      isLoginState.value = false;
+      isLogin.value = false;
+      info.value = null;
+      token.value = "";
+      const route = useRoute();
+      const router = useRouter();
+      const middleware = route.meta.middleware ?? [];
+      if (middleware && middleware.includes("auth"))
+        router.push("/");
+      resolve("");
+    });
+  }
+  return {
+    token,
+    info,
+    isLogin,
+    get,
+    set: set2,
+    update,
+    updateField,
+    login,
+    register,
+    forgot,
+    logout,
+    clear,
+    setToken,
+    refreshToken
+  };
+});
+function useBaseStore() {
+  const user = useUserStore();
+  const tip = useTipStore();
+  const ip = useIPStore();
+  return {
+    // app,
+    // process,
+    user,
+    tip,
+    ip
+  };
+}
 const _sfc_main$m = /* @__PURE__ */ defineComponent({
   __name: "User",
   __ssrInlineRender: true,
@@ -4002,8 +3972,8 @@ const _wrapIf = (component, props, slots) => {
   } };
 };
 const layouts = {
-  blog: () => import('./_nuxt/blog-9518142a.mjs').then((m2) => m2.default || m2),
-  default: () => import('./_nuxt/default-432cd5ca.mjs').then((m2) => m2.default || m2)
+  blog: () => import('./_nuxt/blog-aeb3c14f.mjs').then((m2) => m2.default || m2),
+  default: () => import('./_nuxt/default-3c0c79c1.mjs').then((m2) => m2.default || m2)
 };
 const LayoutLoader = /* @__PURE__ */ defineComponent({
   name: "LayoutLoader",
@@ -6756,8 +6726,8 @@ const _sfc_main$1 = {
     const statusMessage = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-404-5567b6cd.mjs').then((r2) => r2.default || r2));
-    const _Error = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-500-337667df.mjs').then((r2) => r2.default || r2));
+    const _Error404 = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-404-a2e65cc8.mjs').then((r2) => r2.default || r2));
+    const _Error = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/error-500-13a859ae.mjs').then((r2) => r2.default || r2));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ statusCode: unref(statusCode), statusMessage: unref(statusMessage), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
@@ -6775,7 +6745,7 @@ const _sfc_main = {
   __name: "nuxt-root",
   __ssrInlineRender: true,
   setup(__props) {
-    const IslandRenderer = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/island-renderer-58a912d1.mjs').then((r2) => r2.default || r2));
+    const IslandRenderer = /* @__PURE__ */ defineAsyncComponent(() => import('./_nuxt/island-renderer-bdf22884.mjs').then((r2) => r2.default || r2));
     const nuxtApp = /* @__PURE__ */ useNuxtApp();
     nuxtApp.deferHydration();
     nuxtApp.ssrContext.url;
@@ -6842,5 +6812,5 @@ let entry;
 }
 const entry$1 = (ctx) => entry(ctx);
 
-export { __nuxt_component_0$2 as A, useAppConfig as B, htmlTag as C, _imports_0$1 as D, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, defineNuxtRouteMiddleware as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$j as i, __nuxt_component_2$2 as j, __nuxt_component_2$1 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, passwordRegex as o, phoneRegex as p, __nuxt_component_2 as q, fe as r, storeToRefs as s, oe as t, useHead as u, useHttpPost as v, __nuxt_component_4 as w, __nuxt_component_5 as x, __nuxt_component_2$3 as y, _sfc_main$r as z };
+export { _imports_0$1 as A, _sfc_main$r as B, useAppConfig as C, _export_sfc as _, __nuxt_component_0$3 as a, __nuxt_component_1 as b, createError as c, useHttpPost as d, entry$1 as default, useState as e, useRouter as f, useHttpFetchPost as g, useBaseStore as h, _sfc_main$j as i, __nuxt_component_2$2 as j, __nuxt_component_2$1 as k, __nuxt_component_4$1 as l, emailRegex as m, useRoute as n, __nuxt_component_4 as o, phoneRegex as p, __nuxt_component_5 as q, __nuxt_component_0$2 as r, storeToRefs as s, passwordRegex as t, useHead as u, __nuxt_component_2 as v, fe as w, oe as x, __nuxt_component_2$3 as y, htmlTag as z };
 //# sourceMappingURL=server.mjs.map

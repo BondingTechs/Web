@@ -27,7 +27,6 @@ const _type_Captcha_post = defineEventHandler(async (event) => {
     const type = (_b = (_a = event.context) == null ? void 0 : _a.params) == null ? void 0 : _b["type-captcha"].replace("-captcha", "");
     const body = await readBody(event);
     const { phone, area } = body;
-    console.log(body);
     const rules = [
       {
         key: "area",
