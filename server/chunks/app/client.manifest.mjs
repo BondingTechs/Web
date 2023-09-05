@@ -8,7 +8,7 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "error-404.3701b7b2.js",
+    "file": "error-404.038ebd91.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -28,7 +28,7 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "error-500.4eb357f8.js",
+    "file": "error-500.adce47a6.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -42,7 +42,7 @@ const client_manifest = {
   "../node_modules/@vueup/vue-quill/dist/vue-quill.esm-bundler.js": {
     "resourceType": "script",
     "module": true,
-    "file": "vue-quill.esm-bundler.990751c7.js",
+    "file": "vue-quill.esm-bundler.66d6e333.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -66,7 +66,7 @@ const client_manifest = {
       "../node_modules/@nuxt/ui-templates/dist/templates/error-404.vue",
       "../node_modules/@nuxt/ui-templates/dist/templates/error-500.vue"
     ],
-    "file": "entry.369b4bba.js",
+    "file": "entry.93f3e8e9.js",
     "isEntry": true,
     "src": "../node_modules/nuxt/dist/app/entry.js",
     "_globalCSS": true
@@ -90,7 +90,7 @@ const client_manifest = {
     "file": "RowLoading.814d0167.css",
     "src": "RowLoading.css"
   },
-  "_Editor.64468588.js": {
+  "_Editor.22cc6f65.js": {
     "resourceType": "script",
     "module": true,
     "css": [
@@ -99,7 +99,7 @@ const client_manifest = {
     "dynamicImports": [
       "../node_modules/@vueup/vue-quill/dist/vue-quill.esm-bundler.js"
     ],
-    "file": "Editor.64468588.js",
+    "file": "Editor.22cc6f65.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
@@ -108,53 +108,53 @@ const client_manifest = {
     "file": "Editor.7b788d09.css",
     "resourceType": "style"
   },
-  "_Filter.vue.f9c8786d.js": {
+  "_Filter.vue.59541175.js": {
     "resourceType": "script",
     "module": true,
-    "file": "Filter.vue.f9c8786d.js",
+    "file": "Filter.vue.59541175.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
   },
-  "_Header.4541db8b.js": {
+  "_Header.00c74051.js": {
     "resourceType": "script",
     "module": true,
-    "file": "Header.4541db8b.js",
+    "file": "Header.00c74051.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
   },
-  "_Row.fc767c1e.js": {
+  "_Row.0add4715.js": {
     "resourceType": "script",
     "module": true,
     "css": [
       "Row.67848543.css"
     ],
-    "file": "Row.fc767c1e.js",
+    "file": "Row.0add4715.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_RowLoading.c8b81725.js"
+      "_RowLoading.f085a66f.js"
     ]
   },
   "Row.67848543.css": {
     "file": "Row.67848543.css",
     "resourceType": "style"
   },
-  "_Row.vue.494a3ef0.js": {
+  "_Row.vue.f12b04f8.js": {
     "resourceType": "script",
     "module": true,
-    "file": "Row.vue.494a3ef0.js",
+    "file": "Row.vue.f12b04f8.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
   },
-  "_RowLoading.c8b81725.js": {
+  "_RowLoading.f085a66f.js": {
     "resourceType": "script",
     "module": true,
     "css": [
       "RowLoading.814d0167.css"
     ],
-    "file": "RowLoading.c8b81725.js",
+    "file": "RowLoading.f085a66f.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
@@ -163,18 +163,18 @@ const client_manifest = {
     "file": "RowLoading.814d0167.css",
     "resourceType": "style"
   },
-  "_Title.vue.c833e00d.js": {
+  "_Title.vue.351b4826.js": {
     "resourceType": "script",
     "module": true,
-    "file": "Title.vue.c833e00d.js",
+    "file": "Title.vue.351b4826.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
   },
-  "_Wrapper.1aa63ade.js": {
+  "_Wrapper.2bd10263.js": {
     "resourceType": "script",
     "module": true,
-    "file": "Wrapper.1aa63ade.js",
+    "file": "Wrapper.2bd10263.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ]
@@ -188,7 +188,7 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "blog.a70b62f7.js",
+    "file": "blog.28dc8ebd.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -202,7 +202,7 @@ const client_manifest = {
   "layouts/default.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "default.27569710.js",
+    "file": "default.9d6a121f.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -212,7 +212,7 @@ const client_manifest = {
   "pages/404.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "404.60fc1d97.js",
+    "file": "404.8f042858.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -228,14 +228,14 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "index.27756ad1.js",
+    "file": "index.809387ed.js",
     "imports": [
-      "_Title.vue.c833e00d.js",
+      "_Title.vue.351b4826.js",
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Wrapper.1aa63ade.js",
-      "_Row.fc767c1e.js",
-      "_Filter.vue.f9c8786d.js",
-      "_RowLoading.c8b81725.js"
+      "_Wrapper.2bd10263.js",
+      "_Row.0add4715.js",
+      "_Filter.vue.59541175.js",
+      "_RowLoading.f085a66f.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/index.vue"
@@ -247,7 +247,7 @@ const client_manifest = {
   "pages/member-rule.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "member-rule.3eee8784.js",
+    "file": "member-rule.0d5945f0.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -263,7 +263,7 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "my.34764362.js",
+    "file": "my.1f9afccb.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -277,7 +277,7 @@ const client_manifest = {
   "pages/my/account/change-phone.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "change-phone.e4b60ebc.js",
+    "file": "change-phone.6fa86b8a.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -287,7 +287,7 @@ const client_manifest = {
   "pages/my/account/email-binding.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "email-binding.06c08e65.js",
+    "file": "email-binding.46214052.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -297,7 +297,7 @@ const client_manifest = {
   "pages/my/account/email-verify.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "email-verify.6a55411b.js",
+    "file": "email-verify.9a75d5f8.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -313,7 +313,7 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "identity-verify.7de00ad2.js",
+    "file": "identity-verify.7a27797a.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -333,10 +333,10 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "index.39c812e7.js",
+    "file": "index.b17e33e4.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Editor.64468588.js"
+      "_Editor.22cc6f65.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/my/account/index.vue"
@@ -348,7 +348,7 @@ const client_manifest = {
   "pages/my/account/reset-password.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "reset-password.d3f2ed3a.js",
+    "file": "reset-password.20fde0ff.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -358,12 +358,12 @@ const client_manifest = {
   "pages/my/collections.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "collections.a0bf8848.js",
+    "file": "collections.487d28a5.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Row.fc767c1e.js",
-      "_Row.vue.494a3ef0.js",
-      "_RowLoading.c8b81725.js"
+      "_Row.0add4715.js",
+      "_Row.vue.f12b04f8.js",
+      "_RowLoading.f085a66f.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/my/collections.vue"
@@ -371,12 +371,12 @@ const client_manifest = {
   "pages/my/history.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "history.0884ad0a.js",
+    "file": "history.a1dfb02e.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Row.fc767c1e.js",
-      "_Row.vue.494a3ef0.js",
-      "_RowLoading.c8b81725.js"
+      "_Row.0add4715.js",
+      "_Row.vue.f12b04f8.js",
+      "_RowLoading.f085a66f.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/my/history.vue"
@@ -384,7 +384,7 @@ const client_manifest = {
   "pages/my/index.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "index.ecb60166.js",
+    "file": "index.ec537f37.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js"
     ],
@@ -394,37 +394,37 @@ const client_manifest = {
   "pages/my/tips.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "tips.445bc30e.js",
+    "file": "tips.387d8104.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Row.vue.494a3ef0.js"
+      "_Row.vue.f12b04f8.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/my/tips.vue"
   },
   "pages/news/article/[articleSlug].css": {
     "resourceType": "style",
-    "file": "_articleSlug_.7eae936d.css",
+    "file": "_articleSlug_.0e7d4c3c.css",
     "src": "pages/news/article/[articleSlug].css"
   },
   "pages/news/article/[articleSlug].vue": {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "_articleSlug_.4e6c9549.js",
+    "file": "_articleSlug_.cad4272c.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Title.vue.c833e00d.js",
-      "_Header.4541db8b.js",
-      "_Wrapper.1aa63ade.js",
-      "_RowLoading.c8b81725.js",
-      "_Editor.64468588.js"
+      "_Title.vue.351b4826.js",
+      "_Header.00c74051.js",
+      "_Wrapper.2bd10263.js",
+      "_RowLoading.f085a66f.js",
+      "_Editor.22cc6f65.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/news/article/[articleSlug].vue"
   },
-  "_articleSlug_.7eae936d.css": {
-    "file": "_articleSlug_.7eae936d.css",
+  "_articleSlug_.0e7d4c3c.css": {
+    "file": "_articleSlug_.0e7d4c3c.css",
     "resourceType": "style"
   },
   "pages/news/categories.css": {
@@ -436,10 +436,10 @@ const client_manifest = {
     "resourceType": "script",
     "module": true,
     "css": [],
-    "file": "categories.826319f3.js",
+    "file": "categories.86b8a63a.js",
     "imports": [
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Wrapper.1aa63ade.js"
+      "_Wrapper.2bd10263.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/news/categories.vue"
@@ -447,15 +447,15 @@ const client_manifest = {
   "pages/news/category/[categorySlug].vue": {
     "resourceType": "script",
     "module": true,
-    "file": "_categorySlug_.0e95c44f.js",
+    "file": "_categorySlug_.c969c3fd.js",
     "imports": [
-      "_Filter.vue.f9c8786d.js",
-      "_Title.vue.c833e00d.js",
-      "_Header.4541db8b.js",
-      "_Row.fc767c1e.js",
+      "_Filter.vue.59541175.js",
+      "_Title.vue.351b4826.js",
+      "_Header.00c74051.js",
+      "_Row.0add4715.js",
       "../node_modules/nuxt/dist/app/entry.js",
-      "_Wrapper.1aa63ade.js",
-      "_RowLoading.c8b81725.js"
+      "_Wrapper.2bd10263.js",
+      "_RowLoading.f085a66f.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/news/category/[categorySlug].vue"
@@ -463,15 +463,15 @@ const client_manifest = {
   "pages/news/video/[categorySlug].vue": {
     "resourceType": "script",
     "module": true,
-    "file": "_categorySlug_.c0b5a973.js",
+    "file": "_categorySlug_.12af6095.js",
     "imports": [
-      "_Filter.vue.f9c8786d.js",
-      "_Title.vue.c833e00d.js",
-      "_Header.4541db8b.js",
-      "_Row.fc767c1e.js",
-      "_Wrapper.1aa63ade.js",
+      "_Filter.vue.59541175.js",
+      "_Title.vue.351b4826.js",
+      "_Header.00c74051.js",
+      "_Row.0add4715.js",
+      "_Wrapper.2bd10263.js",
       "../node_modules/nuxt/dist/app/entry.js",
-      "_RowLoading.c8b81725.js"
+      "_RowLoading.f085a66f.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/news/video/[categorySlug].vue"
@@ -479,15 +479,15 @@ const client_manifest = {
   "pages/news/video/index.vue": {
     "resourceType": "script",
     "module": true,
-    "file": "index.5860f26a.js",
+    "file": "index.774913d7.js",
     "imports": [
-      "_Filter.vue.f9c8786d.js",
-      "_Title.vue.c833e00d.js",
-      "_Header.4541db8b.js",
-      "_Row.fc767c1e.js",
-      "_Wrapper.1aa63ade.js",
+      "_Filter.vue.59541175.js",
+      "_Title.vue.351b4826.js",
+      "_Header.00c74051.js",
+      "_Row.0add4715.js",
+      "_Wrapper.2bd10263.js",
       "../node_modules/nuxt/dist/app/entry.js",
-      "_RowLoading.c8b81725.js"
+      "_RowLoading.f085a66f.js"
     ],
     "isDynamicEntry": true,
     "src": "pages/news/video/index.vue"

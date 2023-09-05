@@ -494,7 +494,7 @@ const _routes = [
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-d4b23785.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-fcd084da.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
