@@ -388,7 +388,7 @@ const _routes = [
     meta: __nuxt_page_meta$f || {},
     alias: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.alias) || [],
     redirect: (__nuxt_page_meta$f == null ? void 0 : __nuxt_page_meta$f.redirect) || void 0,
-    component: () => import('./_nuxt/index-f27dad7d.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-a6b1cf6a.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "member-rule",
@@ -455,7 +455,7 @@ const _routes = [
         meta: __nuxt_page_meta$8 || {},
         alias: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.alias) || [],
         redirect: (__nuxt_page_meta$8 == null ? void 0 : __nuxt_page_meta$8.redirect) || void 0,
-        component: () => import('./_nuxt/collections-02548498.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/collections-158aa26a.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.name) ?? "my-history",
@@ -463,7 +463,7 @@ const _routes = [
         meta: __nuxt_page_meta$7 || {},
         alias: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.alias) || [],
         redirect: (__nuxt_page_meta$7 == null ? void 0 : __nuxt_page_meta$7.redirect) || void 0,
-        component: () => import('./_nuxt/history-d4a128d4.mjs').then((m2) => m2.default || m2)
+        component: () => import('./_nuxt/history-2cc10eea.mjs').then((m2) => m2.default || m2)
       },
       {
         name: (__nuxt_page_meta$6 == null ? void 0 : __nuxt_page_meta$6.name) ?? "my",
@@ -489,12 +489,12 @@ const _routes = [
     component: () => import('./_nuxt/my-356895b1.mjs').then((m2) => m2.default || m2)
   },
   {
-    name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-article-articleSlug",
-    path: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.path) ?? "/news/article/:articleSlug()",
+    name: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.name) ?? "news-categorySlug-articleSlug",
+    path: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.path) ?? "/news/:categorySlug()/:articleSlug()",
     meta: __nuxt_page_meta$3 || {},
     alias: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.alias) || [],
     redirect: (__nuxt_page_meta$3 == null ? void 0 : __nuxt_page_meta$3.redirect) || void 0,
-    component: () => import('./_nuxt/_articleSlug_-fcd084da.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_articleSlug_-3b6dae40.mjs').then((m2) => m2.default || m2)
   },
   {
     name: "news-categories",
@@ -510,7 +510,7 @@ const _routes = [
     meta: __nuxt_page_meta$2 || {},
     alias: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.alias) || [],
     redirect: (__nuxt_page_meta$2 == null ? void 0 : __nuxt_page_meta$2.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-ee40f43f.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-1668500b.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.name) ?? "news-video-categorySlug",
@@ -518,7 +518,7 @@ const _routes = [
     meta: __nuxt_page_meta$1 || {},
     alias: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.alias) || [],
     redirect: (__nuxt_page_meta$1 == null ? void 0 : __nuxt_page_meta$1.redirect) || void 0,
-    component: () => import('./_nuxt/_categorySlug_-abfd9479.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/_categorySlug_-449b6496.mjs').then((m2) => m2.default || m2)
   },
   {
     name: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.name) ?? "news-video",
@@ -526,7 +526,7 @@ const _routes = [
     meta: __nuxt_page_meta || {},
     alias: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.alias) || [],
     redirect: (__nuxt_page_meta == null ? void 0 : __nuxt_page_meta.redirect) || void 0,
-    component: () => import('./_nuxt/index-70179c87.mjs').then((m2) => m2.default || m2)
+    component: () => import('./_nuxt/index-ac728141.mjs').then((m2) => m2.default || m2)
   }
 ];
 function resolveUnref(r2) {
