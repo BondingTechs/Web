@@ -1,25 +1,10 @@
-import { defineEventHandler, getRouterParams, sendStream } from 'h3';
+import { d as defineEventHandler, g as getRouterParams, s as sendStream, u as useRuntimeConfig } from './nitro/node-server.mjs';
 import axios from 'axios';
-import { u as useRuntimeConfig } from './nitro/node-server.mjs';
-import 'node-fetch-native/polyfill';
 import 'node:http';
 import 'node:https';
-import 'destr';
-import 'ofetch';
-import 'unenv/runtime/fetch/index';
-import 'hookable';
-import 'scule';
-import 'klona';
-import 'defu';
-import 'ohash';
-import 'ufo';
-import 'unstorage';
-import 'unstorage/drivers/fs';
-import 'radix3';
 import 'node:fs';
+import 'node:path';
 import 'node:url';
-import 'pathe';
-import 'http-graceful-shutdown';
 
 const config = useRuntimeConfig();
 const request = axios.create({

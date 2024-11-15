@@ -1,29 +1,14 @@
-import { defineEventHandler, callNodeListener } from 'h3';
-import { r as request } from './nitro/node-server.mjs';
+import { d as defineEventHandler, b as callNodeListener, a as request } from './nitro/node-server.mjs';
 import FormData from 'form-data';
 import multer from 'multer';
 import fs from 'fs';
 import sharp from 'sharp';
-import 'node-fetch-native/polyfill';
 import 'node:http';
 import 'node:https';
-import 'destr';
-import 'ofetch';
-import 'unenv/runtime/fetch/index';
-import 'hookable';
-import 'scule';
-import 'klona';
-import 'defu';
-import 'ohash';
-import 'ufo';
-import 'unstorage';
-import 'unstorage/drivers/fs';
-import 'radix3';
 import 'node:fs';
+import 'node:path';
 import 'node:url';
-import 'pathe';
 import 'axios';
-import 'http-graceful-shutdown';
 
 function uuid() {
   const s = [];
